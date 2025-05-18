@@ -1,0 +1,742 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { z } from "zod";
+import { 
+  insertLeadSchema, 
+  insertProjectSchema, 
+  insertClientSchema, 
+  insertTaskSchema, 
+  insertTagSchema,
+  insertActivitySchema 
+} from "@shared/schema";
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Helper for validating request bodies
+  const validateBody = (schema: z.ZodSchema) => (req: any, res: any, next: any) => {
+    try {
+      req.validatedBody = schema.parse(req.body);
+      next();
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request body", errors: error });
+    }
+  };
+
+  // Helper for recording activities
+  const recordActivity = async (userId: string, action: string, entityType: string, entityId: number, details?: any) => {
+    try {
+      await storage.createActivity({
+        userId,
+        action,
+        entityType,
+        entityId,
+        details: details || null,
+      });
+    } catch (error) {
+      console.error("Failed to record activity:", error);
+    }
+  };
+
+  // Dashboard
+  app.get("/api/dashboard/stats", async (req, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  app.get("/api/dashboard/recent-activities", async (req, res) => {
+    try {
+      const activities = await storage.getRecentActivities(10);
+      res.json(activities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recent activities" });
+    }
+  });
+
+  // Leads
+  app.post("/api/leads", validateBody(insertLeadSchema), async (req, res) => {
+    try {
+      const lead = await storage.createLead(req.validatedBody);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "create",
+          "lead",
+          lead.id,
+          { companyName: lead.companyName }
+        );
+      }
+      
+      res.status(201).json(lead);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create lead" });
+    }
+  });
+
+  app.get("/api/leads", async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      // Apply filters from query params
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.priority) filters.priority = req.query.priority;
+      if (req.query.assignedTo) filters.assignedTo = req.query.assignedTo;
+      
+      const leads = await storage.getLeads(filters);
+      res.json(leads);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch leads" });
+    }
+  });
+
+  app.get("/api/leads/search", async (req, res) => {
+    try {
+      const term = req.query.term as string;
+      if (!term) {
+        return res.status(400).json({ message: "Search term is required" });
+      }
+      
+      const leads = await storage.searchLeads(term);
+      res.json(leads);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search leads" });
+    }
+  });
+
+  app.get("/api/leads/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const lead = await storage.getLead(id);
+      
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      // Get tags for this lead
+      const tags = await storage.getTagsByLead(id);
+      
+      res.json({ ...lead, tags });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch lead" });
+    }
+  });
+
+  app.patch("/api/leads/:id", validateBody(insertLeadSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const lead = await storage.updateLead(id, req.validatedBody);
+      
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update",
+          "lead",
+          lead.id,
+          { changes: req.validatedBody }
+        );
+      }
+      
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update lead" });
+    }
+  });
+
+  app.delete("/api/leads/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteLead(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "delete",
+          "lead",
+          id
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete lead" });
+    }
+  });
+  
+  // Lead tags
+  app.post("/api/leads/:id/tags/:tagId", async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      const lead = await storage.getLead(leadId);
+      const tag = await storage.getTag(tagId);
+      
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      await storage.addTagToLead(leadId, tagId);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "tag",
+          "lead",
+          leadId,
+          { tagId, tagName: tag.name }
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add tag to lead" });
+    }
+  });
+  
+  app.delete("/api/leads/:id/tags/:tagId", async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      await storage.removeTagFromLead(leadId, tagId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to remove tag from lead" });
+    }
+  });
+
+  // Projects
+  app.post("/api/projects", validateBody(insertProjectSchema), async (req, res) => {
+    try {
+      const project = await storage.createProject(req.validatedBody);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "create",
+          "project",
+          project.id,
+          { name: project.name }
+        );
+      }
+      
+      res.status(201).json(project);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create project" });
+    }
+  });
+
+  app.get("/api/projects", async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      // Apply filters from query params
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.leadId) filters.leadId = parseInt(req.query.leadId as string);
+      if (req.query.clientId) filters.clientId = parseInt(req.query.clientId as string);
+      
+      const projects = await storage.getProjects(filters);
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
+  app.get("/api/projects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Get tags for this project
+      const tags = await storage.getTagsByProject(id);
+      
+      res.json({ ...project, tags });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch project" });
+    }
+  });
+
+  app.patch("/api/projects/:id", validateBody(insertProjectSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const project = await storage.updateProject(id, req.validatedBody);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update",
+          "project",
+          project.id,
+          { changes: req.validatedBody }
+        );
+      }
+      
+      res.json(project);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update project" });
+    }
+  });
+
+  app.delete("/api/projects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteProject(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "delete",
+          "project",
+          id
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+  
+  // Project tags
+  app.post("/api/projects/:id/tags/:tagId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      const project = await storage.getProject(projectId);
+      const tag = await storage.getTag(tagId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      await storage.addTagToProject(projectId, tagId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add tag to project" });
+    }
+  });
+  
+  app.delete("/api/projects/:id/tags/:tagId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      await storage.removeTagFromProject(projectId, tagId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to remove tag from project" });
+    }
+  });
+
+  // Clients
+  app.post("/api/clients", validateBody(insertClientSchema), async (req, res) => {
+    try {
+      const client = await storage.createClient(req.validatedBody);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "create",
+          "client",
+          client.id,
+          { companyName: client.companyName }
+        );
+      }
+      
+      res.status(201).json(client);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create client" });
+    }
+  });
+
+  app.get("/api/clients", async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      // Apply filters from query params
+      if (req.query.industry) filters.industry = req.query.industry;
+      if (req.query.upsellOpportunity) filters.upsellOpportunity = req.query.upsellOpportunity === 'true';
+      
+      const clients = await storage.getClients(filters);
+      res.json(clients);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch clients" });
+    }
+  });
+
+  app.get("/api/clients/search", async (req, res) => {
+    try {
+      const term = req.query.term as string;
+      if (!term) {
+        return res.status(400).json({ message: "Search term is required" });
+      }
+      
+      const clients = await storage.searchClients(term);
+      res.json(clients);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search clients" });
+    }
+  });
+
+  app.get("/api/clients/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const client = await storage.getClient(id);
+      
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Get tags for this client
+      const tags = await storage.getTagsByClient(id);
+      
+      // Get projects for this client
+      const projects = await storage.getProjectsByClient(id);
+      
+      res.json({ ...client, tags, projects });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch client" });
+    }
+  });
+
+  app.patch("/api/clients/:id", validateBody(insertClientSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const client = await storage.updateClient(id, req.validatedBody);
+      
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update",
+          "client",
+          client.id,
+          { changes: req.validatedBody }
+        );
+      }
+      
+      res.json(client);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update client" });
+    }
+  });
+
+  app.delete("/api/clients/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteClient(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "delete",
+          "client",
+          id
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete client" });
+    }
+  });
+  
+  // Client tags
+  app.post("/api/clients/:id/tags/:tagId", async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      const client = await storage.getClient(clientId);
+      const tag = await storage.getTag(tagId);
+      
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      await storage.addTagToClient(clientId, tagId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add tag to client" });
+    }
+  });
+  
+  app.delete("/api/clients/:id/tags/:tagId", async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      await storage.removeTagFromClient(clientId, tagId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to remove tag from client" });
+    }
+  });
+
+  // Tasks
+  app.post("/api/tasks", validateBody(insertTaskSchema), async (req, res) => {
+    try {
+      const task = await storage.createTask(req.validatedBody);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "create",
+          "task",
+          task.id,
+          { title: task.title }
+        );
+      }
+      
+      res.status(201).json(task);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create task" });
+    }
+  });
+
+  app.get("/api/tasks", async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      // Apply filters from query params
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.priority) filters.priority = req.query.priority;
+      if (req.query.assignedTo) filters.assignedTo = req.query.assignedTo;
+      if (req.query.projectId) filters.projectId = parseInt(req.query.projectId as string);
+      
+      const tasks = await storage.getTasks(filters);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tasks" });
+    }
+  });
+
+  app.get("/api/tasks/due-soon", async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 7;
+      const tasks = await storage.getTasksDueSoon(days);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch upcoming tasks" });
+    }
+  });
+
+  app.get("/api/tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getTask(id);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      // Get tags for this task
+      const tags = await storage.getTagsByTask(id);
+      
+      res.json({ ...task, tags });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch task" });
+    }
+  });
+
+  app.patch("/api/tasks/:id", validateBody(insertTaskSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.updateTask(id, req.validatedBody);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update",
+          "task",
+          task.id,
+          { changes: req.validatedBody }
+        );
+      }
+      
+      res.json(task);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update task" });
+    }
+  });
+
+  app.delete("/api/tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTask(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "delete",
+          "task",
+          id
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+  
+  // Task tags
+  app.post("/api/tasks/:id/tags/:tagId", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      const task = await storage.getTask(taskId);
+      const tag = await storage.getTag(tagId);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      await storage.addTagToTask(taskId, tagId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add tag to task" });
+    }
+  });
+  
+  app.delete("/api/tasks/:id/tags/:tagId", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const tagId = parseInt(req.params.tagId);
+      
+      await storage.removeTagFromTask(taskId, tagId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to remove tag from task" });
+    }
+  });
+
+  // Tags
+  app.post("/api/tags", validateBody(insertTagSchema), async (req, res) => {
+    try {
+      const tag = await storage.createTag(req.validatedBody);
+      res.status(201).json(tag);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create tag" });
+    }
+  });
+
+  app.get("/api/tags", async (req, res) => {
+    try {
+      const tags = await storage.getTags();
+      res.json(tags);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tags" });
+    }
+  });
+
+  app.patch("/api/tags/:id", validateBody(insertTagSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const tag = await storage.updateTag(id, req.validatedBody);
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      res.json(tag);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update tag" });
+    }
+  });
+
+  app.delete("/api/tags/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTag(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete tag" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
