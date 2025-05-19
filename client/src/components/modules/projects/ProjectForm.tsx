@@ -267,7 +267,7 @@ export const ProjectForm = ({ project, isEdit = false, leadId }: ProjectFormProp
                       <Input 
                         type="number" 
                         placeholder="5000" 
-                        {...field}
+                        value={field.value?.toString() || ''}
                         onChange={(e) => {
                           const value = e.target.value === "" ? undefined : parseInt(e.target.value);
                           field.onChange(value);
@@ -371,9 +371,16 @@ export const ProjectForm = ({ project, isEdit = false, leadId }: ProjectFormProp
               </Button>
               <Button 
                 type="submit" 
-                isLoading={createProjectMutation.isPending || updateProjectMutation.isPending}
+                disabled={createProjectMutation.isPending || updateProjectMutation.isPending}
               >
-                {isEdit ? "Update Project" : "Create Project"}
+                {(createProjectMutation.isPending || updateProjectMutation.isPending) ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Loading...
+                  </>
+                ) : (
+                  isEdit ? "Update Project" : "Create Project"
+                )}
               </Button>
             </div>
           </form>

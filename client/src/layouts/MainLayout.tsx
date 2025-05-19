@@ -33,8 +33,8 @@ type SidebarItemProps = {
 const SidebarItem = ({ icon, label, href, badgeCount, active }: SidebarItemProps) => {
   return (
     <Link href={href}>
-      <a className={cn(
-        "flex items-center px-4 py-3 text-sm transition-colors duration-200 rounded-lg",
+      <div className={cn(
+        "flex items-center px-4 py-3 text-sm transition-colors duration-200 rounded-lg cursor-pointer",
         active 
           ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
           : "text-sidebar-foreground hover:bg-sidebar-accent/20 hover:text-sidebar-foreground"
@@ -46,7 +46,7 @@ const SidebarItem = ({ icon, label, href, badgeCount, active }: SidebarItemProps
             {badgeCount}
           </Badge>
         )}
-      </a>
+      </div>
     </Link>
   );
 };
@@ -66,7 +66,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, [isMobile]);
 
   // Get dashboard stats for badge counts
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<{
+    totalLeads: number;
+    activeProjects: number;
+    totalClients: number;
+    overdueTasks: number;
+  }>({
     queryKey: ["/api/dashboard/stats"],
   });
 
@@ -97,7 +102,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               icon={<Users className="w-5 h-5" />} 
               label="Leads" 
               href="/leads" 
-              badgeCount={stats?.totalLeads} 
+              badgeCount={stats ? stats.totalLeads : undefined} 
               active={location.startsWith("/leads")} 
             />
             
@@ -105,7 +110,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               icon={<FolderKanban className="w-5 h-5" />} 
               label="Projects" 
               href="/projects" 
-              badgeCount={stats?.activeProjects} 
+              badgeCount={stats ? stats.activeProjects : undefined} 
               active={location.startsWith("/projects")} 
             />
             
@@ -113,7 +118,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               icon={<Building2 className="w-5 h-5" />} 
               label="Clients" 
               href="/clients" 
-              badgeCount={stats?.totalClients} 
+              badgeCount={stats ? stats.totalClients : undefined} 
               active={location.startsWith("/clients")} 
             />
             
@@ -121,7 +126,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               icon={<CheckSquare className="w-5 h-5" />} 
               label="Tasks" 
               href="/tasks" 
-              badgeCount={stats?.overdueTasks} 
+              badgeCount={stats ? stats.overdueTasks : undefined} 
               active={location.startsWith("/tasks")} 
             />
           </div>
