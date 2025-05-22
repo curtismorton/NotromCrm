@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, Link, useLocation } from "wouter";
 import { ProjectForm } from "@/components/modules/projects/ProjectForm";
 import { TaskForm } from "@/components/modules/tasks/TaskForm";
@@ -10,11 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { AIAssistant } from "@/components/ai/AIAssistant";
+import { TaskSuggestions } from "@/components/ai/TaskSuggestions";
 import { format } from "date-fns";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
   const isNew = id === 'new';
   
   // Parse query parameters for new projects
@@ -67,6 +70,7 @@ export default function ProjectDetailsPage() {
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                <TabsTrigger value="ai">AI Assistant</TabsTrigger>
                 <TabsTrigger value="edit">Edit</TabsTrigger>
               </TabsList>
               
@@ -233,6 +237,29 @@ export default function ProjectDetailsPage() {
                         </Button>
                       </div>
                     )}
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="ai">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <TaskSuggestions 
+                      project={project} 
+                      onAddTask={() => {
+                        queryClient.invalidateQueries({ queryKey: ["/api/tasks", { projectId: id }] });
+                      }} 
+                    />
+                  </div>
+                  <div>
+                    <AIAssistant 
+                      context={project.description || project.name}
+                      contextType="project"
+                      contextId={project.id}
+                      title="Project AI Assistant"
+                      description="I can help you plan, organize, and manage this project. What can I help you with?"
+                      placeholder="Ask me about this project, suggest tasks, or request advice on project management..."
+                    />
                   </div>
                 </div>
               </TabsContent>
