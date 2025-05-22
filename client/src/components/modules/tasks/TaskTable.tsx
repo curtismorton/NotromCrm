@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Trash2, CheckCircle } from "lucide-react";
-import { Task } from "@shared/schema";
+import { Task, Project } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { format, isPast, isToday, addDays } from "date-fns";
 import { 
@@ -31,13 +31,21 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-export const TaskTable = () => {
+interface TaskTableProps {
+  projectId?: string | number;
+}
+
+export const TaskTable = ({ projectId }: TaskTableProps = {}) => {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 
   const { data: tasks, isLoading } = useQuery<Task[]>({
-    queryKey: ["/api/tasks"],
+    queryKey: projectId ? ["/api/tasks", { projectId }] : ["/api/tasks"],
+  });
+  
+  const { data: projects } = useQuery<Project[]>({
+    queryKey: ["/api/projects"],
   });
 
   const deleteMutation = useMutation({
@@ -144,8 +152,10 @@ export const TaskTable = () => {
           )}>
             {task.title}
           </div>
-          {task.projectId && (
-            <div className="text-xs text-muted-foreground">Project: {task.projectId}</div>
+          {task.projectId && !projectId && projects && (
+            <div className="text-xs text-muted-foreground">
+              Project: {projects.find(p => p.id === task.projectId)?.name || `#${task.projectId}`}
+            </div>
           )}
         </div>
       ),

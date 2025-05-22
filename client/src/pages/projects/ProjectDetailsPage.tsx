@@ -222,7 +222,7 @@ export default function ProjectDetailsPage() {
                       </Button>
                     </div>
                     {tasks && tasks.length > 0 ? (
-                      <TaskTable />
+                      <TaskTable projectId={id} />
                     ) : (
                       <div className="text-center py-8">
                         <p className="text-gray-500 mb-4">This project doesn't have any tasks yet.</p>
