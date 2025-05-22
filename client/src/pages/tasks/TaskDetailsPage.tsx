@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link, useLocation } from "wouter";
 import { TaskForm } from "@/components/modules/tasks/TaskForm";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, CheckCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle, BrainCircuit } from "lucide-react";
 import { Task, Project } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { NaturalLanguageTaskUpdate } from "@/components/ai/NaturalLanguageTaskUpdate";
+import { AIAssistant } from "@/components/ai/AIAssistant";
 
 export default function TaskDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -84,6 +86,7 @@ export default function TaskDetailsPage() {
             <Tabs defaultValue="details">
               <TabsList className="mb-4">
                 <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="ai">AI Assistant</TabsTrigger>
                 <TabsTrigger value="edit">Edit</TabsTrigger>
               </TabsList>
               
@@ -197,6 +200,29 @@ export default function TaskDetailsPage() {
                       )}
                     </CardContent>
                   </Card>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="ai">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <NaturalLanguageTaskUpdate 
+                      task={task} 
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({ queryKey: [`/api/tasks/${id}`] });
+                      }} 
+                    />
+                  </div>
+                  <div>
+                    <AIAssistant 
+                      context={`${task.title}${task.description ? `: ${task.description}` : ''}`}
+                      contextType="task"
+                      contextId={task.id}
+                      title="Task AI Assistant"
+                      description="I can help you manage this task. Ask me anything about task management, priorities, or deadlines."
+                      placeholder="Ask for advice on this task, request status updates, or get suggestions..."
+                    />
+                  </div>
                 </div>
               </TabsContent>
               
