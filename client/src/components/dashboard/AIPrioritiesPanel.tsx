@@ -47,7 +47,7 @@ export const AIPrioritiesPanel = () => {
   // Generate AI-powered insights
   const hasHighPriorityItems = pendingLeads.length > 0 || 
     projectsInReview.length > 0 || 
-    overduePayments.length > 0 || 
+    projectsWithDeadlines.length > 0 || 
     overdueDeadlineTasks.length > 0 ||
     highPriorityTasks.length > 0;
 
@@ -124,13 +124,13 @@ export const AIPrioritiesPanel = () => {
               </div>
             )}
 
-            {overduePayments.length > 0 && (
+            {projectsWithDeadlines.length > 0 && (
               <div className="border-l-4 border-red-400 pl-3 py-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-medium">Payment Follow-ups</h3>
+                    <h3 className="font-medium">Deadline Alert</h3>
                     <p className="text-sm text-slate-600 mt-1">
-                      {overduePayments.length} project{overduePayments.length > 1 ? 's have' : ' has'} pending payment
+                      {projectsWithDeadlines.length} project{projectsWithDeadlines.length > 1 ? 's are' : ' is'} past deadline
                     </p>
                   </div>
                   <Button variant="ghost" size="sm" asChild>

@@ -5,8 +5,11 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentLeads } from "@/components/dashboard/RecentLeads";
 import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { AIPrioritiesPanel } from "@/components/dashboard/AIPrioritiesPanel";
+import { ProjectSummaryStrip } from "@/components/dashboard/ProjectSummaryStrip";
+import { ProjectProgressRings } from "@/components/dashboard/ProjectProgressRings";
 import { Button } from "@/components/ui/button";
-import { Users, FolderKanban, Building2, Clock } from "lucide-react";
+import { Users, FolderKanban, Building2, Clock, Sparkles } from "lucide-react";
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -91,7 +94,33 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Main dashboard content */}
+      {/* AI Command Center - Top Row */}
+      <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <div className="p-4 mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100">
+            <h2 className="flex items-center text-lg font-semibold text-indigo-800 mb-2">
+              <Sparkles className="w-5 h-5 mr-2 text-indigo-500" />
+              AI Command Centre
+            </h2>
+            <p className="text-sm text-indigo-700">
+              AI-powered insights and recommendations for your business
+            </p>
+          </div>
+          <AIPrioritiesPanel />
+        </div>
+        
+        <div>
+          <UpcomingTasks />
+        </div>
+      </div>
+      
+      {/* Project Visualization - Middle Row */}
+      <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-2">
+        <ProjectProgressRings />
+        <ProjectSummaryStrip />
+      </div>
+      
+      {/* Standard Dashboard Elements - Bottom Row */}
       <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
         {/* Recent Leads */}
         <div className="lg:col-span-2">
@@ -100,11 +129,7 @@ export default function Dashboard() {
 
         {/* Sidebar content */}
         <div>
-          <UpcomingTasks />
-          
-          <div className="mt-6">
-            <RecentActivity />
-          </div>
+          <RecentActivity />
         </div>
       </div>
     </div>

@@ -179,9 +179,9 @@ export const ProjectSummaryStrip = () => {
                 
                 <div className="text-xs text-slate-500 mt-2">
                   {project.clientId ? (
-                    <span>Client: {project.clientName || 'Client #' + project.clientId}</span>
+                    <span>Client ID: {project.clientId}</span>
                   ) : project.leadId ? (
-                    <span>Lead: {project.leadName || 'Lead #' + project.leadId}</span>
+                    <span>Lead ID: {project.leadId}</span>
                   ) : (
                     <span>No client assigned</span>
                   )}
