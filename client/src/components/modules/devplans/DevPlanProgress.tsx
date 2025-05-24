@@ -7,14 +7,14 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  PlanIcon, 
-  HammerIcon, 
-  FileEditIcon, 
-  RocketIcon, 
-  ChevronRightIcon,
-  CalendarIcon,
-  ClipboardListIcon,
-  Clock10Icon
+  ClipboardList, 
+  Hammer, 
+  FileEdit, 
+  Rocket, 
+  ChevronRight,
+  Calendar,
+  ClipboardCheck,
+  Clock10
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { format, differenceInDays, isBefore, isAfter } from "date-fns";
@@ -228,7 +228,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
     { 
       id: "planning", 
       name: "Planning", 
-      icon: PlanIcon, 
+      icon: ClipboardList, 
       color: "bg-blue-500",
       textColor: "text-blue-500",
       borderColor: "border-blue-500",
@@ -241,7 +241,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
     { 
       id: "build", 
       name: "Build", 
-      icon: HammerIcon, 
+      icon: Hammer, 
       color: "bg-amber-500",
       textColor: "text-amber-500",
       borderColor: "border-amber-500",
@@ -254,7 +254,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
     { 
       id: "revise", 
       name: "Revise", 
-      icon: FileEditIcon, 
+      icon: FileEdit, 
       color: "bg-purple-500",
       textColor: "text-purple-500",
       borderColor: "border-purple-500",
@@ -267,7 +267,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
     { 
       id: "live", 
       name: "Live", 
-      icon: RocketIcon, 
+      icon: Rocket, 
       color: "bg-green-500",
       textColor: "text-green-500",
       borderColor: "border-green-500",

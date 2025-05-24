@@ -1,23 +1,29 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useParams, Link, useLocation } from "wouter";
 import { ProjectForm } from "@/components/modules/projects/ProjectForm";
 import { TaskForm } from "@/components/modules/tasks/TaskForm";
 import { TaskTable } from "@/components/modules/tasks/TaskTable";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Plus } from "lucide-react";
-import { Project, Task, Lead, Client } from "@shared/schema";
+import { ChevronLeft, Plus, ClipboardCheck } from "lucide-react";
+import { Project, Task, Lead, Client, DevPlan } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AIAssistant } from "@/components/ai/AIAssistant";
 import { TaskSuggestions } from "@/components/ai/TaskSuggestions";
+import { DevPlanForm } from "@/components/modules/devplans/DevPlanForm";
+import { DevPlanProgress } from "@/components/modules/devplans/DevPlanProgress";
+import { DevPlanBlockers } from "@/components/modules/devplans/DevPlanBlockers";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const isNew = id === 'new';
   
   // Parse query parameters for new projects
@@ -43,6 +49,37 @@ export default function ProjectDetailsPage() {
   const { data: client } = useQuery<Client>({
     queryKey: [`/api/clients/${project?.clientId}`],
     enabled: !isNew && !!project?.clientId,
+  });
+  
+  // Get development plan for this project if it exists
+  const { data: devPlan, isLoading: devPlanLoading } = useQuery<DevPlan>({
+    queryKey: [`/api/projects/${id}/dev-plan`],
+    enabled: !isNew && !!id,
+    // Don't throw error if plan doesn't exist
+    throwOnError: false
+  });
+  
+  // Create new development plan for the project
+  const createDevPlanMutation = useMutation({
+    mutationFn: (devPlanData: any) => 
+      apiRequest(`/api/dev-plans`, {
+        method: "POST",
+        body: JSON.stringify(devPlanData)
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/dev-plan`] });
+      toast({
+        title: "Success!",
+        description: "Development plan created successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create development plan",
+        variant: "destructive",
+      });
+    }
   });
 
   return (
@@ -70,6 +107,7 @@ export default function ProjectDetailsPage() {
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                <TabsTrigger value="devplan">Development Plan</TabsTrigger>
                 <TabsTrigger value="ai">AI Assistant</TabsTrigger>
                 <TabsTrigger value="edit">Edit</TabsTrigger>
               </TabsList>
@@ -239,6 +277,61 @@ export default function ProjectDetailsPage() {
                     )}
                   </div>
                 </div>
+              </TabsContent>
+              
+              <TabsContent value="devplan">
+                {devPlan ? (
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div className="lg:col-span-2">
+                      <DevPlanProgress 
+                        project={project} 
+                        onUpdateStage={(updatedPlan) => {
+                          queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/dev-plan`] });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <DevPlanBlockers 
+                        project={project} 
+                        tasks={tasks || []}
+                        devPlan={devPlan}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="p-6">
+                      <div className="text-center py-8">
+                        <h3 className="text-lg font-medium mb-4">No Development Plan Yet</h3>
+                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                          Create a structured development plan to track progress through Planning, Build, Revise, and Live stages.
+                        </p>
+                        <Button 
+                          onClick={() => {
+                            // Get all available projects for the form
+                            const allProjects = [project];
+                            
+                            // Create a default plan
+                            const defaultPlan = {
+                              name: `Development Plan for ${project.name}`,
+                              description: `Development plan to organize and track the progress of ${project.name}`,
+                              projectId: Number(id),
+                              currentStage: "planning",
+                              planningStartDate: new Date().toISOString()
+                            };
+                            
+                            // Create the plan
+                            createDevPlanMutation.mutate(defaultPlan);
+                          }}
+                          disabled={createDevPlanMutation.isPending}
+                        >
+                          <ClipboardCheck className="mr-2 h-4 w-4" />
+                          {createDevPlanMutation.isPending ? "Creating Plan..." : "Create Development Plan"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="ai">
