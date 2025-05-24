@@ -287,7 +287,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <ClipboardListIcon className="w-5 h-5" />
+            <ClipboardList className="w-5 h-5" />
             <span>Development Plan: {devPlan.name}</span>
           </div>
           <Badge>{devPlan.currentStage.charAt(0).toUpperCase() + devPlan.currentStage.slice(1)}</Badge>
@@ -348,7 +348,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
                         {/* Dates display */}
                         {(stage.startDate || stage.endDate) && (
                           <div className="flex items-center text-xs text-gray-500">
-                            <CalendarIcon className="w-3 h-3 mr-1" />
+                            <Calendar className="w-3 h-3 mr-1" />
                             {stage.startDate && format(new Date(stage.startDate), "MMM d, yyyy")}
                             {stage.startDate && stage.endDate && " - "}
                             {stage.endDate && format(new Date(stage.endDate), "MMM d, yyyy")}
@@ -385,7 +385,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
                             disabled={!!updatingStage}
                           >
                             {updatingStage === stage.id ? "Updating..." : "Advance to Next Stage"}
-                            <ChevronRightIcon className="ml-1 w-4 h-4" />
+                            <ChevronRight className="ml-1 w-4 h-4" />
                           </Button>
                         </div>
                       )}
@@ -393,7 +393,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
                       {/* Next stage indicator */}
                       {isNextStage && !stage.active && !stage.completed && (
                         <div className="mt-2 text-xs text-gray-500 flex items-center">
-                          <Clock10Icon className="w-3 h-3 mr-1" />
+                          <Clock10 className="w-3 h-3 mr-1" />
                           <span>Up next</span>
                         </div>
                       )}
