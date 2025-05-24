@@ -49,7 +49,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <ClipboardListIcon className="w-5 h-5" />
+            <ClipboardList className="w-5 h-5" />
             <span>Development Plan</span>
           </CardTitle>
         </CardHeader>
@@ -67,7 +67,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <ClipboardListIcon className="w-5 h-5" />
+            <ClipboardList className="w-5 h-5" />
             <span>Development Plan</span>
           </CardTitle>
         </CardHeader>
