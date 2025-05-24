@@ -233,6 +233,63 @@ export async function getTaskAdvice(taskDescription: string, taskStatus: string,
 }
 
 /**
+ * Generate dashboard insights based on current data
+ */
+export async function generateDashboardInsights(dashboardData: any) {
+  try {
+    const prompt = `
+      As an AI assistant for a CRM system, analyze the following dashboard data and provide insights and recommendations:
+      
+      Dashboard Data: ${JSON.stringify(dashboardData.contextInfo)}
+      
+      ${dashboardData.prompt ? `User's specific question: ${dashboardData.prompt}` : ''}
+      
+      Based on this information:
+      1. Identify key priorities that need attention
+      2. Suggest next actions for the user
+      3. Highlight any potential issues or opportunities
+      
+      Format your response as specific, actionable items that the user should focus on.
+      
+      Return the response in this JSON format:
+      { 
+        "priorities": [
+          { 
+            "title": "Priority title", 
+            "description": "Priority description", 
+            "status": "pending|overdue|completed" 
+          }
+        ],
+        "summary": "Brief summary of the overall situation"
+      }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      return { 
+        priorities: [],
+        summary: "No insights available at this time."
+      };
+    }
+    
+    return JSON.parse(content);
+  } catch (error: any) {
+    console.error("Error generating dashboard insights:", error);
+    return { 
+      priorities: [],
+      summary: "Unable to generate insights at this time. Please try again later.",
+      error: error.message
+    };
+  }
+}
+
+/**
  * Analyze project for potential blockers
  */
 export async function analyzeProjectBlockers(project: any, tasks: any[], devPlan?: any) {
