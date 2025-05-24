@@ -231,3 +231,77 @@ export async function getTaskAdvice(taskDescription: string, taskStatus: string,
     };
   }
 }
+
+/**
+ * Analyze project for potential blockers
+ */
+export async function analyzeProjectBlockers(project: any, tasks: any[], devPlan?: any) {
+  try {
+    const projectData = {
+      name: project.name,
+      description: project.description,
+      status: project.status,
+      startDate: project.startDate,
+      deadline: project.deadline,
+      completedDate: project.completedDate,
+      taskCount: tasks.length,
+      taskStatusBreakdown: {
+        todo: tasks.filter(t => t.status === "todo").length,
+        in_progress: tasks.filter(t => t.status === "in_progress").length,
+        review: tasks.filter(t => t.status === "review").length,
+        completed: tasks.filter(t => t.status === "completed").length
+      },
+      devPlan: devPlan ? {
+        currentStage: devPlan.currentStage,
+        planningStartDate: devPlan.planningStartDate,
+        planningEndDate: devPlan.planningEndDate,
+        buildStartDate: devPlan.buildStartDate,
+        buildEndDate: devPlan.buildEndDate,
+        reviseStartDate: devPlan.reviseStartDate,
+        reviseEndDate: devPlan.reviseEndDate,
+        liveStartDate: devPlan.liveStartDate
+      } : null
+    };
+
+    const promptText = `
+      As an AI project management expert, analyze the following project data and identify potential blockers or issues that might affect project success:
+      
+      Project Data:
+      ${JSON.stringify(projectData, null, 2)}
+      
+      Based on this data, identify 3-5 potential blockers or issues that might delay or derail this project.
+      Consider factors like timeline constraints, task distribution, missing information, and development plan progression.
+      
+      For each blocker, provide:
+      1. A brief description of the potential issue
+      2. Why it could be a problem
+      3. A suggested mitigation strategy
+      
+      Return the response in this JSON format:
+      { "blockers": [ { "description": "Issue description", "impact": "Why it's a problem", "mitigation": "How to address it" } ] }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: promptText }],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      return [];
+    }
+    
+    const result = JSON.parse(content);
+    return result.blockers || [];
+  } catch (error) {
+    console.error("Error analyzing project blockers:", error);
+    return [
+      {
+        description: "Unable to analyze project blockers at this time. Please try again later.",
+        impact: "Analysis service is currently unavailable",
+        mitigation: "Try refreshing or check your connection"
+      }
+    ];
+  }
+}

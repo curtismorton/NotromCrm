@@ -284,6 +284,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/projects/:id/blockers", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Get tasks for this project
+      const tasks = await storage.getTasksByProject(id);
+      
+      // Get dev plan for this project (if exists)
+      const devPlan = await storage.getDevPlanByProject(id);
+      
+      // Analyze project for blockers using AI
+      const blockers = await aiService.analyzeProjectBlockers(project, tasks, devPlan);
+      
+      res.json(blockers);
+    } catch (error) {
+      console.error("Error analyzing project blockers:", error);
+      res.status(500).json({ message: "Failed to analyze project blockers" });
+    }
+  });
+
   app.patch("/api/projects/:id", validateBody(insertProjectSchema.partial()), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -687,6 +712,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Failed to remove tag from task" });
+    }
+  });
+
+  // Dev Plans
+  app.post("/api/dev-plans", validateBody(insertDevPlanSchema), async (req, res) => {
+    try {
+      const devPlan = await storage.createDevPlan(req.validatedBody);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "create",
+          "dev_plan",
+          devPlan.id,
+          { name: devPlan.name, projectId: devPlan.projectId }
+        );
+      }
+      
+      res.status(201).json(devPlan);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create development plan" });
+    }
+  });
+
+  app.get("/api/dev-plans", async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      // Apply filters from query params
+      if (req.query.currentStage) filters.currentStage = req.query.currentStage;
+      if (req.query.projectId) filters.projectId = parseInt(req.query.projectId as string);
+      
+      const devPlans = await storage.getDevPlans(filters);
+      res.json(devPlans);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch development plans" });
+    }
+  });
+
+  app.get("/api/dev-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const devPlan = await storage.getDevPlan(id);
+      
+      if (!devPlan) {
+        return res.status(404).json({ message: "Development plan not found" });
+      }
+      
+      res.json(devPlan);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch development plan" });
+    }
+  });
+
+  app.get("/api/projects/:projectId/dev-plan", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const devPlan = await storage.getDevPlanByProject(projectId);
+      
+      if (!devPlan) {
+        return res.status(404).json({ message: "No development plan found for this project" });
+      }
+      
+      res.json(devPlan);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch development plan for project" });
+    }
+  });
+
+  app.patch("/api/dev-plans/:id", validateBody(insertDevPlanSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const devPlan = await storage.updateDevPlan(id, req.validatedBody);
+      
+      if (!devPlan) {
+        return res.status(404).json({ message: "Development plan not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update",
+          "dev_plan",
+          devPlan.id,
+          { changes: req.validatedBody }
+        );
+      }
+      
+      res.json(devPlan);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update development plan" });
+    }
+  });
+
+  app.patch("/api/dev-plans/:id/stage", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { stage, startDate, endDate } = req.body;
+      
+      if (!stage) {
+        return res.status(400).json({ message: "Stage is required" });
+      }
+      
+      const validStages = ["planning", "build", "revise", "live"];
+      if (!validStages.includes(stage)) {
+        return res.status(400).json({ message: "Invalid stage value" });
+      }
+      
+      const devPlan = await storage.updateDevPlanStage(
+        id, 
+        stage, 
+        startDate ? new Date(startDate) : undefined,
+        endDate ? new Date(endDate) : undefined
+      );
+      
+      if (!devPlan) {
+        return res.status(404).json({ message: "Development plan not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update_stage",
+          "dev_plan",
+          devPlan.id,
+          { stage, startDate, endDate }
+        );
+      }
+      
+      res.json(devPlan);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update development plan stage" });
+    }
+  });
+
+  app.delete("/api/dev-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteDevPlan(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Development plan not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "delete",
+          "dev_plan",
+          id,
+          {}
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete development plan" });
     }
   });
 
