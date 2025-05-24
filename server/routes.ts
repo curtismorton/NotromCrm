@@ -8,7 +8,8 @@ import {
   insertClientSchema, 
   insertTaskSchema, 
   insertTagSchema,
-  insertActivitySchema 
+  insertActivitySchema,
+  insertDevPlanSchema
 } from "@shared/schema";
 import * as aiService from "./services/ai";
 

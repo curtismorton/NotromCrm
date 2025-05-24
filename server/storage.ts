@@ -10,6 +10,7 @@ import {
   projectTags,
   clientTags,
   taskTags,
+  devPlans,
   type User,
   type Lead,
   type Project,
@@ -17,6 +18,7 @@ import {
   type Task,
   type Tag,
   type Activity,
+  type DevPlan,
   type UpsertUser,
   type InsertLead,
   type InsertProject,
@@ -24,6 +26,7 @@ import {
   type InsertTask,
   type InsertTag,
   type InsertActivity,
+  type InsertDevPlan,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, inArray, like, and, or, desc, sql, getTableColumns } from "drizzle-orm";
@@ -91,6 +94,15 @@ export interface IStorage {
   addTagToTask(taskId: number, tagId: number): Promise<void>;
   removeTagFromTask(taskId: number, tagId: number): Promise<void>;
   getTagsByTask(taskId: number): Promise<Tag[]>;
+  
+  // Development Plans
+  createDevPlan(devPlan: InsertDevPlan): Promise<DevPlan>;
+  getDevPlan(id: number): Promise<DevPlan | undefined>;
+  getDevPlanByProject(projectId: number): Promise<DevPlan | undefined>;
+  getDevPlans(filters?: Partial<DevPlan>): Promise<DevPlan[]>;
+  updateDevPlan(id: number, devPlan: Partial<InsertDevPlan>): Promise<DevPlan | undefined>;
+  deleteDevPlan(id: number): Promise<boolean>;
+  updateDevPlanStage(id: number, stage: string, startDate?: Date, endDate?: Date): Promise<DevPlan | undefined>;
   
   // Activities
   createActivity(activity: InsertActivity): Promise<Activity>;
@@ -515,6 +527,83 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(activities.createdAt));
+  }
+
+  // Development Plans
+  async createDevPlan(devPlanData: InsertDevPlan): Promise<DevPlan> {
+    const [devPlan] = await db.insert(devPlans).values(devPlanData).returning();
+    return devPlan;
+  }
+
+  async getDevPlan(id: number): Promise<DevPlan | undefined> {
+    const [devPlan] = await db.select().from(devPlans).where(eq(devPlans.id, id));
+    return devPlan;
+  }
+
+  async getDevPlanByProject(projectId: number): Promise<DevPlan | undefined> {
+    const [devPlan] = await db.select().from(devPlans).where(eq(devPlans.projectId, projectId));
+    return devPlan;
+  }
+
+  async getDevPlans(filters?: Partial<DevPlan>): Promise<DevPlan[]> {
+    let query = db.select().from(devPlans);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.currentStage) conditions.push(eq(devPlans.currentStage, filters.currentStage));
+      if (filters.projectId) conditions.push(eq(devPlans.projectId, filters.projectId));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(devPlans.createdAt));
+  }
+
+  async updateDevPlan(id: number, devPlanData: Partial<InsertDevPlan>): Promise<DevPlan | undefined> {
+    const [updated] = await db
+      .update(devPlans)
+      .set({ ...devPlanData, updatedAt: new Date() })
+      .where(eq(devPlans.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDevPlan(id: number): Promise<boolean> {
+    const result = await db.delete(devPlans).where(eq(devPlans.id, id)).returning({ id: devPlans.id });
+    return result.length > 0;
+  }
+
+  async updateDevPlanStage(id: number, stage: string, startDate?: Date, endDate?: Date): Promise<DevPlan | undefined> {
+    // Get the current dev plan
+    const currentPlan = await this.getDevPlan(id);
+    if (!currentPlan) return undefined;
+    
+    const updates: Partial<InsertDevPlan> = {
+      currentStage: stage as any, // Cast to satisfy TypeScript
+    };
+    
+    // Set stage-specific date fields based on the stage
+    switch (stage) {
+      case 'planning':
+        if (startDate) updates.planningStartDate = startDate;
+        if (endDate) updates.planningEndDate = endDate;
+        break;
+      case 'build':
+        if (startDate) updates.buildStartDate = startDate;
+        if (endDate) updates.buildEndDate = endDate;
+        break;
+      case 'revise':
+        if (startDate) updates.reviseStartDate = startDate;
+        if (endDate) updates.reviseEndDate = endDate;
+        break;
+      case 'live':
+        if (startDate) updates.liveStartDate = startDate;
+        break;
+    }
+    
+    return await this.updateDevPlan(id, updates);
   }
 
   // Dashboard data

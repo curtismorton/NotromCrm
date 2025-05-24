@@ -61,6 +61,13 @@ export const projectStatusEnum = pgEnum("project_status", [
   "cancelled",
 ]);
 
+export const devPlanStageEnum = pgEnum("dev_plan_stage", [
+  "planning",
+  "build",
+  "revise",
+  "live",
+]);
+
 export const taskStatusEnum = pgEnum("task_status", [
   "todo",
   "in_progress",
@@ -195,6 +202,28 @@ export const taskTags = pgTable("task_tags", {
   };
 });
 
+// Development Plans for projects
+export const devPlans = pgTable("dev_plans", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull().unique(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  currentStage: devPlanStageEnum("current_stage").default("planning").notNull(),
+  planningNotes: text("planning_notes"),
+  buildNotes: text("build_notes"),
+  reviseNotes: text("revise_notes"),
+  liveNotes: text("live_notes"),
+  planningStartDate: timestamp("planning_start_date"),
+  planningEndDate: timestamp("planning_end_date"),
+  buildStartDate: timestamp("build_start_date"),
+  buildEndDate: timestamp("build_end_date"),
+  reviseStartDate: timestamp("revise_start_date"),
+  reviseEndDate: timestamp("revise_end_date"),
+  liveStartDate: timestamp("live_start_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Activity for tracking changes across the system
 export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
@@ -214,6 +243,7 @@ export const insertClientSchema = createInsertSchema(clients);
 export const insertTaskSchema = createInsertSchema(tasks);
 export const insertTagSchema = createInsertSchema(tags);
 export const insertActivitySchema = createInsertSchema(activities);
+export const insertDevPlanSchema = createInsertSchema(devPlans);
 
 // Define types for insert operations
 export type InsertLead = z.infer<typeof insertLeadSchema>;
@@ -222,6 +252,7 @@ export type InsertClient = z.infer<typeof insertClientSchema>;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type InsertTag = z.infer<typeof insertTagSchema>;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
+export type InsertDevPlan = z.infer<typeof insertDevPlanSchema>;
 
 // Define types for select operations
 export type Lead = typeof leads.$inferSelect;
@@ -230,3 +261,4 @@ export type Client = typeof clients.$inferSelect;
 export type Task = typeof tasks.$inferSelect;
 export type Tag = typeof tags.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
+export type DevPlan = typeof devPlans.$inferSelect;
