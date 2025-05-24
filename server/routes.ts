@@ -986,6 +986,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/ai/dashboard-insights", async (req, res) => {
+    try {
+      // Validate that there's context information in the request
+      if (!req.body || !req.body.contextInfo) {
+        return res.status(400).json({ message: "Context information is required" });
+      }
+
+      const insights = await aiService.generateDashboardInsights(req.body);
+      res.json(insights);
+    } catch (error) {
+      console.error("Error generating dashboard insights:", error);
+      res.status(500).json({ message: "Failed to generate dashboard insights" });
+    }
+  });
+
   app.post("/api/ai/task-advice", async (req, res) => {
     try {
       const { taskDescription, taskStatus } = req.body;
