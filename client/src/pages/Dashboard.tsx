@@ -1,136 +1,283 @@
-import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Code, Mic, Briefcase, CheckSquare, Calendar, TrendingUp, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { StatsCard } from "@/components/dashboard/StatsCard";
-import { RecentLeads } from "@/components/dashboard/RecentLeads";
-import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks";
-import { RecentActivity } from "@/components/dashboard/RecentActivity";
-import { AIPrioritiesPanel } from "@/components/dashboard/AIPrioritiesPanel";
-import { ProjectSummaryStrip } from "@/components/dashboard/ProjectSummaryStrip";
-import { ProjectProgressRings } from "@/components/dashboard/ProjectProgressRings";
-import { Button } from "@/components/ui/button";
-import { Users, FolderKanban, Building2, Clock, Sparkles } from "lucide-react";
+import { AIAssistant } from "@/components/ai/AIAssistant";
+import type { Lead, Project, Client, Task } from "@shared/schema";
 
 export default function Dashboard() {
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: leads } = useQuery<Lead[]>({
+    queryKey: ["/api/leads"],
+  });
+
+  const { data: projects } = useQuery<Project[]>({
+    queryKey: ["/api/projects"],
+  });
+
+  const { data: clients } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
+  });
+
+  const { data: tasks } = useQuery<Task[]>({
+    queryKey: ["/api/tasks"],
+  });
+
+  const { data: stats } = useQuery<{
+    totalLeads: number;
+    activeProjects: number;
+    totalClients: number;
+    overdueTasks: number;
+  }>({
     queryKey: ["/api/dashboard/stats"],
   });
 
+  // Filter tasks by context
+  const notromTasks = tasks?.filter(task => task.context === 'notrom') || [];
+  const podcastTasks = tasks?.filter(task => task.context === 'podcast') || [];
+  const dayJobTasks = tasks?.filter(task => task.context === 'day_job') || [];
+  const generalTasks = tasks?.filter(task => task.context === 'general') || [];
+
+  const overdueTasks = tasks?.filter(task => {
+    if (!task.dueDate) return false;
+    return new Date(task.dueDate) < new Date() && task.status !== "completed";
+  }) || [];
+
+  const todayTasks = tasks?.filter(task => {
+    if (!task.dueDate) return false;
+    const today = new Date();
+    const taskDate = new Date(task.dueDate);
+    return taskDate.toDateString() === today.toDateString();
+  }) || [];
+
   return (
-    <div>
-      <div className="pb-4 mb-6 border-b border-gray-200">
-        <div className="flex flex-wrap items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-          <div className="flex mt-3 space-x-3 sm:mt-0">
-            <Button asChild>
-              <Link href="/leads/new">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5 mr-2 -ml-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                New Lead
-              </Link>
-            </Button>
-            <Button variant="outline">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 mr-2 -ml-1 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-              Filter
-            </Button>
-          </div>
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">CurtisOS Dashboard</h1>
+          <p className="text-muted-foreground">Unified life and work management system</p>
         </div>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 gap-5 mt-2 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total Leads"
-          value={statsLoading ? "..." : stats?.totalLeads || 0}
-          icon={<Users className="w-5 h-5" />}
-          iconBgColor="bg-primary-500"
-          changePercentage={12}
-        />
-        <StatsCard
-          title="Active Projects"
-          value={statsLoading ? "..." : stats?.activeProjects || 0}
-          icon={<FolderKanban className="w-5 h-5" />}
-          iconBgColor="bg-secondary-500"
-          changePercentage={7}
-        />
-        <StatsCard
-          title="Total Clients"
-          value={statsLoading ? "..." : stats?.totalClients || 0}
-          icon={<Building2 className="w-5 h-5" />}
-          iconBgColor="bg-accent-500"
-          changePercentage={3}
-        />
-        <StatsCard
-          title="Overdue Tasks"
-          value={statsLoading ? "..." : stats?.overdueTasks || 0}
-          icon={<Clock className="w-5 h-5" />}
-          iconBgColor="bg-red-500"
-          changePercentage={-15}
-        />
+      {/* Life & Work Section Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <Link href="/notrom">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Notrom</CardTitle>
+              <Code className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{notromTasks.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Web development tasks
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/podcast">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Podcast</CardTitle>
+              <Mic className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{podcastTasks.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Behind The Screens tasks
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/day-job">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Day Job</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dayJobTasks.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Socially Powerful tasks
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/tasks">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">General Tasks</CardTitle>
+              <CheckSquare className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{generalTasks.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Personal & misc tasks
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
-      {/* AI Command Center - Top Row */}
-      <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <div className="p-4 mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100">
-            <h2 className="flex items-center text-lg font-semibold text-indigo-800 mb-2">
-              <Sparkles className="w-5 h-5 mr-2 text-indigo-500" />
-              AI Command Centre
-            </h2>
-            <p className="text-sm text-indigo-700">
-              AI-powered insights and recommendations for your business
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+            <CheckSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{tasks?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Across all contexts
             </p>
-          </div>
-          <AIPrioritiesPanel />
-        </div>
-        
-        <div>
-          <UpcomingTasks />
-        </div>
-      </div>
-      
-      {/* Project Visualization - Middle Row */}
-      <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-2">
-        <ProjectProgressRings />
-        <ProjectSummaryStrip />
-      </div>
-      
-      {/* Standard Dashboard Elements - Bottom Row */}
-      <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
-        {/* Recent Leads */}
-        <div className="lg:col-span-2">
-          <RecentLeads />
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Sidebar content */}
-        <div>
-          <RecentActivity />
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Due Today</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{todayTasks.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Tasks due today
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{overdueTasks.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Need attention
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.activeProjects || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              In progress
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Today's Tasks */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Today's Tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {todayTasks.slice(0, 5).map((task) => (
+                <Link key={task.id} href={`/tasks/${task.id}`}>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
+                    <div>
+                      <p className="font-medium">{task.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Context: {task.context}
+                      </p>
+                    </div>
+                    <Badge variant={task.priority === 'high' ? 'destructive' : 'default'}>
+                      {task.priority}
+                    </Badge>
+                  </div>
+                </Link>
+              ))}
+              {todayTasks.length === 0 && (
+                <p className="text-sm text-muted-foreground">No tasks due today</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Overdue Tasks */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Overdue Tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {overdueTasks.slice(0, 5).map((task) => (
+                <Link key={task.id} href={`/tasks/${task.id}`}>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
+                    <div>
+                      <p className="font-medium">{task.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Due: {task.dueDate && new Date(task.dueDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge variant="destructive">
+                      {task.priority}
+                    </Badge>
+                  </div>
+                </Link>
+              ))}
+              {overdueTasks.length === 0 && (
+                <p className="text-sm text-muted-foreground">No overdue tasks</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Context Breakdown */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Task Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Notrom</span>
+                <Badge variant="outline">{notromTasks.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Podcast</span>
+                <Badge variant="outline">{podcastTasks.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Day Job</span>
+                <Badge variant="outline">{dayJobTasks.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">General</span>
+                <Badge variant="outline">{generalTasks.length}</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* AI Assistant */}
+        <Card>
+          <CardHeader>
+            <CardTitle>AI Assistant</CardTitle>
+            <CardDescription>Get insights and suggestions for your unified workflow</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AIAssistant
+              contextType="dashboard"
+              placeholder="Ask about your tasks, get suggestions, or request insights across all contexts..."
+              title="CurtisOS Assistant"
+              description="I can help you manage your life and work tasks more effectively."
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

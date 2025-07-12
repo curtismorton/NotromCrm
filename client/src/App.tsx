@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import MainLayout from "@/layouts/MainLayout";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
+import NotromPage from "@/pages/NotromPage";
+import PodcastPage from "@/pages/PodcastPage";
+import DayJobPage from "@/pages/DayJobPage";
 import LeadsPage from "@/pages/leads/LeadsPage";
 import LeadDetailsPage from "@/pages/leads/LeadDetailsPage";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
@@ -19,6 +22,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/notrom" component={NotromPage} />
+      <Route path="/podcast" component={PodcastPage} />
+      <Route path="/day-job" component={DayJobPage} />
       <Route path="/leads" component={LeadsPage} />
       <Route path="/leads/:id" component={LeadDetailsPage} />
       <Route path="/projects" component={ProjectsPage} />

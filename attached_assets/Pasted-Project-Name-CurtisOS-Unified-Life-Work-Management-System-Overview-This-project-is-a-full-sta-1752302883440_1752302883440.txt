@@ -1,0 +1,47 @@
+Project Name: CurtisOS — Unified Life & Work Management System
+
+Overview:
+This project is a full-stack personal operating system that centralizes everything I manage across life and work. It started as a CRM for my side hustle (Notrom web development) but is now evolving into a complete life management platform. CurtisOS will handle podcast production (Behind The Screens), influencer and talent work (my full-time role), side hustle operations, and personal admin (DIY, parenting, meals, finance, etc.).
+
+It will be mobile-first, fast to use, support Siri/iPhone shortcuts, and provide a single dashboard where everything lives.
+
+⸻
+
+🧩 Key Modules
+
+The system will be structured into the following core modules:
+	1.	Tasks: Taggable, prioritised, and linked to context (e.g. podcast, home, talent). Quick-add support via Siri/Shortcuts.
+	2.	Projects: Tracks goals, milestones, and linked tasks. Used for client builds, internal launches, and home projects.
+	3.	Leads: Used to manage brand/inbound/partnership outreach and progress for both my job and side hustle.
+	4.	Clients: For Notrom web dev business — tracks onboarding, contact info, and client notes.
+	5.	Podcast Episodes: Behind The Screens episode tracker for planning, segmenting, publishing, and tagging.
+	6.	Life Trackers: Covers meals, habits, DIY jobs, expenses, grocery lists, and anything else personal.
+	7.	Quick Capture: Webhook-ready for instant logging of tasks, ideas, or expenses via iPhone or Siri.
+
+⸻
+
+🛠 Tech Stack
+	•	Frontend: React (or Next.js if preferred)
+	•	Backend: Node.js with Express
+	•	Database: PostgreSQL (or Replit DB for MVP)
+	•	Hosting: Replit
+	•	API: RESTful API with CRUD routes for each module
+	•	Siri/Shortcuts Integration: JSON webhook endpoints for quick task/idea/expense logging
+
+⸻
+
+🔑 Core Features
+	•	Unified dashboard to see everything going on today across work/life
+	•	Quick capture for task logging via Siri or widgets
+	•	Tagging system to filter across modules (e.g. “DIY”, “BehindTheScreens”, “Talent”)
+	•	Timeline and status tracking for content and projects
+	•	Sync potential with Notion or Apple Reminders later
+	•	Designed mobile-first for easy iPhone use
+
+⸻
+
+🧱 Architecture Notes
+	•	Modular and future-proof: Every entry (task, project, lead, etc.) has context tags and is searchable
+	•	Everything links to a central dashboard and filtered views
+	•	JSON webhook integration is critical for iOS automation
+	•	Fast input, low-friction UI for daily task and idea tracking

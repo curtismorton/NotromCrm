@@ -2,7 +2,18 @@
 
 ## Overview
 
-This is a full-stack web application built with modern technologies for managing business operations including leads, projects, clients, and tasks. The application features a React frontend with TypeScript, a Node.js/Express backend, PostgreSQL database with Drizzle ORM, and AI-powered features using OpenAI's GPT-4o model.
+CurtisOS is a unified life and work management system that centralizes everything across four key areas: Notrom (side hustle web development), podcast production (Behind The Screens), day job (Head of Talent Management at Socially Powerful), and general tasks. This full-stack application features a React frontend with TypeScript, Node.js/Express backend, PostgreSQL database with Drizzle ORM, and AI-powered features using OpenAI's GPT-4o model. The system is designed mobile-first with support for quick capture and unified dashboard views.
+
+## Recent Changes
+
+### CurtisOS Transformation (July 2025)
+- ✅ Updated database schema with context enum for task categorization
+- ✅ Added podcast episodes and life trackers tables
+- ✅ Transformed navigation to reflect four main sections: Notrom, Podcast, Day Job, General Tasks
+- ✅ Created dedicated pages for each life/work context
+- ✅ Updated dashboard to show unified view with task distribution across contexts
+- ✅ Successfully pushed schema changes to database using Drizzle
+- ✅ Integrated context-aware filtering throughout the application
 
 ## User Preferences
 

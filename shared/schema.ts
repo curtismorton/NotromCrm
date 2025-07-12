@@ -75,6 +75,26 @@ export const taskStatusEnum = pgEnum("task_status", [
   "completed",
 ]);
 
+// CurtisOS specific enums
+export const contextEnum = pgEnum("context", [
+  "notrom",
+  "podcast",
+  "day_job",
+  "general",
+  "personal",
+  "home",
+  "finance",
+]);
+
+export const episodeStatusEnum = pgEnum("episode_status", [
+  "planning",
+  "research",
+  "recording",
+  "editing",
+  "published",
+  "archived",
+]);
+
 // Tags for organization
 export const tags = pgTable("tags", {
   id: serial("id").primaryKey(),
@@ -141,9 +161,42 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   status: taskStatusEnum("status").default("todo").notNull(),
   priority: priorityEnum("priority").default("medium").notNull(),
+  context: contextEnum("context").default("general").notNull(),
   dueDate: timestamp("due_date"),
   assignedTo: varchar("assigned_to").references(() => users.id),
   projectId: integer("project_id").references(() => projects.id),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// CurtisOS - Podcast Episodes module
+export const podcastEpisodes = pgTable("podcast_episodes", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  episodeNumber: integer("episode_number"),
+  status: episodeStatusEnum("status").default("planning").notNull(),
+  publishDate: timestamp("publish_date"),
+  duration: integer("duration"), // in minutes
+  topics: text("topics").array(),
+  guests: text("guests").array(),
+  notes: text("notes"),
+  youtubeUrl: varchar("youtube_url", { length: 255 }),
+  spotifyUrl: varchar("spotify_url", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Life Trackers module
+export const lifeTrackers = pgTable("life_trackers", {
+  id: serial("id").primaryKey(),
+  type: varchar("type", { length: 50 }).notNull(), // meal, habit, diy, expense, grocery
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  amount: integer("amount"), // for expenses
+  context: contextEnum("context").default("personal").notNull(),
+  dueDate: timestamp("due_date"),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -244,6 +297,8 @@ export const insertTaskSchema = createInsertSchema(tasks);
 export const insertTagSchema = createInsertSchema(tags);
 export const insertActivitySchema = createInsertSchema(activities);
 export const insertDevPlanSchema = createInsertSchema(devPlans);
+export const insertPodcastEpisodeSchema = createInsertSchema(podcastEpisodes);
+export const insertLifeTrackerSchema = createInsertSchema(lifeTrackers);
 
 // Define types for insert operations
 export type InsertLead = z.infer<typeof insertLeadSchema>;
@@ -253,6 +308,8 @@ export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type InsertTag = z.infer<typeof insertTagSchema>;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type InsertDevPlan = z.infer<typeof insertDevPlanSchema>;
+export type InsertPodcastEpisode = z.infer<typeof insertPodcastEpisodeSchema>;
+export type InsertLifeTracker = z.infer<typeof insertLifeTrackerSchema>;
 
 // Define types for select operations
 export type Lead = typeof leads.$inferSelect;
@@ -262,3 +319,5 @@ export type Task = typeof tasks.$inferSelect;
 export type Tag = typeof tags.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
 export type DevPlan = typeof devPlans.$inferSelect;
+export type PodcastEpisode = typeof podcastEpisodes.$inferSelect;
+export type LifeTracker = typeof lifeTrackers.$inferSelect;

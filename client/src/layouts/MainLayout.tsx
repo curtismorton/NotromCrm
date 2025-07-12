@@ -12,7 +12,10 @@ import {
   Bell, 
   HelpCircle, 
   Menu, 
-  LogOut 
+  LogOut,
+  Code,
+  Mic,
+  Briefcase
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -85,7 +88,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         )}
       >
         <div className="flex items-center justify-center h-16 px-6 bg-primary-600">
-          <h2 className="text-xl font-semibold text-white">Notrom CRM</h2>
+          <h2 className="text-xl font-semibold text-white">CurtisOS</h2>
         </div>
         <nav className="px-3 py-4">
           <SidebarItem 
@@ -96,35 +99,32 @@ export default function MainLayout({ children }: MainLayoutProps) {
           />
           
           <div className="mt-4 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">Modules</p>
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">Life & Work</p>
             
             <SidebarItem 
-              icon={<Users className="w-5 h-5" />} 
-              label="Leads" 
-              href="/leads" 
-              badgeCount={stats ? stats.totalLeads : undefined} 
-              active={location.startsWith("/leads")} 
+              icon={<Code className="w-5 h-5" />} 
+              label="Notrom" 
+              href="/notrom" 
+              active={location.startsWith("/notrom")} 
             />
             
             <SidebarItem 
-              icon={<FolderKanban className="w-5 h-5" />} 
-              label="Projects" 
-              href="/projects" 
-              badgeCount={stats ? stats.activeProjects : undefined} 
-              active={location.startsWith("/projects")} 
+              icon={<Mic className="w-5 h-5" />} 
+              label="Podcast" 
+              href="/podcast" 
+              active={location.startsWith("/podcast")} 
             />
             
             <SidebarItem 
-              icon={<Building2 className="w-5 h-5" />} 
-              label="Clients" 
-              href="/clients" 
-              badgeCount={stats ? stats.totalClients : undefined} 
-              active={location.startsWith("/clients")} 
+              icon={<Briefcase className="w-5 h-5" />} 
+              label="Day Job" 
+              href="/day-job" 
+              active={location.startsWith("/day-job")} 
             />
             
             <SidebarItem 
               icon={<CheckSquare className="w-5 h-5" />} 
-              label="Tasks" 
+              label="General Tasks" 
               href="/tasks" 
               badgeCount={stats ? stats.overdueTasks : undefined} 
               active={location.startsWith("/tasks")} 
