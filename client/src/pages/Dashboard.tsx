@@ -4,6 +4,9 @@ import { Code, Mic, Briefcase, CheckSquare, Calendar, TrendingUp, AlertCircle } 
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { AIAssistant } from "@/components/ai/AIAssistant";
+import { EmailWidget } from "@/components/dashboard/EmailWidget";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { ReportsWidget } from "@/components/dashboard/ReportsWidget";
 import type { Lead, Project, Client, Task } from "@shared/schema";
 
 export default function Dashboard() {
@@ -173,6 +176,47 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">
               In progress
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Enhanced CurtisOS Features */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <EmailWidget />
+        <RevenueChart />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <ReportsWidget />
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Link href="/tasks/new">
+              <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
+                <p className="font-medium">Add New Task</p>
+                <p className="text-xs text-muted-foreground">Create a task in any context</p>
+              </div>
+            </Link>
+            <Link href="/leads/new">
+              <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
+                <p className="font-medium">Add New Lead</p>
+                <p className="text-xs text-muted-foreground">Track a new opportunity</p>
+              </div>
+            </Link>
+            <Link href="/projects/new">
+              <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
+                <p className="font-medium">Start New Project</p>
+                <p className="text-xs text-muted-foreground">Begin a new project</p>
+              </div>
+            </Link>
           </CardContent>
         </Card>
       </div>

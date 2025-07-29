@@ -1016,6 +1016,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import and use the new email and report routes
+  const emailRoutes = await import("../api/emails");
+  const reportRoutes = await import("../api/reports");
+  
+  app.use("/api", emailRoutes.default);
+  app.use("/api", reportRoutes.default);
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -11,6 +11,9 @@ import {
   clientTags,
   taskTags,
   devPlans,
+  emails,
+  revenues,
+  reports,
   type User,
   type Lead,
   type Project,
@@ -19,6 +22,9 @@ import {
   type Tag,
   type Activity,
   type DevPlan,
+  type Email,
+  type Revenue,
+  type Report,
   type UpsertUser,
   type InsertLead,
   type InsertProject,
@@ -27,6 +33,9 @@ import {
   type InsertTag,
   type InsertActivity,
   type InsertDevPlan,
+  type InsertEmail,
+  type InsertRevenue,
+  type InsertReport,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, inArray, like, and, or, desc, sql, getTableColumns } from "drizzle-orm";
@@ -110,6 +119,33 @@ export interface IStorage {
   getActivitiesByUser(userId: string): Promise<Activity[]>;
   getActivitiesByEntity(entityType: string, entityId: number): Promise<Activity[]>;
   
+  // Emails
+  createEmail(email: InsertEmail): Promise<Email>;
+  getEmails(filters?: { context?: string; status?: string; limit?: number }): Promise<Email[]>;
+  getEmailsNeedingResponse(): Promise<Email[]>;
+  getEmailStats(): Promise<{
+    totalEmails: number;
+    needsResponse: number;
+    overdue: number;
+    contextBreakdown: Record<string, number>;
+  }>;
+  markEmailAsResponded(emailId: number): Promise<void>;
+
+  // Revenues
+  createRevenue(revenue: InsertRevenue): Promise<Revenue>;
+  getRevenues(filters?: { context?: string; startDate?: string; endDate?: string; limit?: number }): Promise<Revenue[]>;
+  getRevenueMetrics(context?: string): Promise<{
+    totalRevenue: number;
+    currentMonthRevenue: number;
+    lastMonthRevenue: number;
+    monthlyGrowth: number;
+    revenueByType: Record<string, number>;
+  }>;
+
+  // Reports
+  createReport(report: InsertReport): Promise<Report>;
+  getReports(context?: string, limit?: number): Promise<Report[]>;
+
   // Dashboard data
   getDashboardStats(): Promise<{
     totalLeads: number;
@@ -645,6 +681,168 @@ export class DatabaseStorage implements IStorage {
       totalClients: Number(clientCount?.count || 0),
       overdueTasks: Number(taskCount?.count || 0),
     };
+  }
+
+  // Email operations
+  async createEmail(email: InsertEmail): Promise<Email> {
+    const [newEmail] = await db.insert(emails).values(email).returning();
+    return newEmail;
+  }
+
+  async getEmails(filters?: { context?: string; status?: string; limit?: number }): Promise<Email[]> {
+    let query = db.select().from(emails);
+    
+    const conditions = [];
+    if (filters?.context) conditions.push(eq(emails.context, filters.context as any));
+    if (filters?.status) conditions.push(eq(emails.status, filters.status as any));
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    const results = await query
+      .orderBy(desc(emails.receivedAt))
+      .limit(filters?.limit || 50);
+    
+    return results;
+  }
+
+  async getEmailsNeedingResponse(): Promise<Email[]> {
+    return await db
+      .select()
+      .from(emails)
+      .where(eq(emails.status, 'needs_response'))
+      .orderBy(desc(emails.responseNeededBy));
+  }
+
+  async getEmailStats(): Promise<{
+    totalEmails: number;
+    needsResponse: number;
+    overdue: number;
+    contextBreakdown: Record<string, number>;
+  }> {
+    const allEmails = await db.select().from(emails);
+    const needsResponse = allEmails.filter(e => e.status === 'needs_response').length;
+    const overdue = allEmails.filter(e => 
+      e.responseNeededBy && 
+      new Date(e.responseNeededBy) < new Date() && 
+      e.status === 'needs_response'
+    ).length;
+    
+    const contextBreakdown = allEmails.reduce((acc, email) => {
+      acc[email.context] = (acc[email.context] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      totalEmails: allEmails.length,
+      needsResponse,
+      overdue,
+      contextBreakdown,
+    };
+  }
+
+  async markEmailAsResponded(emailId: number): Promise<void> {
+    await db
+      .update(emails)
+      .set({ 
+        status: 'responded',
+        updatedAt: new Date(),
+      })
+      .where(eq(emails.id, emailId));
+  }
+
+  // Revenue operations
+  async createRevenue(revenue: InsertRevenue): Promise<Revenue> {
+    const [newRevenue] = await db.insert(revenues).values(revenue).returning();
+    return newRevenue;
+  }
+
+  async getRevenues(filters?: { context?: string; startDate?: string; endDate?: string; limit?: number }): Promise<Revenue[]> {
+    let query = db.select().from(revenues);
+    
+    const conditions = [];
+    if (filters?.context) conditions.push(eq(revenues.context, filters.context as any));
+    if (filters?.startDate) conditions.push(sql`${revenues.receivedAt} >= ${new Date(filters.startDate)}`);
+    if (filters?.endDate) conditions.push(sql`${revenues.receivedAt} <= ${new Date(filters.endDate)}`);
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    const results = await query
+      .orderBy(desc(revenues.receivedAt))
+      .limit(filters?.limit || 50);
+    
+    // Convert amounts back to dollars
+    return results.map(r => ({
+      ...r,
+      amount: r.amount / 100,
+    }));
+  }
+
+  async getRevenueMetrics(context?: string): Promise<{
+    totalRevenue: number;
+    currentMonthRevenue: number;
+    lastMonthRevenue: number;
+    monthlyGrowth: number;
+    revenueByType: Record<string, number>;
+  }> {
+    let query = db.select().from(revenues);
+    
+    if (context) {
+      query = query.where(eq(revenues.context, context as any));
+    }
+    
+    const allRevenues = await query;
+    
+    const currentMonth = new Date();
+    currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+    
+    const lastMonth = new Date(currentMonth);
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    
+    const currentMonthRevenue = allRevenues
+      .filter(r => new Date(r.receivedAt) >= currentMonth)
+      .reduce((sum, r) => sum + r.amount, 0) / 100;
+    
+    const lastMonthRevenue = allRevenues
+      .filter(r => new Date(r.receivedAt) >= lastMonth && new Date(r.receivedAt) < currentMonth)
+      .reduce((sum, r) => sum + r.amount, 0) / 100;
+    
+    const totalRevenue = allRevenues.reduce((sum, r) => sum + r.amount, 0) / 100;
+    
+    const monthlyGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0;
+    
+    const revenueByType = allRevenues.reduce((acc, r) => {
+      acc[r.type] = (acc[r.type] || 0) + r.amount / 100;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return {
+      totalRevenue,
+      currentMonthRevenue,
+      lastMonthRevenue,
+      monthlyGrowth,
+      revenueByType,
+    };
+  }
+
+  // Report operations
+  async createReport(report: InsertReport): Promise<Report> {
+    const [newReport] = await db.insert(reports).values(report).returning();
+    return newReport;
+  }
+
+  async getReports(context?: string, limit?: number): Promise<Report[]> {
+    let query = db.select().from(reports);
+    
+    if (context) {
+      query = query.where(eq(reports.context, context as any));
+    }
+    
+    return await query.orderBy(desc(reports.generatedAt)).limit(limit || 10);
   }
 }
 

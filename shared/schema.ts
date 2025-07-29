@@ -202,6 +202,88 @@ export const lifeTrackers = pgTable("life_trackers", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Gmail Integration - Emails module
+export const emailStatusEnum = pgEnum("email_status", [
+  "unread",
+  "read",
+  "needs_response",
+  "responded",
+  "archived",
+  "snoozed"
+]);
+
+export const emails = pgTable("emails", {
+  id: serial("id").primaryKey(),
+  gmailId: varchar("gmail_id", { length: 100 }).notNull().unique(),
+  threadId: varchar("thread_id", { length: 100 }).notNull(),
+  subject: varchar("subject", { length: 500 }).notNull(),
+  fromEmail: varchar("from_email", { length: 255 }).notNull(),
+  fromName: varchar("from_name", { length: 255 }),
+  toEmail: varchar("to_email", { length: 255 }).notNull(),
+  body: text("body"),
+  snippet: text("snippet"),
+  status: emailStatusEnum("status").default("unread").notNull(),
+  context: contextEnum("context").default("general").notNull(),
+  priority: priorityEnum("priority").default("medium").notNull(),
+  receivedAt: timestamp("received_at").notNull(),
+  responseNeededBy: timestamp("response_needed_by"),
+  aiSuggestedResponse: text("ai_suggested_response"),
+  labels: text("labels").array(),
+  attachments: json("attachments"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Revenue Tracking module
+export const revenueTypeEnum = pgEnum("revenue_type", [
+  "notrom_project",
+  "podcast_sponsorship", 
+  "day_job_salary",
+  "consulting",
+  "other"
+]);
+
+export const revenues = pgTable("revenues", {
+  id: serial("id").primaryKey(),
+  type: revenueTypeEnum("type").notNull(),
+  context: contextEnum("context").notNull(),
+  amount: integer("amount").notNull(), // in cents for precision
+  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  description: text("description"),
+  projectId: integer("project_id").references(() => projects.id),
+  clientId: integer("client_id").references(() => clients.id),
+  receivedAt: timestamp("received_at").notNull(),
+  expectedAt: timestamp("expected_at"),
+  invoiceNumber: varchar("invoice_number", { length: 100 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Reports module for dashboard analytics
+export const reportTypeEnum = pgEnum("report_type", [
+  "talent_summary",
+  "podcast_analytics", 
+  "notrom_revenue",
+  "monthly_overview",
+  "custom"
+]);
+
+export const reports = pgTable("reports", {
+  id: serial("id").primaryKey(),
+  type: reportTypeEnum("type").notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  context: contextEnum("context").notNull(),
+  content: json("content").notNull(), // structured report data
+  dateRange: json("date_range"), // {start: date, end: date}
+  generatedBy: varchar("generated_by").references(() => users.id),
+  generatedAt: timestamp("generated_at").defaultNow().notNull(),
+  scheduledFor: timestamp("scheduled_for"),
+  isScheduled: boolean("is_scheduled").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Many-to-many relationships
 export const leadTags = pgTable("lead_tags", {
   leadId: integer("lead_id")
@@ -299,6 +381,9 @@ export const insertActivitySchema = createInsertSchema(activities);
 export const insertDevPlanSchema = createInsertSchema(devPlans);
 export const insertPodcastEpisodeSchema = createInsertSchema(podcastEpisodes);
 export const insertLifeTrackerSchema = createInsertSchema(lifeTrackers);
+export const insertEmailSchema = createInsertSchema(emails);
+export const insertRevenueSchema = createInsertSchema(revenues);
+export const insertReportSchema = createInsertSchema(reports);
 
 // Define types for insert operations
 export type InsertLead = z.infer<typeof insertLeadSchema>;
@@ -310,6 +395,9 @@ export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type InsertDevPlan = z.infer<typeof insertDevPlanSchema>;
 export type InsertPodcastEpisode = z.infer<typeof insertPodcastEpisodeSchema>;
 export type InsertLifeTracker = z.infer<typeof insertLifeTrackerSchema>;
+export type InsertEmail = z.infer<typeof insertEmailSchema>;
+export type InsertRevenue = z.infer<typeof insertRevenueSchema>;
+export type InsertReport = z.infer<typeof insertReportSchema>;
 
 // Define types for select operations
 export type Lead = typeof leads.$inferSelect;
@@ -321,3 +409,6 @@ export type Activity = typeof activities.$inferSelect;
 export type DevPlan = typeof devPlans.$inferSelect;
 export type PodcastEpisode = typeof podcastEpisodes.$inferSelect;
 export type LifeTracker = typeof lifeTrackers.$inferSelect;
+export type Email = typeof emails.$inferSelect;
+export type Revenue = typeof revenues.$inferSelect;
+export type Report = typeof reports.$inferSelect;
