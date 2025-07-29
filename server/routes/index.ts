@@ -12,8 +12,12 @@ import {
   insertDevPlanSchema
 } from "@shared/schema";
 import * as aiService from "../services/ai";
+import { GmailService } from "../services/gmailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Gmail service
+  const gmailService = new GmailService();
+
   // Helper for validating request bodies
   const validateBody = (schema: z.ZodSchema) => (req: any, res: any, next: any) => {
     try {
@@ -1016,12 +1020,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Import and use the new email and report routes
-  const emailRoutes = await import("../api/emails");
-  const reportRoutes = await import("../api/reports");
-  
-  app.use("/api", emailRoutes.default);
-  app.use("/api", reportRoutes.default);
+  // Gmail Integration Routes
+  app.get("/api/gmail/status", async (req, res) => {
+    try {
+      const status = await gmailService.getConnectionStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Gmail status error:", error);
+      res.json({ connected: false, errorMessage: "Unable to check Gmail connection" });
+    }
+  });
+
+  app.get("/api/gmail/auth", async (req, res) => {
+    try {
+      const authUrl = await gmailService.getAuthUrl();
+      res.json({ authUrl });
+    } catch (error) {
+      console.error("Gmail auth error:", error);
+      res.status(500).json({ message: "Failed to generate auth URL" });
+    }
+  });
+
+  app.get("/api/gmail/callback", async (req, res) => {
+    try {
+      const { code } = req.query;
+      if (!code) {
+        return res.status(400).json({ message: "Authorization code required" });
+      }
+      
+      await gmailService.handleAuthCallback(code as string);
+      res.redirect("/dashboard?gmail=connected");
+    } catch (error) {
+      console.error("Gmail callback error:", error);
+      res.status(500).json({ message: "Failed to handle auth callback" });
+    }
+  });
+
+  app.post("/api/gmail/sync", async (req, res) => {
+    try {
+      await gmailService.syncEmails();
+      res.json({ message: "Email sync completed" });
+    } catch (error) {
+      console.error("Gmail sync error:", error);
+      res.status(500).json({ message: "Failed to sync emails" });
+    }
+  });
+
+  // Email management endpoints
+  app.get("/api/emails", async (req, res) => {
+    try {
+      const emails = await storage.getEmails();
+      res.json(emails);
+    } catch (error) {
+      console.error("Get emails error:", error);
+      res.status(500).json({ message: "Failed to fetch emails" });
+    }
+  });
+
+  app.get("/api/emails/stats", async (req, res) => {
+    try {
+      const stats = await storage.getEmailStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Get email stats error:", error);
+      res.status(500).json({ message: "Failed to fetch email stats" });
+    }
+  });
+
+  app.get("/api/emails/needs-response", async (req, res) => {
+    try {
+      const emails = await storage.getEmailsNeedingResponse();
+      res.json(emails);
+    } catch (error) {
+      console.error("Get emails needing response error:", error);
+      res.status(500).json({ message: "Failed to fetch emails needing response" });
+    }
+  });
+
+  // Revenue endpoints
+  app.get("/api/revenue", async (req, res) => {
+    try {
+      const revenues = await storage.getRevenues();
+      res.json(revenues);
+    } catch (error) {
+      console.error("Get revenues error:", error);
+      res.status(500).json({ message: "Failed to fetch revenues" });
+    }
+  });
+
+  app.get("/api/revenue/metrics", async (req, res) => {
+    try {
+      const metrics = await storage.getRevenueMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Get revenue metrics error:", error);
+      res.status(500).json({ message: "Failed to fetch revenue metrics" });
+    }
+  });
+
+  // Reports endpoints
+  app.get("/api/reports", async (req, res) => {
+    try {
+      const reports = await storage.getReports();
+      res.json(reports);
+    } catch (error) {
+      console.error("Get reports error:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

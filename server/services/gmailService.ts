@@ -43,6 +43,29 @@ export class GmailService {
     });
   }
 
+  async getConnectionStatus() {
+    try {
+      // Check if we have valid credentials
+      if (!this.oauth2Client.credentials?.access_token && !this.oauth2Client.credentials?.refresh_token) {
+        return { connected: false, errorMessage: "No authentication tokens" };
+      }
+
+      // Try to make a simple API call to verify connection
+      await this.gmail.users.getProfile({ userId: 'me' });
+      
+      return { 
+        connected: true, 
+        lastSync: new Date().toISOString() 
+      };
+    } catch (error) {
+      logger.error('Gmail connection check failed', error);
+      return { 
+        connected: false, 
+        errorMessage: "Authentication failed - please reconnect" 
+      };
+    }
+  }
+
   async handleAuthCallback(code: string) {
     const { tokens } = await this.oauth2Client.getToken(code);
     this.oauth2Client.setCredentials(tokens);

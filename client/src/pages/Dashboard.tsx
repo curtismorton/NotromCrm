@@ -15,18 +15,27 @@ import type { Lead, Project, Client, Task } from "@shared/schema";
 export default function Dashboard() {
   const { data: leads } = useQuery<Lead[]>({
     queryKey: ["/api/leads"],
+    staleTime: 10 * 60 * 1000, // Fresh for 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: projects } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
+    staleTime: 10 * 60 * 1000, // Fresh for 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
+    staleTime: 15 * 60 * 1000, // Fresh for 15 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: tasks } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
+    retry: false, // Don't retry failed requests
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    staleTime: 5 * 60 * 1000, // Fresh for 5 minutes
   });
 
   const { data: stats } = useQuery<{
@@ -36,6 +45,8 @@ export default function Dashboard() {
     overdueTasks: number;
   }>({
     queryKey: ["/api/dashboard/stats"],
+    staleTime: 5 * 60 * 1000, // Fresh for 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Filter tasks by context
