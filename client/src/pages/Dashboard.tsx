@@ -7,6 +7,9 @@ import { AIAssistant } from "@/components/ai/AIAssistant";
 import { EmailWidget } from "@/components/dashboard/EmailWidget";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { ReportsWidget } from "@/components/dashboard/ReportsWidget";
+import { DragDropProvider, useDashboard } from "@/components/dashboard/DragDropProvider";
+import { DraggableWidget } from "@/components/dashboard/DraggableWidget";
+import { CustomizationPanel } from "@/components/dashboard/CustomizationPanel";
 import type { Lead, Project, Client, Task } from "@shared/schema";
 
 export default function Dashboard() {
@@ -53,179 +56,146 @@ export default function Dashboard() {
     return taskDate.toDateString() === today.toDateString();
   }) || [];
 
-  return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">CurtisOS Dashboard</h1>
-          <p className="text-muted-foreground">Unified life and work management system</p>
+  // Dashboard widget configuration
+  const dashboardWidgets = [
+    {
+      id: 'life-work-sections',
+      component: (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+          <Link href="/notrom">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Notrom</CardTitle>
+                <Code className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{notromTasks.length}</div>
+                <p className="text-xs text-muted-foreground">Web development tasks</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/podcast">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Podcast</CardTitle>
+                <Mic className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{podcastTasks.length}</div>
+                <p className="text-xs text-muted-foreground">Behind The Screens tasks</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/day-job">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Day Job</CardTitle>
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dayJobTasks.length}</div>
+                <p className="text-xs text-muted-foreground">Socially Powerful tasks</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/tasks">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">General Tasks</CardTitle>
+                <CheckSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{generalTasks.length}</div>
+                <p className="text-xs text-muted-foreground">Personal & misc tasks</p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
-      </div>
-
-      {/* Life & Work Section Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Link href="/notrom">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+      ),
+      title: 'Life & Work Sections',
+      size: 'large' as const,
+      enabled: true,
+    },
+    {
+      id: 'stats-overview',
+      component: (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+          <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Notrom</CardTitle>
-              <Code className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{notromTasks.length}</div>
-              <p className="text-xs text-muted-foreground">
-                Web development tasks
-              </p>
+              <div className="text-2xl font-bold">{stats?.activeProjects || 0}</div>
+              <p className="text-xs text-muted-foreground">In progress</p>
             </CardContent>
           </Card>
-        </Link>
-
-        <Link href="/podcast">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Podcast</CardTitle>
-              <Mic className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{podcastTasks.length}</div>
-              <p className="text-xs text-muted-foreground">
-                Behind The Screens tasks
-              </p>
+              <div className="text-2xl font-bold">{stats?.totalLeads || 0}</div>
+              <p className="text-xs text-muted-foreground">Opportunities</p>
             </CardContent>
           </Card>
-        </Link>
-
-        <Link href="/day-job">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Day Job</CardTitle>
+              <CardTitle className="text-sm font-medium">Clients</CardTitle>
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dayJobTasks.length}</div>
-              <p className="text-xs text-muted-foreground">
-                Socially Powerful tasks
-              </p>
+              <div className="text-2xl font-bold">{stats?.totalClients || 0}</div>
+              <p className="text-xs text-muted-foreground">Active clients</p>
             </CardContent>
           </Card>
-        </Link>
-
-        <Link href="/tasks">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">General Tasks</CardTitle>
-              <CheckSquare className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Overdue Tasks</CardTitle>
+              <AlertCircle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{generalTasks.length}</div>
-              <p className="text-xs text-muted-foreground">
-                Personal & misc tasks
-              </p>
+              <div className="text-2xl font-bold text-destructive">{stats?.overdueTasks || 0}</div>
+              <p className="text-xs text-muted-foreground">Need attention</p>
             </CardContent>
           </Card>
-        </Link>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-            <CheckSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{tasks?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Across all contexts
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Due Today</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{todayTasks.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Tasks due today
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{overdueTasks.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Need attention
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.activeProjects || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              In progress
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Enhanced CurtisOS Features */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <EmailWidget />
-        <RevenueChart />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2">
-          <ReportsWidget />
         </div>
-        
-        <Card>
+      ),
+      title: 'Quick Stats',
+      size: 'large' as const,
+      enabled: true,
+    },
+    {
+      id: 'email-widget',
+      component: <EmailWidget />,
+      title: 'Email Management',
+      size: 'medium' as const,
+      enabled: true,
+    },
+    {
+      id: 'revenue-chart',
+      component: <RevenueChart />,
+      title: 'Revenue Analytics',
+      size: 'medium' as const,
+      enabled: true,
+    },
+    {
+      id: 'reports-widget',
+      component: <ReportsWidget />,
+      title: 'Reports & Insights',
+      size: 'large' as const,
+      enabled: true,
+    },
+    {
+      id: 'todays-tasks',
+      component: (
+        <Card className="h-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Quick Actions
+              Today's Tasks
             </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Link href="/tasks/new">
-              <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
-                <p className="font-medium">Add New Task</p>
-                <p className="text-xs text-muted-foreground">Create a task in any context</p>
-              </div>
-            </Link>
-            <Link href="/leads/new">
-              <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
-                <p className="font-medium">Add New Lead</p>
-                <p className="text-xs text-muted-foreground">Track a new opportunity</p>
-              </div>
-            </Link>
-            <Link href="/projects/new">
-              <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
-                <p className="font-medium">Start New Project</p>
-                <p className="text-xs text-muted-foreground">Begin a new project</p>
-              </div>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Today's Tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Today's Tasks</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -250,9 +220,15 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Overdue Tasks */}
-        <Card>
+      ),
+      title: "Today's Tasks",
+      size: 'medium' as const,
+      enabled: true,
+    },
+    {
+      id: 'overdue-tasks',
+      component: (
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Overdue Tasks</CardTitle>
           </CardHeader>
@@ -279,9 +255,15 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Context Breakdown */}
-        <Card>
+      ),
+      title: 'Overdue Tasks',
+      size: 'medium' as const,
+      enabled: true,
+    },
+    {
+      id: 'task-distribution',
+      component: (
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Task Distribution</CardTitle>
           </CardHeader>
@@ -306,9 +288,15 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-
-        {/* AI Assistant */}
-        <Card>
+      ),
+      title: 'Task Distribution',
+      size: 'small' as const,
+      enabled: true,
+    },
+    {
+      id: 'ai-assistant',
+      component: (
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>AI Assistant</CardTitle>
             <CardDescription>Get insights and suggestions for your unified workflow</CardDescription>
@@ -322,7 +310,51 @@ export default function Dashboard() {
             />
           </CardContent>
         </Card>
+      ),
+      title: 'AI Assistant',
+      size: 'large' as const,
+      enabled: true,
+    },
+  ];
+
+  return (
+    <DragDropProvider initialItems={dashboardWidgets}>
+      <DashboardContent dashboardWidgets={dashboardWidgets} />
+    </DragDropProvider>
+  );
+}
+
+function DashboardContent({ dashboardWidgets }: { dashboardWidgets: any[] }) {
+  const { items, isCustomizing } = useDashboard();
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">CurtisOS Dashboard</h1>
+          <p className="text-muted-foreground">Unified life and work management system</p>
+        </div>
       </div>
+
+      {/* Customizable Dashboard Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+        {items
+          .filter(widget => widget.enabled || isCustomizing)
+          .map(widget => (
+            <DraggableWidget
+              key={widget.id}
+              id={widget.id}
+              title={widget.title}
+              size={widget.size}
+              enabled={widget.enabled}
+            >
+              {widget.component}
+            </DraggableWidget>
+          ))}
+      </div>
+
+      {/* Customization Panel */}
+      <CustomizationPanel />
     </div>
   );
 }
