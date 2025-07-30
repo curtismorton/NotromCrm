@@ -1,0 +1,105 @@
+1. Lead & Client Pipeline
+
+Track every prospect, lead, and client through the entire funnel:
+
+Key Statuses:
+• Lead Identified
+• Contacted
+• Call Booked
+• Onboarding Form Completed
+• Build in Progress
+• Awaiting Feedback
+• Revision Round
+• Final Delivery
+• Hosting Setup
+• Complete
+
+Suggested Fields:
+• Client name
+• Business type (dropdown: Café, Salon, Trades, etc.)
+• Contact info
+• Call link or transcript
+• Form received? (yes/no)
+• Build URL
+• Status (kanban or dropdown)
+• Deadline / delivery ETA
+• Notes
+
+⸻
+
+2. Task Automation View
+
+For tasks that can be auto-triggered or connected via Zapier/Make. This helps you plan future automations.
+
+Examples:
+• Auto-create site copy prompt after onboarding form
+• Auto-send “Review your site” email after build upload
+• Auto-generate Notion client card
+• Trigger payment reminder
+• Scheduled health check alerts
+
+Columns to include:
+• Trigger
+• Action
+• Tool used (Zapier, Python, etc.)
+• Status (Built / Planned / In Progress)
+• Priority
+
+⸻
+
+3. Daily + Weekly Ops Dashboard
+
+Clear snapshot for what Curtis (or team) needs to focus on each day/week.
+
+Auto-filters by date and priority. Should pull from all task categories.
+
+Key views:
+• Today’s Tasks
+• This Week’s Deliveries
+• Leads to Follow Up
+• Outstanding Client Revisions
+• Incomplete Onboarding Forms
+
+⸻
+
+4. Delivery Tracker
+
+Every site build with its own row or card. Clear view of where each job is in the process.
+
+Key fields per build:
+• Client
+• Industry (for template matching)
+• Assigned template (dropdown or link)
+• Copy Prompt Generated?
+• Build Started?
+• Revision Round Used?
+• Hosting Plan? (yes/no)
+• Final Review Date
+• Completion Status
+
+⸻
+
+5. Assets & Templates Library
+
+Quick access to core building blocks. Can even include automated site skeletons.
+
+Categories:
+• Site templates (link to Typedream)
+• Copy prompt templates
+• SOPs (onboarding, revision, handover)
+• Branding assets (logo placeholders, testimonials, etc.)
+• Email & WhatsApp message templates
+
+⸻
+
+6. Recurring & Growth Tasks
+
+Handle your growth goals without forgetting them.
+
+Examples:
+• Monthly content drop
+• Outreach 10 new leads / week
+• Review referral incentive performance
+• Update 1 template/month
+• Check Zapier run logs weekly
+• Finance & Hosting Payment Review
