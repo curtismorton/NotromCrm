@@ -9,7 +9,9 @@ import {
   insertTaskSchema, 
   insertTagSchema,
   insertActivitySchema,
-  insertDevPlanSchema
+  insertDevPlanSchema,
+  insertDeliverySchema,
+  insertAutomationSchema
 } from "@shared/schema";
 import * as aiService from "../services/ai";
 import { GmailService } from "../services/gmailService";
@@ -1126,6 +1128,234 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get reports error:", error);
       res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  // Deliveries endpoints
+  app.post("/api/deliveries", validateBody(insertDeliverySchema), async (req, res) => {
+    try {
+      const delivery = await storage.createDelivery(req.validatedBody);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "create",
+          "delivery",
+          delivery.id,
+          { clientName: delivery.clientName }
+        );
+      }
+      
+      res.status(201).json(delivery);
+    } catch (error) {
+      console.error("Create delivery error:", error);
+      res.status(500).json({ message: "Failed to create delivery" });
+    }
+  });
+
+  app.get("/api/deliveries", async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.clientId) filters.clientId = parseInt(req.query.clientId as string);
+      
+      const deliveries = await storage.getDeliveries(filters);
+      res.json(deliveries);
+    } catch (error) {
+      console.error("Get deliveries error:", error);
+      res.status(500).json({ message: "Failed to fetch deliveries" });
+    }
+  });
+
+  app.get("/api/deliveries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const delivery = await storage.getDelivery(id);
+      
+      if (!delivery) {
+        return res.status(404).json({ message: "Delivery not found" });
+      }
+      
+      res.json(delivery);
+    } catch (error) {
+      console.error("Get delivery error:", error);
+      res.status(500).json({ message: "Failed to fetch delivery" });
+    }
+  });
+
+  app.patch("/api/deliveries/:id", validateBody(insertDeliverySchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const delivery = await storage.updateDelivery(id, req.validatedBody);
+      
+      if (!delivery) {
+        return res.status(404).json({ message: "Delivery not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update",
+          "delivery",
+          delivery.id,
+          { changes: req.validatedBody }
+        );
+      }
+      
+      res.json(delivery);
+    } catch (error) {
+      console.error("Update delivery error:", error);
+      res.status(500).json({ message: "Failed to update delivery" });
+    }
+  });
+
+  app.delete("/api/deliveries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteDelivery(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Delivery not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "delete",
+          "delivery",
+          id,
+          {}
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Delete delivery error:", error);
+      res.status(500).json({ message: "Failed to delete delivery" });
+    }
+  });
+
+  // Automations endpoints
+  app.post("/api/automations", validateBody(insertAutomationSchema), async (req, res) => {
+    try {
+      const automation = await storage.createAutomation(req.validatedBody);
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "create",
+          "automation",
+          automation.id,
+          { name: automation.name }
+        );
+      }
+      
+      res.status(201).json(automation);
+    } catch (error) {
+      console.error("Create automation error:", error);
+      res.status(500).json({ message: "Failed to create automation" });
+    }
+  });
+
+  app.get("/api/automations", async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.tool) filters.tool = req.query.tool;
+      if (req.query.isActive !== undefined) filters.isActive = req.query.isActive === 'true';
+      
+      const automations = await storage.getAutomations(filters);
+      res.json(automations);
+    } catch (error) {
+      console.error("Get automations error:", error);
+      res.status(500).json({ message: "Failed to fetch automations" });
+    }
+  });
+
+  app.get("/api/automations/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const automation = await storage.getAutomation(id);
+      
+      if (!automation) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      res.json(automation);
+    } catch (error) {
+      console.error("Get automation error:", error);
+      res.status(500).json({ message: "Failed to fetch automation" });
+    }
+  });
+
+  app.patch("/api/automations/:id", validateBody(insertAutomationSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const automation = await storage.updateAutomation(id, req.validatedBody);
+      
+      if (!automation) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "update",
+          "automation",
+          automation.id,
+          { changes: req.validatedBody }
+        );
+      }
+      
+      res.json(automation);
+    } catch (error) {
+      console.error("Update automation error:", error);
+      res.status(500).json({ message: "Failed to update automation" });
+    }
+  });
+
+  app.delete("/api/automations/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteAutomation(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      // Record activity
+      if (req.user?.claims?.sub) {
+        await recordActivity(
+          req.user.claims.sub,
+          "delete",
+          "automation",
+          id,
+          {}
+        );
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Delete automation error:", error);
+      res.status(500).json({ message: "Failed to delete automation" });
+    }
+  });
+
+  // Pipeline dashboard endpoint
+  app.get("/api/dashboard/pipeline-stats", async (req, res) => {
+    try {
+      const stats = await storage.getPipelineStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Get pipeline stats error:", error);
+      res.status(500).json({ message: "Failed to fetch pipeline stats" });
     }
   });
 

@@ -14,6 +14,8 @@ import {
   emails,
   revenues,
   reports,
+  deliveries,
+  automations,
   type User,
   type Lead,
   type Project,
@@ -25,6 +27,8 @@ import {
   type Email,
   type Revenue,
   type Report,
+  type Delivery,
+  type Automation,
   type UpsertUser,
   type InsertLead,
   type InsertProject,
@@ -36,6 +40,8 @@ import {
   type InsertEmail,
   type InsertRevenue,
   type InsertReport,
+  type InsertDelivery,
+  type InsertAutomation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, inArray, like, and, or, desc, sql, getTableColumns } from "drizzle-orm";
@@ -146,12 +152,39 @@ export interface IStorage {
   createReport(report: InsertReport): Promise<Report>;
   getReports(context?: string, limit?: number): Promise<Report[]>;
 
+  // Deliveries
+  createDelivery(delivery: InsertDelivery): Promise<Delivery>;
+  getDelivery(id: number): Promise<Delivery | undefined>;
+  getDeliveries(filters?: Partial<Delivery>): Promise<Delivery[]>;
+  updateDelivery(id: number, delivery: Partial<InsertDelivery>): Promise<Delivery | undefined>;
+  deleteDelivery(id: number): Promise<boolean>;
+  getDeliveriesByClient(clientId: number): Promise<Delivery[]>;
+  getDeliveriesByStatus(status: string): Promise<Delivery[]>;
+
+  // Automations
+  createAutomation(automation: InsertAutomation): Promise<Automation>;
+  getAutomation(id: number): Promise<Automation | undefined>;
+  getAutomations(filters?: Partial<Automation>): Promise<Automation[]>;
+  updateAutomation(id: number, automation: Partial<InsertAutomation>): Promise<Automation | undefined>;
+  deleteAutomation(id: number): Promise<boolean>;
+  getAutomationsByStatus(status: string): Promise<Automation[]>;
+  getActiveAutomations(): Promise<Automation[]>;
+
   // Dashboard data
   getDashboardStats(): Promise<{
     totalLeads: number;
     activeProjects: number;
     totalClients: number;
     overdueTasks: number;
+  }>;
+
+  // Pipeline-specific dashboard data
+  getPipelineStats(): Promise<{
+    todaysTasks: number;
+    thisWeekDeliveries: number;
+    leadsToFollowUp: number;
+    outstandingRevisions: number;
+    incompleteOnboardingForms: number;
   }>;
 }
 
@@ -843,6 +876,170 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await query.orderBy(desc(reports.generatedAt)).limit(limit || 10);
+  }
+
+  // Delivery operations
+  async createDelivery(delivery: InsertDelivery): Promise<Delivery> {
+    const [newDelivery] = await db.insert(deliveries).values(delivery).returning();
+    return newDelivery;
+  }
+
+  async getDelivery(id: number): Promise<Delivery | undefined> {
+    const [delivery] = await db.select().from(deliveries).where(eq(deliveries.id, id));
+    return delivery;
+  }
+
+  async getDeliveries(filters?: Partial<Delivery>): Promise<Delivery[]> {
+    let query = db.select().from(deliveries);
+    
+    if (filters?.status) {
+      query = query.where(eq(deliveries.status, filters.status as any));
+    }
+    if (filters?.clientId) {
+      query = query.where(eq(deliveries.clientId, filters.clientId));
+    }
+    
+    return await query.orderBy(desc(deliveries.createdAt));
+  }
+
+  async updateDelivery(id: number, delivery: Partial<InsertDelivery>): Promise<Delivery | undefined> {
+    const [updated] = await db
+      .update(deliveries)
+      .set({ ...delivery, updatedAt: new Date() })
+      .where(eq(deliveries.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDelivery(id: number): Promise<boolean> {
+    const result = await db.delete(deliveries).where(eq(deliveries.id, id)).returning({ id: deliveries.id });
+    return result.length > 0;
+  }
+
+  async getDeliveriesByClient(clientId: number): Promise<Delivery[]> {
+    return await db.select().from(deliveries)
+      .where(eq(deliveries.clientId, clientId))
+      .orderBy(desc(deliveries.createdAt));
+  }
+
+  async getDeliveriesByStatus(status: string): Promise<Delivery[]> {
+    return await db.select().from(deliveries)
+      .where(eq(deliveries.status, status as any))
+      .orderBy(desc(deliveries.createdAt));
+  }
+
+  // Automation operations
+  async createAutomation(automation: InsertAutomation): Promise<Automation> {
+    const [newAutomation] = await db.insert(automations).values(automation).returning();
+    return newAutomation;
+  }
+
+  async getAutomation(id: number): Promise<Automation | undefined> {
+    const [automation] = await db.select().from(automations).where(eq(automations.id, id));
+    return automation;
+  }
+
+  async getAutomations(filters?: Partial<Automation>): Promise<Automation[]> {
+    let query = db.select().from(automations);
+    
+    if (filters?.status) {
+      query = query.where(eq(automations.status, filters.status as any));
+    }
+    if (filters?.tool) {
+      query = query.where(eq(automations.tool, filters.tool as any));
+    }
+    if (filters?.isActive !== undefined) {
+      query = query.where(eq(automations.isActive, filters.isActive));
+    }
+    
+    return await query.orderBy(desc(automations.createdAt));
+  }
+
+  async updateAutomation(id: number, automation: Partial<InsertAutomation>): Promise<Automation | undefined> {
+    const [updated] = await db
+      .update(automations)
+      .set({ ...automation, updatedAt: new Date() })
+      .where(eq(automations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAutomation(id: number): Promise<boolean> {
+    const result = await db.delete(automations).where(eq(automations.id, id)).returning({ id: automations.id });
+    return result.length > 0;
+  }
+
+  async getAutomationsByStatus(status: string): Promise<Automation[]> {
+    return await db.select().from(automations)
+      .where(eq(automations.status, status as any))
+      .orderBy(desc(automations.createdAt));
+  }
+
+  async getActiveAutomations(): Promise<Automation[]> {
+    return await db.select().from(automations)
+      .where(eq(automations.isActive, true))
+      .orderBy(desc(automations.createdAt));
+  }
+
+  // Pipeline-specific dashboard data
+  async getPipelineStats(): Promise<{
+    todaysTasks: number;
+    thisWeekDeliveries: number;
+    leadsToFollowUp: number;
+    outstandingRevisions: number;
+    incompleteOnboardingForms: number;
+  }> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const thisWeekStart = new Date(today);
+    thisWeekStart.setDate(today.getDate() - today.getDay());
+    
+    const thisWeekEnd = new Date(thisWeekStart);
+    thisWeekEnd.setDate(thisWeekStart.getDate() + 7);
+
+    // Today's tasks
+    const todaysTasks = await db.select({ count: sql<number>`count(*)` })
+      .from(tasks)
+      .where(
+        and(
+          sql`DATE(due_date) = DATE(${today.toISOString()})`,
+          eq(tasks.status, 'todo')
+        )
+      );
+
+    // This week's deliveries
+    const thisWeekDeliveries = await db.select({ count: sql<number>`count(*)` })
+      .from(deliveries)
+      .where(
+        and(
+          sql`delivery_date >= ${thisWeekStart.toISOString()}`,
+          sql`delivery_date < ${thisWeekEnd.toISOString()}`
+        )
+      );
+
+    // Leads to follow up (contacted status)
+    const leadsToFollowUp = await db.select({ count: sql<number>`count(*)` })
+      .from(leads)
+      .where(eq(leads.status, 'contacted'));
+
+    // Outstanding revisions
+    const outstandingRevisions = await db.select({ count: sql<number>`count(*)` })
+      .from(leads)
+      .where(eq(leads.status, 'revision_round'));
+
+    // Incomplete onboarding forms
+    const incompleteOnboardingForms = await db.select({ count: sql<number>`count(*)` })
+      .from(leads)
+      .where(eq(leads.onboardingFormReceived, false));
+
+    return {
+      todaysTasks: todaysTasks[0]?.count || 0,
+      thisWeekDeliveries: thisWeekDeliveries[0]?.count || 0,
+      leadsToFollowUp: leadsToFollowUp[0]?.count || 0,
+      outstandingRevisions: outstandingRevisions[0]?.count || 0,
+      incompleteOnboardingForms: incompleteOnboardingForms[0]?.count || 0,
+    };
   }
 }
 

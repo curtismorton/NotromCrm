@@ -15,7 +15,8 @@ import {
   LogOut,
   Code,
   Mic,
-  Briefcase
+  Briefcase,
+  Workflow
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -97,6 +98,41 @@ export default function MainLayout({ children }: MainLayoutProps) {
             href="/" 
             active={location === "/"} 
           />
+          
+          <div className="mt-4 space-y-1">
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">Business</p>
+            
+            <SidebarItem 
+              icon={<Workflow className="w-5 h-5" />} 
+              label="Pipeline" 
+              href="/pipeline" 
+              active={location.startsWith("/pipeline")} 
+            />
+            
+            <SidebarItem 
+              icon={<Users className="w-5 h-5" />} 
+              label="Leads" 
+              href="/leads" 
+              badgeCount={stats ? stats.totalLeads : undefined} 
+              active={location.startsWith("/leads")} 
+            />
+            
+            <SidebarItem 
+              icon={<FolderKanban className="w-5 h-5" />} 
+              label="Projects" 
+              href="/projects" 
+              badgeCount={stats ? stats.activeProjects : undefined} 
+              active={location.startsWith("/projects")} 
+            />
+            
+            <SidebarItem 
+              icon={<Building2 className="w-5 h-5" />} 
+              label="Clients" 
+              href="/clients" 
+              badgeCount={stats ? stats.totalClients : undefined} 
+              active={location.startsWith("/clients")} 
+            />
+          </div>
           
           <div className="mt-4 space-y-1">
             <p className="px-4 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">Life & Work</p>
