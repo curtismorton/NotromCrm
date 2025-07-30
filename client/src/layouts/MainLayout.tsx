@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useMedia } from "@/hooks/use-mobile";
+import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 
 type SidebarItemProps = {
   icon: ReactNode;
@@ -212,46 +213,49 @@ export default function MainLayout({ children }: MainLayoutProps) {
       
       {/* Main content */}
       <div className="flex flex-col flex-1 w-full overflow-hidden">
-        {/* Top navbar */}
-        <header className="flex items-center justify-between px-4 py-3 bg-white border-b lg:py-4 lg:px-6">
-          <div className="flex items-center">
+        {/* Top navbar - Mobile optimized */}
+        <header className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b lg:py-4 lg:px-6">
+          <div className="flex items-center flex-1 min-w-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1 mr-3 text-gray-500 lg:hidden focus:ring-primary-500"
+              className="p-2 mr-2 text-gray-500 lg:hidden focus:ring-primary-500 flex-shrink-0"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </Button>
-            <div className="relative w-full max-w-md">
+            <div className="relative flex-1 max-w-md">
               <Input
                 type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 text-gray-700 bg-gray-100 border-none rounded-lg"
+                placeholder="Search tasks, leads, projects..."
+                className="w-full pl-9 pr-4 py-2 text-sm text-gray-700 bg-gray-100 border-none rounded-lg"
               />
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="w-5 h-5 text-gray-400" />
+                <Search className="w-4 h-4 text-gray-400" />
               </div>
             </div>
           </div>
           
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" className="p-1 mr-4 text-gray-400 hover:text-gray-500">
+          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+            <Button variant="ghost" size="icon" className="p-2 text-gray-400 hover:text-gray-500">
               <span className="sr-only">View notifications</span>
-              <Bell className="w-6 h-6" />
+              <Bell className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="p-1 mr-2 text-gray-400 hover:text-gray-500">
+            <Button variant="ghost" size="icon" className="p-2 text-gray-400 hover:text-gray-500 hidden sm:flex">
               <span className="sr-only">View help</span>
-              <HelpCircle className="w-6 h-6" />
+              <HelpCircle className="w-5 h-5" />
             </Button>
           </div>
         </header>
         
-        {/* Main content area */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
+        {/* Main content area - Mobile optimized */}
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-2 sm:p-4 lg:p-6 pb-20 sm:pb-6">
           {children}
         </main>
       </div>
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Code, Mic, Briefcase, CheckSquare, Calendar, TrendingUp, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -72,121 +73,195 @@ export default function Dashboard() {
     {
       id: 'life-work-sections',
       component: (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-          <Link href="/notrom">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Notrom</CardTitle>
-                <Code className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{notromTasks.length}</div>
-                <p className="text-xs text-muted-foreground">Web development tasks</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/podcast">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Podcast</CardTitle>
-                <Mic className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{podcastTasks.length}</div>
-                <p className="text-xs text-muted-foreground">Behind The Screens tasks</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/day-job">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Day Job</CardTitle>
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dayJobTasks.length}</div>
-                <p className="text-xs text-muted-foreground">Socially Powerful tasks</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/tasks">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">General Tasks</CardTitle>
-                <CheckSquare className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{generalTasks.length}</div>
-                <p className="text-xs text-muted-foreground">Personal & misc tasks</p>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
+        <Card className="h-full">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Life & Work Contexts</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Manage tasks across different areas of your life. Click any section to view details.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Link href="/notrom">
+              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-md">
+                    <Code className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">Notrom Business</h4>
+                    <p className="text-xs text-muted-foreground">Web development & client work</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold">{notromTasks.length}</div>
+                  <p className="text-xs text-muted-foreground">tasks</p>
+                </div>
+              </div>
+            </Link>
+            
+            <Link href="/podcast">
+              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-md">
+                    <Mic className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">Behind The Screens</h4>
+                    <p className="text-xs text-muted-foreground">Podcast production & content</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold">{podcastTasks.length}</div>
+                  <p className="text-xs text-muted-foreground">tasks</p>
+                </div>
+              </div>
+            </Link>
+            
+            <Link href="/day-job">
+              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-md">
+                    <Briefcase className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">Socially Powerful</h4>
+                    <p className="text-xs text-muted-foreground">Full-time employment tasks</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold">{dayJobTasks.length}</div>
+                  <p className="text-xs text-muted-foreground">tasks</p>
+                </div>
+              </div>
+            </Link>
+            
+            <Link href="/tasks">
+              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-md">
+                    <CheckSquare className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">General Tasks</h4>
+                    <p className="text-xs text-muted-foreground">Personal & miscellaneous</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold">{generalTasks.length}</div>
+                  <p className="text-xs text-muted-foreground">tasks</p>
+                </div>
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
       ),
-      title: 'Life & Work Sections',
+      title: 'Life & Work Contexts',
       size: 'large' as const,
       enabled: true,
     },
     {
       id: 'stats-overview',
       component: (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.activeProjects || 0}</div>
-              <p className="text-xs text-muted-foreground">In progress</p>
-            </CardContent>
-          </Card>
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalLeads || 0}</div>
-              <p className="text-xs text-muted-foreground">Opportunities</p>
-            </CardContent>
-          </Card>
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Clients</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalClients || 0}</div>
-              <p className="text-xs text-muted-foreground">Active clients</p>
-            </CardContent>
-          </Card>
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue Tasks</CardTitle>
-              <AlertCircle className="h-4 w-4 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">{stats?.overdueTasks || 0}</div>
-              <p className="text-xs text-muted-foreground">Need attention</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="h-full">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Business Overview</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Key metrics for your business performance. Click any stat to view details.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/projects">
+                <div className="p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-medium text-muted-foreground">PROJECTS</span>
+                  </div>
+                  <div className="text-xl font-bold">{stats?.activeProjects || 0}</div>
+                  <p className="text-xs text-muted-foreground">Active & in progress</p>
+                </div>
+              </Link>
+              
+              <Link href="/leads">
+                <div className="p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <span className="text-xs font-medium text-muted-foreground">LEADS</span>
+                  </div>
+                  <div className="text-xl font-bold">{stats?.totalLeads || 0}</div>
+                  <p className="text-xs text-muted-foreground">Potential opportunities</p>
+                </div>
+              </Link>
+              
+              <Link href="/clients">
+                <div className="p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Briefcase className="h-4 w-4 text-purple-600" />
+                    <span className="text-xs font-medium text-muted-foreground">CLIENTS</span>
+                  </div>
+                  <div className="text-xl font-bold">{stats?.totalClients || 0}</div>
+                  <p className="text-xs text-muted-foreground">Active relationships</p>
+                </div>
+              </Link>
+              
+              <Link href="/tasks">
+                <div className={`p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer ${stats?.overdueTasks && stats.overdueTasks > 0 ? 'border-red-200 bg-red-50' : ''}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className={`h-4 w-4 ${stats?.overdueTasks && stats.overdueTasks > 0 ? 'text-red-600' : 'text-orange-600'}`} />
+                    <span className="text-xs font-medium text-muted-foreground">OVERDUE</span>
+                  </div>
+                  <div className={`text-xl font-bold ${stats?.overdueTasks && stats.overdueTasks > 0 ? 'text-red-600' : ''}`}>
+                    {stats?.overdueTasks || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Tasks need attention</p>
+                </div>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       ),
-      title: 'Quick Stats',
-      size: 'large' as const,
+      title: 'Business Overview',
+      size: 'medium' as const,
       enabled: true,
     },
     {
-      id: 'email-widget',
-      component: <EmailWidget />,
+      id: 'email-widget', 
+      component: (
+        <Card className="h-full">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              📧 Email Management
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Monitor important emails and response times. Connect Gmail to get started.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EmailWidget />
+          </CardContent>
+        </Card>
+      ),
       title: 'Email Management',
       size: 'medium' as const,
       enabled: true,
     },
     {
       id: 'revenue-chart',
-      component: <RevenueChart />,
+      component: (
+        <Card className="h-full">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              💰 Revenue Analytics
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Track your income, expenses, and profitability over time.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RevenueChart />
+          </CardContent>
+        </Card>
+      ),
       title: 'Revenue Analytics',
       size: 'medium' as const,
       enabled: true,
@@ -202,37 +277,59 @@ export default function Dashboard() {
       id: 'todays-tasks',
       component: (
         <Card className="h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Today's Tasks
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <Calendar className="h-4 w-4" />
+              Today's Focus
             </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Tasks due today across all your contexts. Stay on track with your daily priorities.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {todayTasks.slice(0, 5).map((task) => (
+            <div className="space-y-2">
+              {todayTasks.slice(0, 4).map((task) => (
                 <Link key={task.id} href={`/tasks/${task.id}`}>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80">
-                    <div>
-                      <p className="font-medium">{task.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Context: {task.context}
-                      </p>
+                  <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer">
+                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                      task.priority === 'high' ? 'bg-red-500' : 
+                      task.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{task.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {task.context}
+                        </Badge>
+                        <Badge variant={task.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                          {task.priority}
+                        </Badge>
+                      </div>
                     </div>
-                    <Badge variant={task.priority === 'high' ? 'destructive' : 'default'}>
-                      {task.priority}
-                    </Badge>
                   </div>
                 </Link>
               ))}
               {todayTasks.length === 0 && (
-                <p className="text-sm text-muted-foreground">No tasks due today</p>
+                <div className="text-center py-4">
+                  <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No tasks due today</p>
+                  <p className="text-xs text-muted-foreground">Enjoy your free time!</p>
+                </div>
+              )}
+              {todayTasks.length > 4 && (
+                <Link href="/tasks">
+                  <div className="text-center py-2">
+                    <Button variant="ghost" size="sm" className="text-xs">
+                      View {todayTasks.length - 4} more tasks
+                    </Button>
+                  </div>
+                </Link>
               )}
             </div>
           </CardContent>
         </Card>
       ),
-      title: "Today's Tasks",
+      title: "Today's Focus",
       size: 'medium' as const,
       enabled: true,
     },
@@ -339,16 +436,43 @@ function DashboardContent({ dashboardWidgets }: { dashboardWidgets: any[] }) {
   const { items, isCustomizing } = useDashboard();
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+      {/* Header with better mobile spacing */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">CurtisOS Dashboard</h1>
-          <p className="text-muted-foreground">Unified life and work management system</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">CurtisOS Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Unified life and work management system - track leads, manage projects, and automate workflows
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <CustomizationPanel />
         </div>
       </div>
 
-      {/* Customizable Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+      {/* Quick Actions for Mobile */}
+      <div className="block sm:hidden mb-4">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Link href="/leads">
+            <Button size="sm" variant="outline" className="whitespace-nowrap">
+              Add Lead
+            </Button>
+          </Link>
+          <Link href="/projects">
+            <Button size="sm" variant="outline" className="whitespace-nowrap">
+              New Project
+            </Button>
+          </Link>
+          <Link href="/tasks">
+            <Button size="sm" variant="outline" className="whitespace-nowrap">
+              Create Task
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Responsive Dashboard Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {items
           .filter(widget => widget.enabled || isCustomizing)
           .map(widget => (
@@ -363,9 +487,6 @@ function DashboardContent({ dashboardWidgets }: { dashboardWidgets: any[] }) {
             </DraggableWidget>
           ))}
       </div>
-
-      {/* Customization Panel */}
-      <CustomizationPanel />
     </div>
   );
 }

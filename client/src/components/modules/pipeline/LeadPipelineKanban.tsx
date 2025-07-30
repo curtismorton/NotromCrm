@@ -37,7 +37,8 @@ export function LeadPipelineKanban() {
     mutationFn: async ({ leadId, status }: { leadId: number; status: string }) => {
       return apiRequest(`/api/leads/${leadId}`, {
         method: "PATCH",
-        body: { status },
+        body: JSON.stringify({ status }),
+        headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: () => {
@@ -68,11 +69,16 @@ export function LeadPipelineKanban() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Lead Pipeline</h3>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div>
+          <h3 className="text-lg font-semibold">Lead Pipeline</h3>
+          <p className="text-sm text-muted-foreground">
+            Drag cards between columns to update lead status. Add new leads with the button.
+          </p>
+        </div>
         <Dialog open={isAddingLead} onOpenChange={setIsAddingLead}>
           <DialogTrigger asChild>
-            <Button>
+            <Button size="sm" className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Add Lead
             </Button>
@@ -92,22 +98,22 @@ export function LeadPipelineKanban() {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 min-h-[400px]">
           {statusColumns.map((column) => {
             const columnLeads = leads.filter((lead) => lead.status === column.id);
             
             return (
-              <div key={column.id} className="flex-shrink-0 w-80">
-                <Card>
+              <div key={column.id} className="flex-shrink-0 w-72 sm:w-80">
+                <Card className="h-full">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium">{column.title}</CardTitle>
-                      <Badge variant="secondary" className="text-xs">
+                      <CardTitle className="text-sm font-medium truncate pr-2">{column.title}</CardTitle>
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">
                         {columnLeads.length}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3">
                     <Droppable droppableId={column.id}>
                       {(provided) => (
                         <div
