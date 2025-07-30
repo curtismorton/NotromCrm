@@ -15,6 +15,16 @@ CurtisOS is a unified life and work management system that centralizes everythin
 - ✅ Successfully pushed schema changes to database using Drizzle
 - ✅ Integrated context-aware filtering throughout the application
 
+### Mobile-First Visual Enhancement (July 30, 2025)
+- ✅ Added context field to leads table to distinguish Notrom vs day job
+- ✅ Created comprehensive mobile-first pipeline with visual context separation
+- ✅ Replaced table-based layouts with responsive card layouts for mobile
+- ✅ Enhanced pipeline with icons, colors, and visual hierarchy
+- ✅ Added mobile bottom navigation for touch-friendly access
+- ✅ Implemented context-aware lead management with color coding
+- ✅ Created comprehensive explainers throughout the system
+- ✅ Improved dashboard widgets with functional interactions
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

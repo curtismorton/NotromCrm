@@ -31,17 +31,99 @@ export const RecentLeads = () => {
 
   return (
     <Card>
-      <CardHeader className="flex items-center justify-between border-b px-6 py-4">
-        <CardTitle className="text-lg font-medium">Recent Leads</CardTitle>
-        <Link href="/leads">
-          <Button variant="link" className="text-primary-600 hover:text-primary-500">
-            View all
-          </Button>
-        </Link>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            🎯 Recent Leads
+          </CardTitle>
+          <Link href="/leads">
+            <Button variant="link" className="text-primary-600 hover:text-primary-500">
+              View all
+            </Button>
+          </Link>
+        </div>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="space-y-3">
+        {isLoading ? (
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <Skeleton className="h-6 w-16" />
+              </div>
+            ))}
+          </div>
+        ) : leads && leads.length > 0 ? (
+          <div className="space-y-3">
+            {leads.slice(0, 5).map((lead) => (
+              <Link key={lead.id} href={`/leads/${lead.id}`}>
+                <div className={`flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors border-l-4 ${
+                  lead.context === 'notrom' ? 'border-l-blue-500' : 'border-l-green-500'
+                }`}>
+                  <Avatar>
+                    <AvatarFallback className={`text-white ${
+                      lead.context === 'notrom' ? 'bg-blue-500' : 'bg-green-500'
+                    }`}>
+                      {getInitials(lead.companyName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-gray-900 truncate">{lead.companyName}</p>
+                      <span className="text-xs">
+                        {lead.context === 'notrom' ? '🏢' : '💼'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 truncate">{lead.contactName}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge variant="outline" className={cn("text-xs", getStatusBadgeClass(lead.status))}>
+                      {lead.status.replace(/_/g, " ")}
+                    </Badge>
+                    <Badge variant="outline" className={cn("text-xs", getPriorityBadgeClass(lead.priority))}>
+                      {lead.priority === 'high' && '🔥'} 
+                      {lead.priority === 'medium' && '⚡'} 
+                      {lead.priority === 'low' && '📝'} 
+                      {lead.priority}
+                    </Badge>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-2">🎯</div>
+            <p className="text-sm text-gray-500">No leads found</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const MobileRecentLeads = () => {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-medium flex items-center gap-2">
+            🎯 Recent Leads
+          </CardTitle>
+          <Link href="/leads">
+            <Button variant="link" size="sm">
+              View all
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <div className="space-y-2 min-w-0">
             <thead className="bg-gray-50">
               <tr>
                 <th

@@ -133,6 +133,7 @@ export const leads = pgTable("leads", {
   contactPhone: varchar("contact_phone", { length: 20 }),
   status: leadStatusEnum("status").default("lead_identified").notNull(),
   priority: priorityEnum("priority").default("medium").notNull(),
+  context: contextEnum("context").default("notrom").notNull(), // Distinguish between Notrom and day job
   notes: text("notes"),
   callLink: varchar("call_link", { length: 500 }),
   callTranscript: text("call_transcript"),
