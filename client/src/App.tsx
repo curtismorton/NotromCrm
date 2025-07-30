@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import MainLayout from "@/layouts/MainLayout";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
@@ -47,6 +48,7 @@ function App() {
         <Toaster />
         <MainLayout>
           <Router />
+          <FloatingActionButton />
         </MainLayout>
       </TooltipProvider>
     </QueryClientProvider>

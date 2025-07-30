@@ -6,11 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { PlusCircle, Building2, Briefcase, Mic, Home, CheckSquare, AlertTriangle, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "@shared/schema";
+import { useQuickFilters } from "@/hooks/use-quick-filters";
 
 export default function TasksPage() {
-  const { data: tasks = [] } = useQuery<Task[]>({
+  const { data: allTasks = [] } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
   });
+
+  const { currentFilter, filterTasks } = useQuickFilters();
+  const tasks = currentFilter ? filterTasks(allTasks) : allTasks;
 
   const notromTasks = tasks.filter(t => t.context === 'notrom');
   const podcastTasks = tasks.filter(t => t.context === 'podcast');
@@ -43,12 +47,33 @@ export default function TasksPage() {
             Organize and track tasks across all your life and work contexts
           </p>
         </div>
-        <Button asChild className="w-full sm:w-auto">
-          <Link href="/tasks/new">
-            <PlusCircle className="w-5 h-5 mr-2" />
-            Create New Task
-          </Link>
-        </Button>
+        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
+          {currentFilter && (
+            <Button asChild variant="secondary" size="sm" className="w-full sm:w-auto">
+              <Link href="/tasks">
+                Clear Filter
+              </Link>
+            </Button>
+          )}
+          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/tasks?filter=overdue">
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Overdue ({overdueTasks.length})
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/tasks?filter=today">
+              <Clock className="w-4 h-4 mr-2" />
+              Due Today ({todayTasks.length})
+            </Link>
+          </Button>
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/tasks/new">
+              <PlusCircle className="w-5 h-5 mr-2" />
+              Create New Task
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats */}

@@ -3,14 +3,18 @@ import { LeadCardList } from "@/components/modules/leads/LeadCardList";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Building2, Briefcase, Users } from "lucide-react";
+import { PlusCircle, Building2, Briefcase, Users, Target, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Lead } from "@shared/schema";
+import { useQuickFilters } from "@/hooks/use-quick-filters";
 
 export default function LeadsPage() {
-  const { data: leads = [] } = useQuery<Lead[]>({
+  const { data: allLeads = [] } = useQuery<Lead[]>({
     queryKey: ["/api/leads"],
   });
+
+  const { currentFilter, filterLeads } = useQuickFilters();
+  const leads = currentFilter ? filterLeads(allLeads) : allLeads;
 
   const notromLeads = leads.filter(lead => lead.context === 'notrom');
   const dayJobLeads = leads.filter(lead => lead.context === 'day_job');
@@ -28,12 +32,33 @@ export default function LeadsPage() {
             Track and manage prospects across your business contexts
           </p>
         </div>
-        <Button asChild className="w-full sm:w-auto">
-          <Link href="/leads/new">
-            <PlusCircle className="w-5 h-5 mr-2" />
-            Add New Lead
-          </Link>
-        </Button>
+        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
+          {currentFilter && (
+            <Button asChild variant="secondary" size="sm" className="w-full sm:w-auto">
+              <Link href="/leads">
+                Clear Filter
+              </Link>
+            </Button>
+          )}
+          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/leads?filter=high_priority">
+              <Target className="w-4 h-4 mr-2" />
+              High Priority ({allLeads.filter(l => l.priority === 'high').length})
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/leads?filter=contacted">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Active ({allLeads.filter(l => ['contacted', 'call_booked', 'build_in_progress'].includes(l.status)).length})
+            </Link>
+          </Button>
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/leads/new">
+              <PlusCircle className="w-5 h-5 mr-2" />
+              Add New Lead
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Overview */}

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,18 @@ import {
   Briefcase,
   Mic,
   Home,
-  FileText
+  FileText,
+  RotateCcw,
+  ArrowRight,
+  Edit3,
+  Star,
+  Archive
 } from "lucide-react";
 import { Link } from "wouter";
 import { Task } from "@shared/schema";
 import { cn } from "@/lib/utils";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface TaskCardListProps {
   context?: 'notrom' | 'podcast' | 'day_job' | 'general' | 'all';
@@ -31,6 +38,37 @@ export function TaskCardList({ context = 'all', status, priority }: TaskCardList
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
   });
+
+  const { toast } = useToast();
+
+  // Quick action mutations
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, updates }: { taskId: number; updates: Partial<Task> }) => {
+      return apiRequest(`/api/tasks/${taskId}`, 'PATCH', updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      toast({
+        title: "Task updated",
+        description: "Task has been updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const quickStatusUpdate = (taskId: number, newStatus: 'todo' | 'in_progress' | 'review' | 'completed') => {
+    updateTaskMutation.mutate({ taskId, updates: { status: newStatus } });
+  };
+
+  const quickPriorityUpdate = (taskId: number, newPriority: 'low' | 'medium' | 'high') => {
+    updateTaskMutation.mutate({ taskId, updates: { priority: newPriority } });
+  };
 
   const filteredTasks = tasks.filter(task => {
     const contextMatch = context === 'all' || task.context === context;
@@ -291,12 +329,115 @@ export function TaskCardList({ context = 'all', status, priority }: TaskCardList
                   </div>
                 )}
 
-                {/* Action Button */}
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link href={`/tasks/${task.id}`}>
-                    {task.status === 'completed' ? 'View Details' : 'Update Task'}
-                  </Link>
-                </Button>
+                {/* Quick Action Buttons */}
+                <div className="space-y-2 pt-2 border-t">
+                  {/* Status Quick Actions */}
+                  <div className="flex gap-1 flex-wrap">
+                    {task.status !== 'completed' && (
+                      <>
+                        {task.status === 'todo' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => quickStatusUpdate(task.id, 'in_progress')}
+                            disabled={updateTaskMutation.isPending}
+                            className="flex-1 min-w-0 text-xs"
+                          >
+                            <Play className="w-3 h-3 mr-1" />
+                            Start
+                          </Button>
+                        )}
+                        {task.status === 'in_progress' && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => quickStatusUpdate(task.id, 'review')}
+                              disabled={updateTaskMutation.isPending}
+                              className="flex-1 min-w-0 text-xs"
+                            >
+                              <Pause className="w-3 h-3 mr-1" />
+                              Review
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => quickStatusUpdate(task.id, 'completed')}
+                              disabled={updateTaskMutation.isPending}
+                              className="flex-1 min-w-0 text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                            >
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                              Complete
+                            </Button>
+                          </>
+                        )}
+                        {task.status === 'review' && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => quickStatusUpdate(task.id, 'in_progress')}
+                              disabled={updateTaskMutation.isPending}
+                              className="flex-1 min-w-0 text-xs"
+                            >
+                              <RotateCcw className="w-3 h-3 mr-1" />
+                              Resume
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => quickStatusUpdate(task.id, 'completed')}
+                              disabled={updateTaskMutation.isPending}
+                              className="flex-1 min-w-0 text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                            >
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                              Complete
+                            </Button>
+                          </>
+                        )}
+                      </>
+                    )}
+                    {task.status === 'completed' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => quickStatusUpdate(task.id, 'todo')}
+                        disabled={updateTaskMutation.isPending}
+                        className="flex-1 min-w-0 text-xs"
+                      >
+                        <RotateCcw className="w-3 h-3 mr-1" />
+                        Reopen
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Priority and Edit Actions */}
+                  <div className="flex gap-1 flex-wrap">
+                    {task.priority !== 'high' && task.status !== 'completed' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => quickPriorityUpdate(task.id, 'high')}
+                        disabled={updateTaskMutation.isPending}
+                        className="flex-1 min-w-0 text-xs text-red-600 hover:bg-red-50"
+                      >
+                        <Star className="w-3 h-3 mr-1" />
+                        High Priority
+                      </Button>
+                    )}
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 min-w-0 text-xs"
+                    >
+                      <Link href={`/tasks/${task.id}`}>
+                        <Edit3 className="w-3 h-3 mr-1" />
+                        Edit
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           );

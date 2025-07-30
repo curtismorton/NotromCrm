@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,19 @@ import {
   Calendar, 
   DollarSign,
   ExternalLink,
-  Clock
+  Clock,
+  ArrowRight,
+  Edit3,
+  Star,
+  CheckCircle2,
+  MessageSquare,
+  Video,
+  FileText
 } from "lucide-react";
 import { Lead } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 interface LeadCardListProps {
   context?: 'notrom' | 'day_job' | 'all';
@@ -22,6 +32,37 @@ export function LeadCardList({ context = 'all' }: LeadCardListProps) {
   const { data: leads = [], isLoading } = useQuery<Lead[]>({
     queryKey: ["/api/leads"],
   });
+
+  const { toast } = useToast();
+
+  // Quick action mutations
+  const updateLeadMutation = useMutation({
+    mutationFn: async ({ leadId, updates }: { leadId: number; updates: Partial<Lead> }) => {
+      return apiRequest(`/api/leads/${leadId}`, 'PATCH', updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
+      toast({
+        title: "Lead updated",
+        description: "Lead has been updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update lead",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const quickStatusUpdate = (leadId: number, newStatus: string) => {
+    updateLeadMutation.mutate({ leadId, updates: { status: newStatus as any } });
+  };
+
+  const quickPriorityUpdate = (leadId: number, newPriority: 'low' | 'medium' | 'high') => {
+    updateLeadMutation.mutate({ leadId, updates: { priority: newPriority } });
+  };
 
   const filteredLeads = context === 'all' 
     ? leads 
@@ -190,19 +231,113 @@ export function LeadCardList({ context = 'all' }: LeadCardListProps) {
                 )}
               </div>
 
-              {/* Context Indicator */}
-              <div className="flex items-center gap-2 pt-2 border-t">
-                {lead.context === 'notrom' ? (
-                  <div className="flex items-center gap-2 text-sm text-blue-600">
-                    <Building2 className="w-4 h-4" />
-                    <span>Notrom Business</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-sm text-green-600">
-                    <Briefcase className="w-4 h-4" />
-                    <span>Day Job</span>
-                  </div>
-                )}
+              {/* Quick Action Buttons */}
+              <div className="space-y-2 pt-2 border-t">
+                {/* Status Progression Actions */}
+                <div className="flex gap-1 flex-wrap">
+                  {lead.status === 'lead_identified' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => quickStatusUpdate(lead.id, 'contacted')}
+                      disabled={updateLeadMutation.isPending}
+                      className="flex-1 min-w-0 text-xs"
+                    >
+                      <MessageSquare className="w-3 h-3 mr-1" />
+                      Mark Contacted
+                    </Button>
+                  )}
+                  {lead.status === 'contacted' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => quickStatusUpdate(lead.id, 'call_booked')}
+                      disabled={updateLeadMutation.isPending}
+                      className="flex-1 min-w-0 text-xs"
+                    >
+                      <Video className="w-3 h-3 mr-1" />
+                      Book Call
+                    </Button>
+                  )}
+                  {lead.status === 'call_booked' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => quickStatusUpdate(lead.id, 'onboarding_form_completed')}
+                      disabled={updateLeadMutation.isPending}
+                      className="flex-1 min-w-0 text-xs"
+                    >
+                      <FileText className="w-3 h-3 mr-1" />
+                      Form Complete
+                    </Button>
+                  )}
+                  {(lead.status === 'onboarding_form_completed' || lead.status === 'build_in_progress') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => quickStatusUpdate(lead.id, 'awaiting_feedback')}
+                      disabled={updateLeadMutation.isPending}
+                      className="flex-1 min-w-0 text-xs"
+                    >
+                      <ArrowRight className="w-3 h-3 mr-1" />
+                      Next Stage
+                    </Button>
+                  )}
+                  {lead.status !== 'complete' && lead.status !== 'lead_identified' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => quickStatusUpdate(lead.id, 'complete')}
+                      disabled={updateLeadMutation.isPending}
+                      className="flex-1 min-w-0 text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                    >
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Mark Complete
+                    </Button>
+                  )}
+                </div>
+
+                {/* Priority and Action Buttons */}
+                <div className="flex gap-1 flex-wrap">
+                  {lead.priority !== 'high' && lead.status !== 'complete' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => quickPriorityUpdate(lead.id, 'high')}
+                      disabled={updateLeadMutation.isPending}
+                      className="flex-1 min-w-0 text-xs text-red-600 hover:bg-red-50"
+                    >
+                      <Star className="w-3 h-3 mr-1" />
+                      High Priority
+                    </Button>
+                  )}
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 min-w-0 text-xs"
+                  >
+                    <Link href={`/leads/${lead.id}`}>
+                      <Edit3 className="w-3 h-3 mr-1" />
+                      Edit
+                    </Link>
+                  </Button>
+                </div>
+
+                {/* Context Indicator */}
+                <div className="flex items-center gap-2 pt-1">
+                  {lead.context === 'notrom' ? (
+                    <div className="flex items-center gap-2 text-xs text-blue-600">
+                      <Building2 className="w-3 h-3" />
+                      <span>Notrom Business</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-green-600">
+                      <Briefcase className="w-3 h-3" />
+                      <span>Day Job</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
