@@ -89,8 +89,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center justify-center h-16 px-6 bg-primary-600">
-          <h2 className="text-xl font-semibold text-white">CurtisOS</h2>
+        <div className="flex items-center justify-center h-16 px-6 bg-sidebar-primary">
+          <h2 className="text-xl font-semibold text-sidebar-primary-foreground">CurtisOS</h2>
         </div>
         <nav className="px-3 py-4">
           <SidebarItem 
@@ -101,7 +101,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           />
           
           <div className="mt-4 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">Business</p>
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider">Business</p>
             
             <SidebarItem 
               icon={<Workflow className="w-5 h-5" />} 
@@ -136,7 +136,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
           
           <div className="mt-4 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">Life & Work</p>
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider">Life & Work</p>
             
             <SidebarItem 
               icon={<Code className="w-5 h-5" />} 
@@ -169,7 +169,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
           
           <div className="mt-6 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">Settings</p>
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider">Settings</p>
             
             <SidebarItem 
               icon={<Settings className="w-5 h-5" />} 
