@@ -42,7 +42,7 @@ const SidebarItem = ({ icon, label, href, badgeCount, active }: SidebarItemProps
         "flex items-center px-4 py-3 text-sm transition-colors duration-200 rounded-lg cursor-pointer",
         active 
           ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
-          : "text-sidebar-foreground hover:bg-sidebar-accent/20 hover:text-sidebar-foreground"
+          : "text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-white"
       )}>
         <span className="w-5 h-5">{icon}</span>
         <span className="mx-4 font-medium">{label}</span>
@@ -101,7 +101,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           />
           
           <div className="mt-4 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider">Business</p>
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wider">Business</p>
             
             <SidebarItem 
               icon={<Workflow className="w-5 h-5" />} 
@@ -136,7 +136,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
           
           <div className="mt-4 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider">Life & Work</p>
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wider">Life & Work</p>
             
             <SidebarItem 
               icon={<Code className="w-5 h-5" />} 
@@ -169,7 +169,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
           
           <div className="mt-6 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider">Settings</p>
+            <p className="px-4 text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wider">Settings</p>
             
             <SidebarItem 
               icon={<Settings className="w-5 h-5" />} 
@@ -194,9 +194,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
             </Avatar>
             <div className="ml-3">
               <p className="text-sm font-medium text-sidebar-foreground">Chris Morgan</p>
-              <p className="text-xs text-sidebar-foreground/60">Administrator</p>
+              <p className="text-xs text-sidebar-foreground/75">Administrator</p>
             </div>
-            <Button variant="ghost" size="icon" className="p-1 ml-auto text-sidebar-foreground/80 hover:text-sidebar-foreground">
+            <Button variant="ghost" size="icon" className="p-1 ml-auto text-sidebar-foreground/90 hover:text-white">
               <LogOut className="w-5 h-5" />
             </Button>
           </div>
