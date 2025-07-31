@@ -39,15 +39,15 @@ const SidebarItem = ({ icon, label, href, badgeCount, active }: SidebarItemProps
   return (
     <Link href={href}>
       <div className={cn(
-        "flex items-center px-4 py-3 text-sm transition-colors duration-200 rounded-lg cursor-pointer",
+        "flex items-center px-4 py-3.5 text-sm transition-all duration-200 rounded-xl cursor-pointer group",
         active 
-          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
-          : "text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-white"
+          ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-md" 
+          : "text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-white font-medium"
       )}>
-        <span className="w-5 h-5">{icon}</span>
-        <span className="mx-4 font-medium">{label}</span>
+        <span className="w-5 h-5 transition-transform group-hover:scale-110">{icon}</span>
+        <span className="mx-4 font-semibold">{label}</span>
         {badgeCount !== undefined && (
-          <Badge variant="secondary" className="ml-auto">
+          <Badge variant="secondary" className="ml-auto font-semibold">
             {badgeCount}
           </Badge>
         )}

@@ -79,19 +79,18 @@ export function FloatingActionButton() {
               </div>
               
               {/* Action button */}
-              <Button
-                asChild
-                size="sm"
-                className={cn(
-                  "rounded-full w-12 h-12 shadow-lg transition-all duration-200",
-                  action.color
-                )}
-                onClick={() => setIsOpen(false)}
-              >
-                <Link href={action.href}>
+              <Link href={action.href}>
+                <Button
+                  size="sm"
+                  className={cn(
+                    "rounded-full w-12 h-12 shadow-lg transition-all duration-200",
+                    action.color
+                  )}
+                  onClick={() => setIsOpen(false)}
+                >
                   <action.icon className="w-5 h-5" />
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </div>
           </div>
         ))}
