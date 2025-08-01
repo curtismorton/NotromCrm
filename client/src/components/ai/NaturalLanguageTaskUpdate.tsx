@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { api, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Task } from "@shared/schema";
 import { 
@@ -29,14 +29,14 @@ export const NaturalLanguageTaskUpdate = ({ task, onUpdate }: NaturalLanguageTas
   const processUpdateMutation = useMutation({
     mutationFn: async () => {
       // First, process the natural language update to get structured data
-      const processed = await apiRequest("POST", "/api/ai/process-task-update", {
+      const processed = await api.post("/api/ai/process-task-update", {
         taskId: task.id,
         currentStatus: task.status,
         update: prompt
       });
       
       // Then, use the processed data to update the task
-      return apiRequest("PATCH", `/api/tasks/${task.id}`, processed.updates);
+      return api.patch(`/api/tasks/${task.id}`, processed.updates);
     },
     onSuccess: async () => {
       toast({

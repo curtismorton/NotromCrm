@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { api, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Project } from "@shared/schema";
 import { 
@@ -26,7 +26,7 @@ export const TaskSuggestions = ({ project, onAddTask }: TaskSuggestionsProps) =>
 
   const generateSuggestionsMutation = useMutation({
     mutationFn: () => {
-      return apiRequest("POST", "/api/ai/generate-task-suggestions", {
+      return api.post("/api/ai/generate-task-suggestions", {
         projectName: project.name,
         projectDescription: project.description || `${project.name} project`,
       });
@@ -61,7 +61,7 @@ export const TaskSuggestions = ({ project, onAddTask }: TaskSuggestionsProps) =>
 
   const addTaskMutation = useMutation({
     mutationFn: (task: any) => {
-      return apiRequest("POST", "/api/tasks", {
+      return api.post("/api/tasks", {
         title: task.title,
         description: task.description || "",
         status: "todo",

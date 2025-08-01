@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export const ClientTable = () => {
@@ -40,7 +40,7 @@ export const ClientTable = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/clients/${id}`),
+    mutationFn: (id: number) => api.delete(`/api/clients/${id}`),
     onSuccess: async () => {
       toast({
         title: "Client deleted",

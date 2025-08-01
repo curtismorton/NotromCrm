@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export const ProjectTable = () => {
@@ -40,7 +40,7 @@ export const ProjectTable = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/projects/${id}`),
+    mutationFn: (id: number) => api.delete(`/api/projects/${id}`),
     onSuccess: async () => {
       toast({
         title: "Project deleted",

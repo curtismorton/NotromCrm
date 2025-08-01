@@ -25,7 +25,7 @@ import {
 import { Link } from "wouter";
 import { Task } from "@shared/schema";
 import { cn } from "@/lib/utils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface TaskCardListProps {
@@ -44,7 +44,7 @@ export function TaskCardList({ context = 'all', status, priority }: TaskCardList
   // Quick action mutations
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, updates }: { taskId: number; updates: Partial<Task> }) => {
-      return apiRequest(`/api/tasks/${taskId}`, 'PATCH', updates);
+      return api.patch(`/api/tasks/${taskId}`, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });

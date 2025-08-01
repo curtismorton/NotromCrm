@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { insertAutomationSchema, type Automation, type InsertAutomation } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { api, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -52,15 +52,9 @@ export function AutomationForm({ automation, onSuccess }: AutomationFormProps) {
   const mutation = useMutation({
     mutationFn: async (data: InsertAutomation) => {
       if (isEditing) {
-        return apiRequest(`/api/automations/${automation.id}`, {
-          method: "PATCH",
-          body: data,
-        });
+        return api.patch(`/api/automations/${automation.id}`, data);
       } else {
-        return apiRequest("/api/automations", {
-          method: "POST",
-          body: data,
-        });
+        return api.post("/api/automations", data);
       }
     },
     onSuccess: () => {
@@ -110,7 +104,8 @@ export function AutomationForm({ automation, onSuccess }: AutomationFormProps) {
               <FormControl>
                 <Textarea 
                   placeholder="Automatically generate site copy prompts when onboarding form is completed"
-                  {...field} 
+                  {...field}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />
@@ -251,7 +246,8 @@ export function AutomationForm({ automation, onSuccess }: AutomationFormProps) {
               <FormControl>
                 <Textarea 
                   placeholder="Additional notes about this automation"
-                  {...field} 
+                  {...field}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />

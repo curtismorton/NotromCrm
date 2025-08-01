@@ -7,20 +7,58 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Base fetch function
+async function baseFetch(
+  url: string,
+  method: string,
+  data?: unknown,
+  options?: RequestInit
+): Promise<any> {
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+    body: data ? JSON.stringify(data) : undefined,
+    credentials: 'include',
+    ...options,
+  });
+  
+  await throwIfResNotOk(res);
+  
+  const contentType = res.headers.get('Content-Type') || '';
+  if (contentType.includes('application/json')) {
+    return await res.json();
+  }
+  return await res.text();
+}
+
+// Dedicated API methods
+export const api = {
+  // GET requests
+  get: (url: string, options?: RequestInit) => baseFetch(url, 'GET', undefined, options),
+  
+  // POST requests
+  post: (url: string, data?: unknown, options?: RequestInit) => baseFetch(url, 'POST', data, options),
+  
+  // PUT requests (full replace)
+  put: (url: string, data?: unknown, options?: RequestInit) => baseFetch(url, 'PUT', data, options),
+  
+  // PATCH requests (partial update)
+  patch: (url: string, data?: unknown, options?: RequestInit) => baseFetch(url, 'PATCH', data, options),
+  
+  // DELETE requests
+  delete: (url: string, options?: RequestInit) => baseFetch(url, 'DELETE', undefined, options),
+};
+
+// Legacy apiRequest function for backward compatibility - will be deprecated
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res;
+): Promise<any> {
+  return baseFetch(url, method, data);
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

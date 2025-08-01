@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Task, insertTaskSchema, Project, User } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 
 import {
@@ -87,7 +87,7 @@ export const TaskForm = ({ task, isEdit = false, projectId }: TaskFormProps) => 
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
         completedAt: data.completedAt ? new Date(data.completedAt).toISOString() : undefined,
       };
-      return apiRequest("POST", "/api/tasks", formattedData);
+      return api.post("/api/tasks", formattedData);
     },
     onSuccess: async () => {
       toast({
@@ -120,7 +120,7 @@ export const TaskForm = ({ task, isEdit = false, projectId }: TaskFormProps) => 
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
         completedAt: data.completedAt ? new Date(data.completedAt).toISOString() : undefined,
       };
-      return apiRequest("PATCH", `/api/tasks/${task?.id}`, formattedData);
+      return api.patch(`/api/tasks/${task?.id}`, formattedData);
     },
     onSuccess: async () => {
       toast({
@@ -315,6 +315,7 @@ export const TaskForm = ({ task, isEdit = false, projectId }: TaskFormProps) => 
                       placeholder="Details about this task..."
                       className="min-h-[120px]"
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />

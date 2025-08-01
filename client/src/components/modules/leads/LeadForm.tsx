@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { insertLeadSchema, type Lead, type InsertLead, type Client } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { api, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -69,17 +69,9 @@ export function LeadForm({ lead, onSuccess }: LeadFormProps) {
       };
 
       if (isEditing) {
-        return apiRequest(`/api/leads/${lead.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(processedData),
-          headers: { 'Content-Type': 'application/json' }
-        });
+        return api.patch(`/api/leads/${lead.id}`, processedData);
       } else {
-        return apiRequest("/api/leads", {
-          method: "POST",
-          body: JSON.stringify(processedData),
-          headers: { 'Content-Type': 'application/json' }
-        });
+        return api.post("/api/leads", processedData);
       }
     },
     onSuccess: () => {
@@ -99,7 +91,7 @@ export function LeadForm({ lead, onSuccess }: LeadFormProps) {
     },
   });
 
-  const onSubmit = (data: InsertLead) => {
+  const onSubmit = (data: any) => {
     mutation.mutate(data);
   };
 

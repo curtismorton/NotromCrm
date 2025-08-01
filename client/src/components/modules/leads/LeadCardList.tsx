@@ -20,7 +20,7 @@ import {
   FileText
 } from "lucide-react";
 import { Lead } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
@@ -38,7 +38,7 @@ export function LeadCardList({ context = 'all' }: LeadCardListProps) {
   // Quick action mutations
   const updateLeadMutation = useMutation({
     mutationFn: async ({ leadId, updates }: { leadId: number; updates: Partial<Lead> }) => {
-      return apiRequest(`/api/leads/${leadId}`, 'PATCH', updates);
+      return api.patch(`/api/leads/${leadId}`, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/leads"] });

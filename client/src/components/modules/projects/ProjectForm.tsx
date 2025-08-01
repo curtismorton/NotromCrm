@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Project, insertProjectSchema, Lead, Client } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 
 import {
@@ -91,7 +91,7 @@ export const ProjectForm = ({ project, isEdit = false, leadId }: ProjectFormProp
         deadline: data.deadline ? new Date(data.deadline).toISOString() : undefined,
         completedDate: data.completedDate ? new Date(data.completedDate).toISOString() : undefined,
       };
-      return apiRequest("POST", "/api/projects", formattedData);
+      return api.post("/api/projects", formattedData);
     },
     onSuccess: async () => {
       toast({
@@ -120,7 +120,7 @@ export const ProjectForm = ({ project, isEdit = false, leadId }: ProjectFormProp
         deadline: data.deadline ? new Date(data.deadline).toISOString() : undefined,
         completedDate: data.completedDate ? new Date(data.completedDate).toISOString() : undefined,
       };
-      return apiRequest("PATCH", `/api/projects/${project?.id}`, formattedData);
+      return api.patch(`/api/projects/${project?.id}`, formattedData);
     },
     onSuccess: async () => {
       toast({
@@ -286,7 +286,7 @@ export const ProjectForm = ({ project, isEdit = false, leadId }: ProjectFormProp
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
                       <Checkbox
-                        checked={field.value}
+                        checked={field.value || false}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
@@ -354,6 +354,7 @@ export const ProjectForm = ({ project, isEdit = false, leadId }: ProjectFormProp
                       placeholder="Details about this project..."
                       className="min-h-[120px]"
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />

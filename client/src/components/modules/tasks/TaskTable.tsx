@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface TaskTableProps {
@@ -49,7 +49,7 @@ export const TaskTable = ({ projectId }: TaskTableProps = {}) => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/tasks/${id}`),
+    mutationFn: (id: number) => api.delete(`/api/tasks/${id}`),
     onSuccess: async () => {
       toast({
         title: "Task deleted",
@@ -70,7 +70,7 @@ export const TaskTable = ({ projectId }: TaskTableProps = {}) => {
 
   const completeTaskMutation = useMutation({
     mutationFn: (taskId: number) => 
-      apiRequest("PATCH", `/api/tasks/${taskId}`, { 
+      api.patch(`/api/tasks/${taskId}`, { 
         status: "completed",
         completedAt: new Date().toISOString()
       }),
@@ -118,7 +118,7 @@ export const TaskTable = ({ projectId }: TaskTableProps = {}) => {
     if (isToday(date)) {
       return { status: "today", label: "Due today" };
     }
-    if (isPast(addDays(new Date(), 3), date)) {
+    if (isPast(addDays(new Date(), 3)) && !isPast(date)) {
       return { status: "soon", label: `Due ${format(date, "MMM d")}` };
     }
     
@@ -128,7 +128,7 @@ export const TaskTable = ({ projectId }: TaskTableProps = {}) => {
   const columns = [
     {
       header: "",
-      accessorKey: "id",
+      accessorKey: "id" as keyof Task,
       cell: (task: Task) => (
         <Checkbox
           checked={task.status === "completed"}

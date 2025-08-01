@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, Play, Pause } from "lucide-react";
 import { Automation } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { api, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { AutomationForm } from "@/components/modules/automation/AutomationForm";
@@ -49,9 +49,7 @@ export function AutomationTasksView() {
 
   const deleteAutomationMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/automations/${id}`, {
-        method: "DELETE",
-      });
+      return api.delete(`/api/automations/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automations"] });
@@ -71,10 +69,7 @@ export function AutomationTasksView() {
 
   const toggleAutomationMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
-      return apiRequest(`/api/automations/${id}`, {
-        method: "PATCH",
-        body: { isActive },
-      });
+      return api.patch(`/api/automations/${id}`, { isActive });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automations"] });

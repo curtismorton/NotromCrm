@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Client, insertClientSchema, Lead } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 
 import {
@@ -53,7 +53,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
   const defaultValues: Partial<ClientFormValues> = {
     companyName: client?.companyName || lead?.companyName || "",
     website: client?.website || lead?.website || "",
-    industry: client?.industry || lead?.industry || "",
+    industry: client?.industry || "",
     contactName: client?.contactName || lead?.contactName || "",
     contactEmail: client?.contactEmail || lead?.contactEmail || "",
     contactPhone: client?.contactPhone || lead?.contactPhone || "",
@@ -75,7 +75,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
         ...data,
         onboardedDate: data.onboardedDate ? new Date(data.onboardedDate).toISOString() : undefined,
       };
-      return apiRequest("POST", "/api/clients", formattedData);
+      return api.post("/api/clients", formattedData);
     },
     onSuccess: async (response) => {
       toast({
@@ -125,7 +125,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
         ...data,
         onboardedDate: data.onboardedDate ? new Date(data.onboardedDate).toISOString() : undefined,
       };
-      return apiRequest("PATCH", `/api/clients/${client?.id}`, formattedData);
+      return api.patch(`/api/clients/${client?.id}`, formattedData);
     },
     onSuccess: async () => {
       toast({
@@ -183,7 +183,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
                   <FormItem>
                     <FormLabel>Website</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com" {...field} />
+                      <Input placeholder="https://example.com" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -197,7 +197,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
                   <FormItem>
                     <FormLabel>Industry</FormLabel>
                     <FormControl>
-                      <Input placeholder="Technology" {...field} />
+                      <Input placeholder="Technology" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -225,7 +225,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
                   <FormItem>
                     <FormLabel>Contact Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="john@example.com" {...field} />
+                      <Input placeholder="john@example.com" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -239,7 +239,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
                   <FormItem>
                     <FormLabel>Contact Phone</FormLabel>
                     <FormControl>
-                      <Input placeholder="+1 (555) 123-4567" {...field} />
+                      <Input placeholder="+1 (555) 123-4567" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -267,7 +267,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
                       <Checkbox
-                        checked={field.value}
+                        checked={field.value || false}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
@@ -291,6 +291,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
                       placeholder="123 Main St, Suite 100, City, State, Zip"
                       className="min-h-[80px]"
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -309,6 +310,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
                       placeholder="Additional information about this client..."
                       className="min-h-[120px]"
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
