@@ -170,7 +170,7 @@ export default function TasksPage() {
             <span className="hidden sm:inline">Notrom</span>
             <span className="sm:hidden">Not.</span>
             <Badge variant="secondary" className="ml-1 text-xs">
-              {notromTasks.length}
+              {taskCounts.notrom}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="podcast" className="flex items-center gap-1 text-xs sm:text-sm">
@@ -178,7 +178,7 @@ export default function TasksPage() {
             <span className="hidden sm:inline">Podcast</span>
             <span className="sm:hidden">Pod.</span>
             <Badge variant="secondary" className="ml-1 text-xs">
-              {podcastTasks.length}
+              {taskCounts.podcast}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="day_job" className="flex items-center gap-1 text-xs sm:text-sm">
@@ -186,7 +186,7 @@ export default function TasksPage() {
             <span className="hidden sm:inline">Day Job</span>
             <span className="sm:hidden">Job</span>
             <Badge variant="secondary" className="ml-1 text-xs">
-              {dayJobTasks.length}
+              {taskCounts.dayJob}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-1 text-xs sm:text-sm">
@@ -194,7 +194,7 @@ export default function TasksPage() {
             <span className="hidden sm:inline">General</span>
             <span className="sm:hidden">Gen.</span>
             <Badge variant="secondary" className="ml-1 text-xs">
-              {generalTasks.length}
+              {taskCounts.general}
             </Badge>
           </TabsTrigger>
         </TabsList>

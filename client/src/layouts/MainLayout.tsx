@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -8,21 +8,16 @@ import {
   CheckSquare, 
   Settings, 
   Download, 
-  Search, 
-  Bell, 
-  HelpCircle, 
   Menu, 
-  LogOut,
-  Code,
+  X,
   Mic,
   Briefcase,
   Workflow
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 import { useMedia } from "@/hooks/use-mobile";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
@@ -39,17 +34,31 @@ const SidebarItem = ({ icon, label, href, badgeCount, active }: SidebarItemProps
   return (
     <Link href={href}>
       <div className={cn(
-        "flex items-center px-4 py-3.5 text-sm transition-all duration-200 rounded-xl cursor-pointer group",
+        "flex items-center px-3 py-2.5 text-sm transition-all duration-200 rounded-lg cursor-pointer group relative",
         active 
-          ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-md" 
-          : "text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-white font-medium"
+          ? "bg-blue-50 text-blue-700 border border-blue-200 font-medium shadow-sm" 
+          : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 font-normal"
       )}>
-        <span className="w-5 h-5 transition-transform group-hover:scale-110">{icon}</span>
-        <span className="mx-4 font-semibold">{label}</span>
-        {badgeCount !== undefined && (
-          <Badge variant="secondary" className="ml-auto font-semibold">
+        <span className={cn(
+          "w-5 h-5 transition-colors mr-3",
+          active ? "text-blue-600" : "text-gray-500 group-hover:text-gray-700"
+        )}>
+          {icon}
+        </span>
+        <span className="font-medium">{label}</span>
+        {badgeCount !== undefined && badgeCount > 0 && (
+          <Badge 
+            variant={active ? "default" : "secondary"} 
+            className={cn(
+              "ml-auto text-xs font-medium",
+              active ? "bg-blue-100 text-blue-700 border-blue-200" : "bg-gray-100 text-gray-600"
+            )}
+          >
             {badgeCount}
           </Badge>
+        )}
+        {active && (
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full" />
         )}
       </div>
     </Link>
@@ -63,199 +72,175 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
   const isMobile = useMedia("(max-width: 1024px)");
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-  
-  // Reset sidebar state when screen size changes
-  useEffect(() => {
-    setSidebarOpen(!isMobile);
-  }, [isMobile]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Get dashboard stats for badge counts
   const { data: stats } = useQuery<{
     totalLeads: number;
     activeProjects: number;
     totalClients: number;
-    overdueTasks: number;
+    totalTasks: number;
   }>({
     queryKey: ["/api/dashboard/stats"],
   });
 
-  return (
-    <div className="h-screen flex overflow-hidden">
-      {/* Sidebar */}
-      <div 
-        className={cn(
-          "fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition-transform transform bg-sidebar-background border-r border-sidebar-border lg:translate-x-0 lg:static lg:inset-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex items-center justify-center h-16 px-6 bg-sidebar-primary">
-          <h2 className="text-xl font-semibold text-sidebar-primary-foreground">CurtisOS</h2>
-        </div>
-        <nav className="px-3 py-4">
-          <SidebarItem 
-            icon={<LayoutDashboard className="w-5 h-5" />} 
-            label="Dashboard" 
-            href="/" 
-            active={location === "/"} 
-          />
-          
-          <div className="mt-4 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wider">Business</p>
-            
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-white border-r border-gray-200">
+      {/* Logo Header */}
+      <div className="flex items-center justify-center h-16 px-6 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-700">
+        <h2 className="text-xl font-bold text-white">CurtisOS</h2>
+      </div>
+      
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+        {/* Main Section */}
+        <div className="space-y-2">
+          <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h3>
+          <div className="space-y-1">
+            <SidebarItem 
+              icon={<LayoutDashboard className="w-5 h-5" />} 
+              label="Dashboard" 
+              href="/" 
+              active={location === "/"} 
+            />
+            <SidebarItem 
+              icon={<CheckSquare className="w-5 h-5" />} 
+              label="Tasks" 
+              href="/tasks" 
+              badgeCount={stats?.totalTasks} 
+              active={location.startsWith("/tasks")} 
+            />
             <SidebarItem 
               icon={<Workflow className="w-5 h-5" />} 
               label="Pipeline" 
               href="/pipeline" 
               active={location.startsWith("/pipeline")} 
             />
-            
-            <SidebarItem 
-              icon={<Users className="w-5 h-5" />} 
-              label="Leads" 
-              href="/leads" 
-              badgeCount={stats ? stats.totalLeads : undefined} 
-              active={location.startsWith("/leads")} 
-            />
-            
-            <SidebarItem 
-              icon={<FolderKanban className="w-5 h-5" />} 
-              label="Projects" 
-              href="/projects" 
-              badgeCount={stats ? stats.activeProjects : undefined} 
-              active={location.startsWith("/projects")} 
-            />
-            
+          </div>
+        </div>
+
+        {/* Life & Work Contexts */}
+        <div className="space-y-2">
+          <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Life & Work</h3>
+          <div className="space-y-1">
             <SidebarItem 
               icon={<Building2 className="w-5 h-5" />} 
-              label="Clients" 
-              href="/clients" 
-              badgeCount={stats ? stats.totalClients : undefined} 
-              active={location.startsWith("/clients")} 
-            />
-          </div>
-          
-          <div className="mt-4 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wider">Life & Work</p>
-            
-            <SidebarItem 
-              icon={<Code className="w-5 h-5" />} 
               label="Notrom" 
               href="/notrom" 
               active={location.startsWith("/notrom")} 
             />
-            
             <SidebarItem 
               icon={<Mic className="w-5 h-5" />} 
               label="Podcast" 
               href="/podcast" 
               active={location.startsWith("/podcast")} 
             />
-            
             <SidebarItem 
               icon={<Briefcase className="w-5 h-5" />} 
               label="Day Job" 
               href="/day-job" 
               active={location.startsWith("/day-job")} 
             />
-            
-            <SidebarItem 
-              icon={<CheckSquare className="w-5 h-5" />} 
-              label="General Tasks" 
-              href="/tasks" 
-              badgeCount={stats ? stats.overdueTasks : undefined} 
-              active={location.startsWith("/tasks")} 
-            />
-          </div>
-          
-          <div className="mt-6 space-y-1">
-            <p className="px-4 text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wider">Settings</p>
-            
-            <SidebarItem 
-              icon={<Settings className="w-5 h-5" />} 
-              label="Settings" 
-              href="/settings" 
-              active={location === "/settings"} 
-            />
-            
-            <SidebarItem 
-              icon={<Download className="w-5 h-5" />} 
-              label="Export" 
-              href="/export" 
-              active={location === "/export"} 
-            />
-          </div>
-        </nav>
-        <div className="absolute bottom-0 w-full">
-          <div className="flex items-center px-5 py-3 border-t border-sidebar-border">
-            <Avatar>
-              <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User profile" />
-              <AvatarFallback>CM</AvatarFallback>
-            </Avatar>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-sidebar-foreground">Chris Morgan</p>
-              <p className="text-xs text-sidebar-foreground/75">Administrator</p>
-            </div>
-            <Button variant="ghost" size="icon" className="p-1 ml-auto text-sidebar-foreground/90 hover:text-white">
-              <LogOut className="w-5 h-5" />
-            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile navigation backdrop */}
-      {sidebarOpen && isMobile && (
-        <div 
-          className="fixed inset-0 z-20 transition-opacity bg-gray-600 opacity-75 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      
-      {/* Main content */}
-      <div className="flex flex-col flex-1 w-full overflow-hidden">
-        {/* Top navbar - Mobile optimized */}
-        <header className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b lg:py-4 lg:px-6">
-          <div className="flex items-center flex-1 min-w-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 mr-2 text-gray-500 lg:hidden focus:ring-primary-500 flex-shrink-0"
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="relative flex-1 max-w-md">
-              <Input
-                type="text"
-                placeholder="Search tasks, leads, projects..."
-                className="w-full pl-9 pr-4 py-2 text-sm text-gray-700 bg-gray-100 border-none rounded-lg"
-              />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="w-4 h-4 text-gray-400" />
-              </div>
-            </div>
+        {/* Business Management */}
+        <div className="space-y-2">
+          <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</h3>
+          <div className="space-y-1">
+            <SidebarItem 
+              icon={<Users className="w-5 h-5" />} 
+              label="Leads" 
+              href="/leads" 
+              badgeCount={stats?.totalLeads} 
+              active={location.startsWith("/leads")} 
+            />
+            <SidebarItem 
+              icon={<FolderKanban className="w-5 h-5" />} 
+              label="Projects" 
+              href="/projects" 
+              badgeCount={stats?.activeProjects} 
+              active={location.startsWith("/projects")} 
+            />
+            <SidebarItem 
+              icon={<Building2 className="w-5 h-5" />} 
+              label="Clients" 
+              href="/clients" 
+              badgeCount={stats?.totalClients} 
+              active={location.startsWith("/clients")} 
+            />
           </div>
+        </div>
+
+        {/* Settings */}
+        <div className="pt-4 mt-auto border-t border-gray-200 space-y-1">
+          <SidebarItem 
+            icon={<Settings className="w-5 h-5" />} 
+            label="Settings" 
+            href="/settings" 
+            active={location.startsWith("/settings")} 
+          />
+          <SidebarItem 
+            icon={<Download className="w-5 h-5" />} 
+            label="Export" 
+            href="/export" 
+            active={location.startsWith("/export")} 
+          />
+        </div>
+      </nav>
+    </div>
+  );
+
+  return (
+    <div className="h-screen flex overflow-hidden bg-gray-50">
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <div className="w-64 flex-shrink-0">
+          <SidebarContent />
+        </div>
+      )}
+
+      {/* Mobile Sidebar */}
+      {isMobile && (
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <SheetContent side="left" className="p-0 w-64">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          {isMobile && (
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="lg:hidden">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+            </Sheet>
+          )}
           
-          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-            <Button variant="ghost" size="icon" className="p-2 text-gray-400 hover:text-gray-500">
-              <span className="sr-only">View notifications</span>
-              <Bell className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="p-2 text-gray-400 hover:text-gray-500 hidden sm:flex">
-              <span className="sr-only">View help</span>
-              <HelpCircle className="w-5 h-5" />
+          <div className="flex-1" />
+          
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" className="text-gray-500">
+              <span className="sr-only">Notifications</span>
+              🔔
             </Button>
           </div>
         </header>
-        
-        {/* Main content area - Mobile optimized */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-2 sm:p-4 lg:p-6 pb-20 sm:pb-6">
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
-      
+
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 }
