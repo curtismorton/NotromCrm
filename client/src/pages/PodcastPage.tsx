@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Mic, Play, Calendar, Clock, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Task } from "@shared/schema";
+import { EpisodeModal } from "@/components/modules/podcast/EpisodeModal";
 
 export default function PodcastPage() {
+  const [isEpisodeModalOpen, setIsEpisodeModalOpen] = useState(false);
+  
   const { data: tasks } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
   });
@@ -33,7 +37,10 @@ export default function PodcastPage() {
           <p className="text-muted-foreground">Behind The Screens episode management</p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm">
+          <Button 
+            onClick={() => setIsEpisodeModalOpen(true)}
+            size="sm"
+          >
             <Plus className="w-4 h-4 mr-2" />
             New Episode
           </Button>
@@ -165,6 +172,12 @@ export default function PodcastPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Episode Modal */}
+      <EpisodeModal 
+        isOpen={isEpisodeModalOpen} 
+        onClose={() => setIsEpisodeModalOpen(false)} 
+      />
     </div>
   );
 }

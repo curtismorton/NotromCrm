@@ -7,58 +7,20 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Base fetch function
-async function baseFetch(
-  url: string,
-  method: string,
-  data?: unknown,
-  options?: RequestInit
-): Promise<any> {
-  const res = await fetch(url, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: 'include',
-    ...options,
-  });
-  
-  await throwIfResNotOk(res);
-  
-  const contentType = res.headers.get('Content-Type') || '';
-  if (contentType.includes('application/json')) {
-    return await res.json();
-  }
-  return await res.text();
-}
-
-// Dedicated API methods
-export const api = {
-  // GET requests
-  get: (url: string, options?: RequestInit) => baseFetch(url, 'GET', undefined, options),
-  
-  // POST requests
-  post: (url: string, data?: unknown, options?: RequestInit) => baseFetch(url, 'POST', data, options),
-  
-  // PUT requests (full replace)
-  put: (url: string, data?: unknown, options?: RequestInit) => baseFetch(url, 'PUT', data, options),
-  
-  // PATCH requests (partial update)
-  patch: (url: string, data?: unknown, options?: RequestInit) => baseFetch(url, 'PATCH', data, options),
-  
-  // DELETE requests
-  delete: (url: string, options?: RequestInit) => baseFetch(url, 'DELETE', undefined, options),
-};
-
-// Legacy apiRequest function for backward compatibility - will be deprecated
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-): Promise<any> {
-  return baseFetch(url, method, data);
+): Promise<Response> {
+  const res = await fetch(url, {
+    method,
+    headers: data ? { 'Content-Type': 'application/json' } : {},
+    body: data ? JSON.stringify(data) : undefined,
+    credentials: 'include',
+  });
+  await throwIfResNotOk(res);
+  const contentType = res.headers.get('Content-Type') || '';
+  return contentType.includes('application/json') ? await res.json() : await res.text();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -78,6 +40,14 @@ export const getQueryFn: <T>(options: {
     await throwIfResNotOk(res);
     return await res.json();
   };
+
+// HTTP method wrapper functions
+export const api = {
+  get: (url: string) => apiRequest("GET", url),
+  post: (url: string, data?: unknown) => apiRequest("POST", url, data),
+  patch: (url: string, data?: unknown) => apiRequest("PATCH", url, data),
+  delete: (url: string) => apiRequest("DELETE", url),
+};
 
 export const queryClient = new QueryClient({
   defaultOptions: {

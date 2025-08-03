@@ -19,6 +19,8 @@ import ClientsPage from "@/pages/clients/ClientsPage";
 import ClientDetailsPage from "@/pages/clients/ClientDetailsPage";
 import TasksPage from "@/pages/tasks/TasksPage";
 import TaskDetailsPage from "@/pages/tasks/TaskDetailsPage";
+import SettingsPage from "@/pages/SettingsPage";
+import ExportPage from "@/pages/ExportPage";
 
 function Router() {
   return (
@@ -36,6 +38,8 @@ function Router() {
       <Route path="/clients/:id" component={ClientDetailsPage} />
       <Route path="/tasks" component={TasksPage} />
       <Route path="/tasks/:id" component={TaskDetailsPage} />
+      <Route path="/settings" component={SettingsPage} />
+      <Route path="/export" component={ExportPage} />
       <Route component={NotFound} />
     </Switch>
   );

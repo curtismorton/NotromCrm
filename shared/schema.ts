@@ -77,6 +77,7 @@ export const taskStatusEnum = pgEnum("task_status", [
   "in_progress",
   "review",
   "completed",
+  "archived",
 ]);
 
 // CurtisOS specific enums

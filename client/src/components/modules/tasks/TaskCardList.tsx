@@ -46,12 +46,37 @@ export function TaskCardList({ context = 'all', status, priority }: TaskCardList
     mutationFn: async ({ taskId, updates }: { taskId: number; updates: Partial<Task> }) => {
       return api.patch(`/api/tasks/${taskId}`, updates);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      toast({
-        title: "Task updated",
-        description: "Task has been updated successfully",
-      });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      
+      // Show context-specific success messages
+      if (variables.updates.status === 'archived') {
+        toast({
+          title: "Task archived",
+          description: "Task has been moved to archive",
+        });
+      } else if (variables.updates.status === 'completed') {
+        toast({
+          title: "Task completed",
+          description: "Great work! Task marked as complete",
+        });
+      } else if (variables.updates.status === 'todo') {
+        toast({
+          title: "Task restored",
+          description: "Task has been unarchived and restored",
+        });
+      } else if (variables.updates.priority === 'high') {
+        toast({
+          title: "Priority updated",
+          description: "Task marked as high priority",
+        });
+      } else {
+        toast({
+          title: "Task updated",
+          description: "Changes saved successfully",
+        });
+      }
     },
     onError: () => {
       toast({
@@ -62,7 +87,7 @@ export function TaskCardList({ context = 'all', status, priority }: TaskCardList
     },
   });
 
-  const quickStatusUpdate = (taskId: number, newStatus: 'todo' | 'in_progress' | 'review' | 'completed') => {
+  const quickStatusUpdate = (taskId: number, newStatus: 'todo' | 'in_progress' | 'review' | 'completed' | 'archived') => {
     updateTaskMutation.mutate({ taskId, updates: { status: newStatus } });
   };
 
@@ -108,6 +133,12 @@ export function TaskCardList({ context = 'all', status, priority }: TaskCardList
         icon: <CheckCircle2 className="w-4 h-4" />,
         label: 'Completed',
         bgColor: 'bg-green-50 border-l-green-500'
+      },
+      'archived': {
+        color: 'bg-slate-100 text-slate-800',
+        icon: <Archive className="w-4 h-4" />,
+        label: 'Archived',
+        bgColor: 'bg-slate-50 border-l-slate-500'
       }
     };
     return configs[status] || configs['todo'];
@@ -411,9 +442,36 @@ export function TaskCardList({ context = 'all', status, priority }: TaskCardList
                     )}
                   </div>
 
-                  {/* Priority and Edit Actions */}
+                  {/* Archive/Priority/Edit Actions */}
                   <div className="flex gap-1 flex-wrap">
-                    {task.priority !== 'high' && task.status !== 'completed' && (
+                    {/* Archive/Unarchive Button */}
+                    {task.status !== 'archived' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => quickStatusUpdate(task.id, 'archived')}
+                        disabled={updateTaskMutation.isPending}
+                        className="flex-1 min-w-0 text-xs text-slate-600 hover:bg-slate-50"
+                      >
+                        <Archive className="w-3 h-3 mr-1" />
+                        Archive
+                      </Button>
+                    )}
+                    
+                    {task.status === 'archived' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => quickStatusUpdate(task.id, 'todo')}
+                        disabled={updateTaskMutation.isPending}
+                        className="flex-1 min-w-0 text-xs text-blue-600 hover:bg-blue-50"
+                      >
+                        <RotateCcw className="w-3 h-3 mr-1" />
+                        Unarchive
+                      </Button>
+                    )}
+                    
+                    {task.priority !== 'high' && task.status !== 'completed' && task.status !== 'archived' && (
                       <Button
                         variant="ghost"
                         size="sm"

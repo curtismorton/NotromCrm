@@ -1,38 +1,61 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { TaskCardList } from "@/components/modules/tasks/TaskCardList";
+import { TaskModal } from "@/components/modules/tasks/TaskModal";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Building2, Briefcase, Mic, Home, CheckSquare, AlertTriangle, Clock } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PlusCircle, Building2, Briefcase, Mic, Home, CheckSquare, AlertTriangle, Clock, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "@shared/schema";
 import { useQuickFilters } from "@/hooks/use-quick-filters";
+import { getTaskCounts, getOverdueTasks, getDueTodayTasks, getHighPriorityTasks } from "@/lib/utils/taskHelpers";
 
 export default function TasksPage() {
-  const { data: allTasks = [] } = useQuery<Task[]>({
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  
+  const { data: allTasks = [], isLoading, error } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
   });
 
   const { currentFilter, filterTasks } = useQuickFilters();
   const tasks = currentFilter ? filterTasks(allTasks) : allTasks;
-
-  const notromTasks = tasks.filter(t => t.context === 'notrom');
-  const podcastTasks = tasks.filter(t => t.context === 'podcast');
-  const dayJobTasks = tasks.filter(t => t.context === 'day_job');
-  const generalTasks = tasks.filter(t => t.context === 'general');
   
-  const overdueTasks = tasks.filter(task => {
-    return task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
-  });
-  
-  const todayTasks = tasks.filter(task => {
-    if (!task.dueDate) return false;
-    const today = new Date();
-    const taskDate = new Date(task.dueDate);
-    return taskDate.toDateString() === today.toDateString();
-  });
+  // Use helper functions for consistent counts
+  const taskCounts = getTaskCounts(allTasks);
+  const overdueTasks = getOverdueTasks(allTasks);
+  const todayTasks = getDueTodayTasks(allTasks);
+  const highPriorityTasks = getHighPriorityTasks(allTasks);
 
-  const highPriorityTasks = tasks.filter(t => t.priority === 'high' && t.status !== 'completed');
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <Skeleton className="h-12 w-64" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-20" />
+          ))}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        <div className="text-center py-12">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Failed to load tasks</h2>
+          <p className="text-muted-foreground">There was an error loading your tasks. Please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
@@ -67,11 +90,12 @@ export default function TasksPage() {
               Due Today ({todayTasks.length})
             </Link>
           </Button>
-          <Button asChild className="w-full sm:w-auto">
-            <Link href="/tasks/new">
-              <PlusCircle className="w-5 h-5 mr-2" />
-              Create New Task
-            </Link>
+          <Button 
+            onClick={() => setIsTaskModalOpen(true)}
+            className="w-full sm:w-auto"
+          >
+            <PlusCircle className="w-5 h-5 mr-2" />
+            Create New Task
           </Button>
         </div>
       </div>
@@ -244,6 +268,12 @@ export default function TasksPage() {
           <TaskCardList context="general" />
         </TabsContent>
       </Tabs>
+
+      {/* Task Modal */}
+      <TaskModal 
+        isOpen={isTaskModalOpen} 
+        onClose={() => setIsTaskModalOpen(false)} 
+      />
     </div>
   );
 }
