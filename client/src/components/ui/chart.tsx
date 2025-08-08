@@ -67,37 +67,53 @@ const ChartContainer = React.forwardRef<
 })
 ChartContainer.displayName = "Chart"
 
+const sanitizeKey = (key: string) => key.replace(/[^a-zA-Z0-9-]/g, "")
+
+const isValidCssColor = (value: string) =>
+  /^#[0-9a-fA-F]{3,8}$/.test(value) ||
+  /^[a-zA-Z]+$/.test(value) ||
+  /^var\(--[\w-]+\)$/.test(value) ||
+  /^rgba?\([^\)]*\)$/.test(value) ||
+  /^hsla?\([^\)]*\)$/.test(value)
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color
+  const styleRef = React.useRef<HTMLStyleElement>(null)
+
+  const colorConfig = React.useMemo(
+    () => Object.entries(config).filter(([, cfg]) => cfg.theme || cfg.color),
+    [config]
   )
+
+  React.useEffect(() => {
+    const styleEl = styleRef.current
+    if (!styleEl) return
+    const newline = "\n"
+    const css = Object.entries(THEMES)
+      .map(([theme, prefix]) => {
+        const declarations = colorConfig
+          .map(([key, itemConfig]) => {
+            const color =
+              itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+              itemConfig.color
+            if (!color || !isValidCssColor(color)) return null
+            const safeKey = sanitizeKey(key)
+            return `  --color-${safeKey}: ${color};`
+          })
+          .filter(Boolean)
+          .join(newline)
+        if (!declarations) return null
+        return `${prefix} [data-chart="${CSS.escape(id)}"] {${newline}${declarations}${newline}}`
+      })
+      .filter(Boolean)
+      .join(newline)
+    styleEl.textContent = css
+  }, [id, colorConfig])
 
   if (!colorConfig.length) {
     return null
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
-      }}
-    />
-  )
+  return <style ref={styleRef} />
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip
