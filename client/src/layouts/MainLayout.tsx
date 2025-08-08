@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, memo } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -9,7 +9,6 @@ import {
   Settings, 
   Download, 
   Menu, 
-  X,
   Mic,
   Briefcase,
   Workflow
@@ -65,6 +64,127 @@ const SidebarItem = ({ icon, label, href, badgeCount, active }: SidebarItemProps
   );
 };
 
+interface DashboardStats {
+  totalLeads: number;
+  activeProjects: number;
+  totalClients: number;
+  totalTasks: number;
+}
+
+interface SidebarContentProps {
+  location: string;
+  stats?: DashboardStats;
+}
+
+const SidebarContent = memo(({ location, stats }: SidebarContentProps) => (
+  <div className="flex flex-col h-full bg-white border-r border-gray-200">
+    {/* Logo Header */}
+    <div className="flex items-center justify-center h-16 px-6 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-700">
+      <h2 className="text-xl font-bold text-white">CurtisOS</h2>
+    </div>
+
+    {/* Navigation */}
+    <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+      {/* Main Section */}
+      <div className="space-y-2">
+        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h3>
+        <div className="space-y-1">
+          <SidebarItem
+            icon={<LayoutDashboard className="w-5 h-5" />}
+            label="Dashboard"
+            href="/"
+            active={location === "/"}
+          />
+          <SidebarItem
+            icon={<CheckSquare className="w-5 h-5" />}
+            label="Tasks"
+            href="/tasks"
+            badgeCount={stats?.totalTasks}
+            active={location.startsWith("/tasks")}
+          />
+          <SidebarItem
+            icon={<Workflow className="w-5 h-5" />}
+            label="Pipeline"
+            href="/pipeline"
+            active={location.startsWith("/pipeline")}
+          />
+        </div>
+      </div>
+
+      {/* Life & Work Contexts */}
+      <div className="space-y-2">
+        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Life & Work</h3>
+        <div className="space-y-1">
+          <SidebarItem
+            icon={<Building2 className="w-5 h-5" />}
+            label="Notrom"
+            href="/notrom"
+            active={location.startsWith("/notrom")}
+          />
+          <SidebarItem
+            icon={<Mic className="w-5 h-5" />}
+            label="Podcast"
+            href="/podcast"
+            active={location.startsWith("/podcast")}
+          />
+          <SidebarItem
+            icon={<Briefcase className="w-5 h-5" />}
+            label="Day Job"
+            href="/day-job"
+            active={location.startsWith("/day-job")}
+          />
+        </div>
+      </div>
+
+      {/* Business Management */}
+      <div className="space-y-2">
+        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</h3>
+        <div className="space-y-1">
+          <SidebarItem
+            icon={<Users className="w-5 h-5" />}
+            label="Leads"
+            href="/leads"
+            badgeCount={stats?.totalLeads}
+            active={location.startsWith("/leads")}
+          />
+          <SidebarItem
+            icon={<FolderKanban className="w-5 h-5" />}
+            label="Projects"
+            href="/projects"
+            badgeCount={stats?.activeProjects}
+            active={location.startsWith("/projects")}
+          />
+          <SidebarItem
+            icon={<Building2 className="w-5 h-5" />}
+            label="Clients"
+            href="/clients"
+            badgeCount={stats?.totalClients}
+            active={location.startsWith("/clients")}
+          />
+        </div>
+      </div>
+
+      {/* Settings */}
+      <div className="pt-4 mt-auto border-t border-gray-200 space-y-1">
+        <SidebarItem
+          icon={<Settings className="w-5 h-5" />}
+          label="Settings"
+          href="/settings"
+          active={location.startsWith("/settings")}
+        />
+        <SidebarItem
+          icon={<Download className="w-5 h-5" />}
+          label="Export"
+          href="/export"
+          active={location.startsWith("/export")}
+        />
+      </div>
+    </nav>
+  </div>
+));
+
+SidebarContent.displayName = "SidebarContent";
+
 interface MainLayoutProps {
   children: ReactNode;
 }
@@ -75,128 +195,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Get dashboard stats for badge counts
-  const { data: stats } = useQuery<{
-    totalLeads: number;
-    activeProjects: number;
-    totalClients: number;
-    totalTasks: number;
-  }>({
+  const { data: stats } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
-
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200">
-      {/* Logo Header */}
-      <div className="flex items-center justify-center h-16 px-6 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-700">
-        <h2 className="text-xl font-bold text-white">CurtisOS</h2>
-      </div>
-      
-      {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-        {/* Main Section */}
-        <div className="space-y-2">
-          <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h3>
-          <div className="space-y-1">
-            <SidebarItem 
-              icon={<LayoutDashboard className="w-5 h-5" />} 
-              label="Dashboard" 
-              href="/" 
-              active={location === "/"} 
-            />
-            <SidebarItem 
-              icon={<CheckSquare className="w-5 h-5" />} 
-              label="Tasks" 
-              href="/tasks" 
-              badgeCount={stats?.totalTasks} 
-              active={location.startsWith("/tasks")} 
-            />
-            <SidebarItem 
-              icon={<Workflow className="w-5 h-5" />} 
-              label="Pipeline" 
-              href="/pipeline" 
-              active={location.startsWith("/pipeline")} 
-            />
-          </div>
-        </div>
-
-        {/* Life & Work Contexts */}
-        <div className="space-y-2">
-          <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Life & Work</h3>
-          <div className="space-y-1">
-            <SidebarItem 
-              icon={<Building2 className="w-5 h-5" />} 
-              label="Notrom" 
-              href="/notrom" 
-              active={location.startsWith("/notrom")} 
-            />
-            <SidebarItem 
-              icon={<Mic className="w-5 h-5" />} 
-              label="Podcast" 
-              href="/podcast" 
-              active={location.startsWith("/podcast")} 
-            />
-            <SidebarItem 
-              icon={<Briefcase className="w-5 h-5" />} 
-              label="Day Job" 
-              href="/day-job" 
-              active={location.startsWith("/day-job")} 
-            />
-          </div>
-        </div>
-
-        {/* Business Management */}
-        <div className="space-y-2">
-          <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</h3>
-          <div className="space-y-1">
-            <SidebarItem 
-              icon={<Users className="w-5 h-5" />} 
-              label="Leads" 
-              href="/leads" 
-              badgeCount={stats?.totalLeads} 
-              active={location.startsWith("/leads")} 
-            />
-            <SidebarItem 
-              icon={<FolderKanban className="w-5 h-5" />} 
-              label="Projects" 
-              href="/projects" 
-              badgeCount={stats?.activeProjects} 
-              active={location.startsWith("/projects")} 
-            />
-            <SidebarItem 
-              icon={<Building2 className="w-5 h-5" />} 
-              label="Clients" 
-              href="/clients" 
-              badgeCount={stats?.totalClients} 
-              active={location.startsWith("/clients")} 
-            />
-          </div>
-        </div>
-
-        {/* Settings */}
-        <div className="pt-4 mt-auto border-t border-gray-200 space-y-1">
-          <SidebarItem 
-            icon={<Settings className="w-5 h-5" />} 
-            label="Settings" 
-            href="/settings" 
-            active={location.startsWith("/settings")} 
-          />
-          <SidebarItem 
-            icon={<Download className="w-5 h-5" />} 
-            label="Export" 
-            href="/export" 
-            active={location.startsWith("/export")} 
-          />
-        </div>
-      </nav>
-    </div>
-  );
-
   return (
     <div className="h-screen flex overflow-hidden bg-gray-50">
       {/* Desktop Sidebar */}
       {!isMobile && (
         <div className="w-64 flex-shrink-0">
-          <SidebarContent />
+          <SidebarContent location={location} stats={stats} />
         </div>
       )}
 
@@ -204,7 +211,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       {isMobile && (
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetContent side="left" className="p-0 w-64">
-            <SidebarContent />
+            <SidebarContent location={location} stats={stats} />
           </SheetContent>
         </Sheet>
       )}
