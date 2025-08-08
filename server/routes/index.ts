@@ -15,7 +15,23 @@ import {
 } from "@shared/schema";
 import * as aiService from "../services/ai";
 import { GmailService } from "../services/gmailService";
+import { logger } from "../utils/logger";
 
+export async function recordActivity(
+  userId: string,
+  action: string,
+  entityType: string,
+  entityId: number,
+  details?: any
+) {
+  await storage.createActivity({
+    userId,
+    action,
+    entityType,
+    entityId,
+    details: details || null,
+  });
+}
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Gmail service
   const gmailService = new GmailService();
@@ -27,21 +43,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next();
     } catch (error) {
       res.status(400).json({ message: "Invalid request body", errors: error });
-    }
-  };
-
-  // Helper for recording activities
-  const recordActivity = async (userId: string, action: string, entityType: string, entityId: number, details?: any) => {
-    try {
-      await storage.createActivity({
-        userId,
-        action,
-        entityType,
-        entityId,
-        details: details || null,
-      });
-    } catch (error) {
-      console.error("Failed to record activity:", error);
     }
   };
 
@@ -77,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "lead",
           lead.id,
           { companyName: lead.companyName }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(201).json(lead);
@@ -151,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "lead",
           lead.id,
           { changes: req.validatedBody }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(lead);
@@ -176,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "delete",
           "lead",
           id
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
@@ -212,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "lead",
           leadId,
           { tagId, tagName: tag.name }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
@@ -247,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "project",
           project.id,
           { name: project.name }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(201).json(project);
@@ -332,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "project",
           project.id,
           { changes: req.validatedBody }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(project);
@@ -357,7 +358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "delete",
           "project",
           id
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
@@ -417,7 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "client",
           client.id,
           { companyName: client.companyName }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(201).json(client);
@@ -493,7 +494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "client",
           client.id,
           { changes: req.validatedBody }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(client);
@@ -518,7 +519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "delete",
           "client",
           id
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
@@ -578,7 +579,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "task",
           task.id,
           { title: task.title }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(201).json(task);
@@ -649,7 +650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "task",
           task.id,
           { changes: req.validatedBody }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(task);
@@ -674,7 +675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "delete",
           "task",
           id
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
@@ -734,7 +735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "dev_plan",
           devPlan.id,
           { name: devPlan.name, projectId: devPlan.projectId }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(201).json(devPlan);
@@ -805,7 +806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "dev_plan",
           devPlan.id,
           { changes: req.validatedBody }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(devPlan);
@@ -847,7 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "dev_plan",
           devPlan.id,
           { stage, startDate, endDate }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(devPlan);
@@ -873,7 +874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "dev_plan",
           id,
           {}
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
@@ -1144,7 +1145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "delivery",
           delivery.id,
           { clientName: delivery.clientName }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(201).json(delivery);
@@ -1202,7 +1203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "delivery",
           delivery.id,
           { changes: req.validatedBody }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(delivery);
@@ -1229,7 +1230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "delivery",
           id,
           {}
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
@@ -1252,7 +1253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "automation",
           automation.id,
           { name: automation.name }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(201).json(automation);
@@ -1311,7 +1312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "automation",
           automation.id,
           { changes: req.validatedBody }
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.json(automation);
@@ -1338,7 +1339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "automation",
           id,
           {}
-        );
+        ).catch((error) => logger.error("Failed to record activity", error));
       }
       
       res.status(204).end();
