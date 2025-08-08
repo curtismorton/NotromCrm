@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  ClipboardList, 
-  Hammer, 
-  FileEdit, 
-  Rocket, 
+import {
+  ClipboardList,
+  Hammer,
+  FileEdit,
+  Rocket,
   ChevronRight,
   Calendar,
   ClipboardCheck,
@@ -19,6 +19,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { format, differenceInDays, isBefore, isAfter } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { logger } from "../../../../../server/utils/logger";
 
 interface DevPlanProgressProps {
   project: Project;
@@ -40,7 +41,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
   // Error handling
   useEffect(() => {
     if (error) {
-      console.error("Error fetching dev plan:", error);
+      logger.error("Error fetching dev plan:", error);
     }
   }, [error]);
 
@@ -209,7 +210,7 @@ export const DevPlanProgress = ({ project, onUpdateStage }: DevPlanProgressProps
         onUpdateStage(updatedPlan);
       }
     } catch (error) {
-      console.error("Error updating stage:", error);
+      logger.error("Error updating stage:", error);
       toast({
         title: "Error",
         description: "Failed to update development stage.",

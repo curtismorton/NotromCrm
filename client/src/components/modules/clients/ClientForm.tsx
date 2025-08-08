@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { api, apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { logger } from "../../../../../server/utils/logger";
 
 import {
   Form,
@@ -101,7 +102,7 @@ export const ClientForm = ({ client, isEdit = false, leadId }: ClientFormProps) 
             details: { clientId: response.id }
           });
         } catch (error) {
-          console.error("Error creating project from lead:", error);
+          logger.error("Error creating project from lead:", error);
         }
       }
       

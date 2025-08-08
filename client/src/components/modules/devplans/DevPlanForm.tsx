@@ -7,6 +7,7 @@ import { useNavigate } from "wouter";
 import { insertDevPlanSchema, type DevPlan, type Project } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "../../../../../server/utils/logger";
 
 // UI components
 import {
@@ -165,7 +166,7 @@ export const DevPlanForm = ({ projects, initialData, onSuccess }: DevPlanFormPro
         onSuccess();
       }
     } catch (error) {
-      console.error("Error saving development plan:", error);
+      logger.error("Error saving development plan:", error);
       toast({
         title: "Error",
         description: "There was a problem saving the development plan.",

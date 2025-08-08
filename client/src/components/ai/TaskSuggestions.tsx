@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Project } from "@shared/schema";
+import { logger } from "../../../../server/utils/logger";
 import { 
   Card, 
   CardContent, 
@@ -39,7 +40,7 @@ export const TaskSuggestions = ({ project, onAddTask }: TaskSuggestionsProps) =>
           description: `Generated ${data.tasks.length} task suggestions for this project`,
         });
       } else {
-        console.error("Unexpected response format:", data);
+        logger.error("Unexpected response format:", data);
         toast({
           title: "Error",
           description: "Received unexpected response format from AI service",
@@ -49,7 +50,7 @@ export const TaskSuggestions = ({ project, onAddTask }: TaskSuggestionsProps) =>
       setIsLoading(false);
     },
     onError: (error) => {
-      console.error("Error generating task suggestions:", error);
+      logger.error("Error generating task suggestions:", error);
       toast({
         title: "Error",
         description: `Failed to generate task suggestions: ${error.message}`,

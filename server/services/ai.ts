@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { storage } from "../config/storage";
 import { env } from "../config/env";
+import { logger } from "../utils/logger";
 
 // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
@@ -39,7 +40,7 @@ export async function generateTaskSuggestions(projectDescription: string, projec
     
     return JSON.parse(content);
   } catch (error) {
-    console.error("Error generating task suggestions:", error);
+    logger.error("Error generating task suggestions:", error);
     return { 
       tasks: [],
       error: "Failed to generate task suggestions. Please try again later."
@@ -101,7 +102,7 @@ export async function processNaturalLanguageUpdate(taskId: number, currentStatus
     
     return JSON.parse(content);
   } catch (error) {
-    console.error("Error processing natural language update:", error);
+    logger.error("Error processing natural language update:", error);
     return { 
       updates: {},
       error: "Failed to process natural language update. Please try again later."
@@ -143,7 +144,7 @@ export async function generateClientInsights(clientData: any) {
     
     return JSON.parse(content);
   } catch (error) {
-    console.error("Error generating client insights:", error);
+    logger.error("Error generating client insights:", error);
     return { 
       insights: "Unable to generate insights at this time. Please try again later.",
       error: error.message
@@ -186,7 +187,7 @@ export async function searchProspectiveClients(industry: string, criteria: strin
     
     return JSON.parse(content);
   } catch (error) {
-    console.error("Error searching prospective clients:", error);
+    logger.error("Error searching prospective clients:", error);
     return { 
       prospects: [],
       error: "Failed to search for prospective clients. Please try again later."
@@ -225,7 +226,7 @@ export async function getTaskAdvice(taskDescription: string, taskStatus: string,
     
     return JSON.parse(content);
   } catch (error) {
-    console.error("Error getting task advice:", error);
+    logger.error("Error getting task advice:", error);
     return { 
       advice: "Unable to generate advice at this time. Please try again later.",
       error: error.message
@@ -281,7 +282,7 @@ export async function generateDashboardInsights(dashboardData: any) {
     
     return JSON.parse(content);
   } catch (error: any) {
-    console.error("Error generating dashboard insights:", error);
+    logger.error("Error generating dashboard insights:", error);
     return { 
       priorities: [],
       summary: "Unable to generate insights at this time. Please try again later.",
@@ -353,7 +354,7 @@ export async function analyzeProjectBlockers(project: any, tasks: any[], devPlan
     const result = JSON.parse(content);
     return result.blockers || [];
   } catch (error) {
-    console.error("Error analyzing project blockers:", error);
+    logger.error("Error analyzing project blockers:", error);
     return [
       {
         description: "Unable to analyze project blockers at this time. Please try again later.",

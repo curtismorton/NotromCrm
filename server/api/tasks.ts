@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "../config/db";
 import { tasks, insertTaskSchema } from "@shared/schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
+import { logger } from "../utils/logger";
 
 const router = Router();
 
@@ -11,7 +12,7 @@ router.get("/", async (req, res) => {
     const allTasks = await db.select().from(tasks).orderBy(desc(tasks.createdAt));
     res.json(allTasks);
   } catch (error) {
-    console.error("Error fetching tasks:", error);
+    logger.error("Error fetching tasks:", error);
     res.status(500).json({ message: "Failed to fetch tasks" });
   }
 });
@@ -35,7 +36,7 @@ router.get("/due-soon", async (req, res) => {
     
     res.json(dueSoonTasks);
   } catch (error) {
-    console.error("Error fetching due soon tasks:", error);
+    logger.error("Error fetching due soon tasks:", error);
     res.status(500).json({ message: "Failed to fetch due soon tasks" });
   }
 });
@@ -52,7 +53,7 @@ router.get("/:id", async (req, res) => {
     
     res.json(task[0]);
   } catch (error) {
-    console.error("Error fetching task:", error);
+    logger.error("Error fetching task:", error);
     res.status(500).json({ message: "Failed to fetch task" });
   }
 });
@@ -64,7 +65,7 @@ router.post("/", async (req, res) => {
     const [newTask] = await db.insert(tasks).values(validated).returning();
     res.status(201).json(newTask);
   } catch (error) {
-    console.error("Error creating task:", error);
+    logger.error("Error creating task:", error);
     res.status(500).json({ message: "Failed to create task" });
   }
 });
@@ -97,7 +98,7 @@ router.patch("/:id", async (req, res) => {
     
     res.json(updatedTask);
   } catch (error) {
-    console.error("Error updating task:", error);
+    logger.error("Error updating task:", error);
     res.status(500).json({ message: "Failed to update task" });
   }
 });
@@ -109,7 +110,7 @@ router.delete("/:id", async (req, res) => {
     await db.delete(tasks).where(eq(tasks.id, taskId));
     res.status(204).send();
   } catch (error) {
-    console.error("Error deleting task:", error);
+    logger.error("Error deleting task:", error);
     res.status(500).json({ message: "Failed to delete task" });
   }
 });
