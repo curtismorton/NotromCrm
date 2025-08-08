@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../config/db";
 import { tasks, insertTaskSchema } from "@shared/schema";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { eq, and, isNull, desc, lte } from "drizzle-orm";
 
 const router = Router();
 
@@ -28,7 +28,8 @@ router.get("/due-soon", async (req, res) => {
       .where(
         and(
           eq(tasks.status, "todo"),
-          isNull(tasks.completedAt)
+          isNull(tasks.completedAt),
+          lte(tasks.dueDate, threeDaysFromNow)
         )
       )
       .orderBy(tasks.dueDate);
