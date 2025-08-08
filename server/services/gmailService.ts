@@ -272,7 +272,7 @@ Respond with JSON: {
         body,
       ].join('\n');
 
-      const encodedMessage = Buffer.from(message).toString('base64');
+      const encodedMessage = Buffer.from(message).toString('base64url');
 
       await this.gmail.users.messages.send({
         userId: 'me',
