@@ -7,6 +7,7 @@ import { PlusCircle, Building2, Briefcase, Users, Target, TrendingUp } from "luc
 import { useQuery } from "@tanstack/react-query";
 import { Lead } from "@shared/schema";
 import { useQuickFilters } from "@/hooks/use-quick-filters";
+import { useMemo } from "react";
 
 export default function LeadsPage() {
   const { data: allLeads = [] } = useQuery<Lead[]>({
@@ -16,8 +17,31 @@ export default function LeadsPage() {
   const { currentFilter, filterLeads } = useQuickFilters();
   const leads = currentFilter ? filterLeads(allLeads) : allLeads;
 
-  const notromLeads = leads.filter(lead => lead.context === 'notrom');
-  const dayJobLeads = leads.filter(lead => lead.context === 'day_job');
+  const { notromLeads, dayJobLeads, notromLeadCount, dayJobLeadCount, highPriorityCount, contactedCount } = useMemo(() => {
+    const notrom = leads.filter(lead => lead.context === 'notrom');
+    const dayJob = leads.filter(lead => lead.context === 'day_job');
+    const highPriority = leads.filter(l => l.priority === 'high').length;
+    const contacted = leads.filter(l => l.status === 'contacted').length;
+    console.count('LeadsPage lead filtering');
+    return {
+      notromLeads: notrom,
+      dayJobLeads: dayJob,
+      notromLeadCount: notrom.length,
+      dayJobLeadCount: dayJob.length,
+      highPriorityCount: highPriority,
+      contactedCount: contacted,
+    };
+  }, [leads]);
+
+  const { highPriorityAllCount, activeAllCount } = useMemo(() => {
+    const highPriority = allLeads.filter(l => l.priority === 'high').length;
+    const active = allLeads.filter(l => ['contacted', 'call_booked', 'build_in_progress'].includes(l.status)).length;
+    console.count('LeadsPage allLeads filtering');
+    return {
+      highPriorityAllCount: highPriority,
+      activeAllCount: active,
+    };
+  }, [allLeads]);
 
   return (
     <div className="min-h-screen p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
@@ -43,13 +67,13 @@ export default function LeadsPage() {
           <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
             <Link href="/leads?filter=high_priority">
               <Target className="w-4 h-4 mr-2" />
-              High Priority ({allLeads.filter(l => l.priority === 'high').length})
+              High Priority ({highPriorityAllCount})
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
             <Link href="/leads?filter=contacted">
               <TrendingUp className="w-4 h-4 mr-2" />
-              Active ({allLeads.filter(l => ['contacted', 'call_booked', 'build_in_progress'].includes(l.status)).length})
+              Active ({activeAllCount})
             </Link>
           </Button>
           <Button asChild className="w-full sm:w-auto">
@@ -67,7 +91,7 @@ export default function LeadsPage() {
           <div className="flex items-center gap-2">
             <Building2 className="w-5 h-5 text-blue-600" />
             <div>
-              <p className="text-2xl font-bold text-blue-900">{notromLeads.length}</p>
+              <p className="text-2xl font-bold text-blue-900">{notromLeadCount}</p>
               <p className="text-sm text-blue-700">Notrom Leads</p>
             </div>
           </div>
@@ -76,7 +100,7 @@ export default function LeadsPage() {
           <div className="flex items-center gap-2">
             <Briefcase className="w-5 h-5 text-green-600" />
             <div>
-              <p className="text-2xl font-bold text-green-900">{dayJobLeads.length}</p>
+              <p className="text-2xl font-bold text-green-900">{dayJobLeadCount}</p>
               <p className="text-sm text-green-700">Day Job Leads</p>
             </div>
           </div>
@@ -86,7 +110,7 @@ export default function LeadsPage() {
             <span className="text-lg">🔥</span>
             <div>
               <p className="text-2xl font-bold text-orange-900">
-                {leads.filter(l => l.priority === 'high').length}
+                {highPriorityCount}
               </p>
               <p className="text-sm text-orange-700">High Priority</p>
             </div>
@@ -97,7 +121,7 @@ export default function LeadsPage() {
             <span className="text-lg">📞</span>
             <div>
               <p className="text-2xl font-bold text-purple-900">
-                {leads.filter(l => l.status === 'contacted').length}
+                {contactedCount}
               </p>
               <p className="text-sm text-purple-700">Contacted</p>
             </div>
@@ -121,7 +145,7 @@ export default function LeadsPage() {
             <span className="hidden sm:inline">Notrom</span>
             <span className="sm:hidden">Notrom</span>
             <Badge variant="secondary" className="ml-2">
-              {notromLeads.length}
+              {notromLeadCount}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="day_job" className="flex items-center gap-2">
@@ -129,7 +153,7 @@ export default function LeadsPage() {
             <span className="hidden sm:inline">Day Job</span>
             <span className="sm:hidden">Day Job</span>
             <Badge variant="secondary" className="ml-2">
-              {dayJobLeads.length}
+              {dayJobLeadCount}
             </Badge>
           </TabsTrigger>
         </TabsList>

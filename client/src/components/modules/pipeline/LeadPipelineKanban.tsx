@@ -8,7 +8,7 @@ import { Plus, Building2, Briefcase } from "lucide-react";
 import { Lead } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { LeadForm } from "@/components/modules/leads/LeadForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -133,8 +133,17 @@ export function LeadPipelineKanban() {
   }
 
   // Filter leads by context
-  const notromLeads = leads.filter(lead => lead.context === 'notrom');
-  const dayJobLeads = leads.filter(lead => lead.context === 'day_job');
+  const { notromLeads, dayJobLeads, notromLeadCount, dayJobLeadCount } = useMemo(() => {
+    const notrom = leads.filter(lead => lead.context === 'notrom');
+    const dayJob = leads.filter(lead => lead.context === 'day_job');
+    console.count('LeadPipelineKanban filtering');
+    return {
+      notromLeads: notrom,
+      dayJobLeads: dayJob,
+      notromLeadCount: notrom.length,
+      dayJobLeadCount: dayJob.length,
+    };
+  }, [leads]);
 
   const renderKanbanBoard = (contextLeads: Lead[], context: 'notrom' | 'day_job') => (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -283,7 +292,7 @@ export function LeadPipelineKanban() {
             <span className="hidden sm:inline">Notrom Business</span>
             <span className="sm:hidden">Notrom</span>
             <Badge variant="secondary" className="ml-2">
-              {notromLeads.length}
+              {notromLeadCount}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="day_job" className="flex items-center gap-2">
@@ -291,7 +300,7 @@ export function LeadPipelineKanban() {
             <span className="hidden sm:inline">Day Job</span>
             <span className="sm:hidden">Day Job</span>
             <Badge variant="secondary" className="ml-2">
-              {dayJobLeads.length}
+              {dayJobLeadCount}
             </Badge>
           </TabsTrigger>
         </TabsList>

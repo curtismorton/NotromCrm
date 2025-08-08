@@ -122,9 +122,9 @@ const MobileRecentLeads = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="overflow-x-auto">
-          <div className="space-y-2 min-w-0">
-            <thead className="bg-gray-50">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gray-50">
               <tr>
                 <th
                   scope="col"
@@ -155,7 +155,7 @@ const MobileRecentLeads = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200">
               {isLoading ? (
                 Array(4)
                   .fill(0)
@@ -233,9 +233,9 @@ const MobileRecentLeads = () => {
                   </td>
                 </tr>
               )}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
       </CardContent>
     </Card>
   );
