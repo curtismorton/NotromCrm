@@ -1,4 +1,11 @@
-import { format as formatDateFns, formatDistanceToNow, isToday, isPast, addDays } from "date-fns";
+import {
+  format as formatDateFns,
+  formatDistanceToNow,
+  isToday,
+  isPast,
+  addDays,
+  isBefore,
+} from "date-fns";
 
 // Format date to display in a readable format
 export const formatDate = (date: Date | string | null | undefined): string => {
@@ -38,7 +45,7 @@ export const getDueDateStatus = (dueDate: string | null | undefined) => {
   if (isToday(date)) {
     return { status: "today", label: "Due today" };
   }
-  if (isPast(addDays(new Date(), 3), date)) {
+  if (isBefore(date, addDays(new Date(), 3))) {
     return { status: "soon", label: `Due ${formatDateFns(date, "MMM d")}` };
   }
   
