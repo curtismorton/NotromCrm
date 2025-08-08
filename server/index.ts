@@ -54,7 +54,7 @@ app.use((req, res, next) => {
     });
 
     res.status(status).json({ message });
-    throw err;
+    return;
   });
 
   // importantly only setup vite in development and after
