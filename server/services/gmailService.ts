@@ -4,9 +4,10 @@ import { storage } from '../config/storage';
 import { emails, tasks, type InsertEmail, type InsertTask } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '../utils/logger';
+import { env } from '../config/env';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: env.OPENAI_API_KEY,
 });
 
 export class GmailService {
@@ -15,15 +16,15 @@ export class GmailService {
 
   constructor() {
     this.oauth2Client = new google.auth.OAuth2(
-      process.env.GMAIL_CLIENT_ID,
-      process.env.GMAIL_CLIENT_SECRET,
-      process.env.GMAIL_REDIRECT_URI
+      env.GMAIL_CLIENT_ID,
+      env.GMAIL_CLIENT_SECRET,
+      env.GMAIL_REDIRECT_URI
     );
 
     // Set credentials if we have a refresh token
-    if (process.env.GMAIL_REFRESH_TOKEN) {
+    if (env.GMAIL_REFRESH_TOKEN) {
       this.oauth2Client.setCredentials({
-        refresh_token: process.env.GMAIL_REFRESH_TOKEN,
+        refresh_token: env.GMAIL_REFRESH_TOKEN,
       });
     }
 
