@@ -16,7 +16,7 @@ export default function ExportPage() {
   const [dateRange, setDateRange] = useState<'all' | '30' | '90' | '365'>('all');
 
   // Get data counts for display
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading, error } = useQuery({
     queryKey: ["/api/dashboard/stats"],
   });
 
@@ -49,6 +49,26 @@ export default function ExportPage() {
       });
     },
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-10">
+        Error loading export data.
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return null;
+  }
 
   const modules = [
     {
