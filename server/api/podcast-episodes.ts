@@ -3,6 +3,7 @@ import { db } from "../config/db";
 import { podcastEpisodes } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
+import { logger } from "../utils/logger";
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.get("/", async (req, res) => {
     const episodes = await db.select().from(podcastEpisodes).orderBy(desc(podcastEpisodes.createdAt));
     res.json(episodes);
   } catch (error) {
-    console.error("Error fetching episodes:", error);
+    logger.error("Error fetching episodes:", error);
     res.status(500).json({ message: "Failed to fetch episodes" });
   }
 });
@@ -41,7 +42,7 @@ router.post("/", async (req, res) => {
     }).returning();
     res.status(201).json(newEpisode);
   } catch (error) {
-    console.error("Error creating episode:", error);
+    logger.error("Error creating episode:", error);
     res.status(500).json({ message: "Failed to create episode" });
   }
 });
@@ -64,7 +65,7 @@ router.patch("/:id", async (req, res) => {
     
     res.json(updatedEpisode);
   } catch (error) {
-    console.error("Error updating episode:", error);
+    logger.error("Error updating episode:", error);
     res.status(500).json({ message: "Failed to update episode" });
   }
 });

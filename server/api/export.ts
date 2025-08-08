@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "../config/db";
 import { tasks, leads, projects, clients } from "@shared/schema";
+import { logger } from "../utils/logger";
 
 const router = Router();
 
@@ -65,7 +66,7 @@ router.post("/", async (req, res) => {
       res.json(data);
     }
   } catch (error) {
-    console.error("Error exporting data:", error);
+    logger.error("Error exporting data:", error);
     res.status(500).json({ message: "Failed to export data" });
   }
 });

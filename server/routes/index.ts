@@ -15,6 +15,7 @@ import {
 } from "@shared/schema";
 import * as aiService from "../services/ai";
 import { GmailService } from "../services/gmailService";
+import { logger } from "../utils/logger";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Gmail service
@@ -41,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: details || null,
       });
     } catch (error) {
-      console.error("Failed to record activity:", error);
+      logger.error("Failed to record activity:", error);
     }
   };
 
@@ -310,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(blockers);
     } catch (error) {
-      console.error("Error analyzing project blockers:", error);
+      logger.error("Error analyzing project blockers:", error);
       res.status(500).json({ message: "Failed to analyze project blockers" });
     }
   });
@@ -942,7 +943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const suggestions = await aiService.generateTaskSuggestions(projectDescription, projectName);
       res.json(suggestions);
     } catch (error) {
-      console.error("Error generating task suggestions:", error);
+      logger.error("Error generating task suggestions:", error);
       res.status(500).json({ message: "Failed to generate task suggestions" });
     }
   });
@@ -957,7 +958,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const processed = await aiService.processNaturalLanguageUpdate(taskId, currentStatus, update);
       res.json(processed);
     } catch (error) {
-      console.error("Error processing natural language update:", error);
+      logger.error("Error processing natural language update:", error);
       res.status(500).json({ message: "Failed to process natural language update" });
     }
   });
@@ -972,7 +973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insights = await aiService.generateClientInsights(clientData);
       res.json(insights);
     } catch (error) {
-      console.error("Error generating client insights:", error);
+      logger.error("Error generating client insights:", error);
       res.status(500).json({ message: "Failed to generate client insights" });
     }
   });
@@ -987,7 +988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prospects = await aiService.searchProspectiveClients(industry, criteria);
       res.json(prospects);
     } catch (error) {
-      console.error("Error searching for prospective clients:", error);
+      logger.error("Error searching for prospective clients:", error);
       res.status(500).json({ message: "Failed to search for prospective clients" });
     }
   });
@@ -1002,7 +1003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insights = await aiService.generateDashboardInsights(req.body);
       res.json(insights);
     } catch (error) {
-      console.error("Error generating dashboard insights:", error);
+      logger.error("Error generating dashboard insights:", error);
       res.status(500).json({ message: "Failed to generate dashboard insights" });
     }
   });
@@ -1017,7 +1018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const advice = await aiService.getTaskAdvice(taskDescription, taskStatus);
       res.json(advice);
     } catch (error) {
-      console.error("Error getting task advice:", error);
+      logger.error("Error getting task advice:", error);
       res.status(500).json({ message: "Failed to get task advice" });
     }
   });
@@ -1028,7 +1029,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const status = await gmailService.getConnectionStatus();
       res.json(status);
     } catch (error) {
-      console.error("Gmail status error:", error);
+      logger.error("Gmail status error:", error);
       res.json({ connected: false, errorMessage: "Unable to check Gmail connection" });
     }
   });
@@ -1038,7 +1039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authUrl = await gmailService.getAuthUrl();
       res.json({ authUrl });
     } catch (error) {
-      console.error("Gmail auth error:", error);
+      logger.error("Gmail auth error:", error);
       res.status(500).json({ message: "Failed to generate auth URL" });
     }
   });
@@ -1053,7 +1054,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await gmailService.handleAuthCallback(code as string);
       res.redirect("/dashboard?gmail=connected");
     } catch (error) {
-      console.error("Gmail callback error:", error);
+      logger.error("Gmail callback error:", error);
       res.status(500).json({ message: "Failed to handle auth callback" });
     }
   });
@@ -1063,7 +1064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await gmailService.syncEmails();
       res.json({ message: "Email sync completed" });
     } catch (error) {
-      console.error("Gmail sync error:", error);
+      logger.error("Gmail sync error:", error);
       res.status(500).json({ message: "Failed to sync emails" });
     }
   });
@@ -1074,7 +1075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const emails = await storage.getEmails();
       res.json(emails);
     } catch (error) {
-      console.error("Get emails error:", error);
+      logger.error("Get emails error:", error);
       res.status(500).json({ message: "Failed to fetch emails" });
     }
   });
@@ -1084,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getEmailStats();
       res.json(stats);
     } catch (error) {
-      console.error("Get email stats error:", error);
+      logger.error("Get email stats error:", error);
       res.status(500).json({ message: "Failed to fetch email stats" });
     }
   });
@@ -1094,7 +1095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const emails = await storage.getEmailsNeedingResponse();
       res.json(emails);
     } catch (error) {
-      console.error("Get emails needing response error:", error);
+      logger.error("Get emails needing response error:", error);
       res.status(500).json({ message: "Failed to fetch emails needing response" });
     }
   });
@@ -1105,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const revenues = await storage.getRevenues();
       res.json(revenues);
     } catch (error) {
-      console.error("Get revenues error:", error);
+      logger.error("Get revenues error:", error);
       res.status(500).json({ message: "Failed to fetch revenues" });
     }
   });
@@ -1115,7 +1116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const metrics = await storage.getRevenueMetrics();
       res.json(metrics);
     } catch (error) {
-      console.error("Get revenue metrics error:", error);
+      logger.error("Get revenue metrics error:", error);
       res.status(500).json({ message: "Failed to fetch revenue metrics" });
     }
   });
@@ -1126,7 +1127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reports = await storage.getReports();
       res.json(reports);
     } catch (error) {
-      console.error("Get reports error:", error);
+      logger.error("Get reports error:", error);
       res.status(500).json({ message: "Failed to fetch reports" });
     }
   });
@@ -1149,7 +1150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json(delivery);
     } catch (error) {
-      console.error("Create delivery error:", error);
+      logger.error("Create delivery error:", error);
       res.status(500).json({ message: "Failed to create delivery" });
     }
   });
@@ -1164,7 +1165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deliveries = await storage.getDeliveries(filters);
       res.json(deliveries);
     } catch (error) {
-      console.error("Get deliveries error:", error);
+      logger.error("Get deliveries error:", error);
       res.status(500).json({ message: "Failed to fetch deliveries" });
     }
   });
@@ -1180,7 +1181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(delivery);
     } catch (error) {
-      console.error("Get delivery error:", error);
+      logger.error("Get delivery error:", error);
       res.status(500).json({ message: "Failed to fetch delivery" });
     }
   });
@@ -1207,7 +1208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(delivery);
     } catch (error) {
-      console.error("Update delivery error:", error);
+      logger.error("Update delivery error:", error);
       res.status(500).json({ message: "Failed to update delivery" });
     }
   });
@@ -1234,7 +1235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(204).end();
     } catch (error) {
-      console.error("Delete delivery error:", error);
+      logger.error("Delete delivery error:", error);
       res.status(500).json({ message: "Failed to delete delivery" });
     }
   });
@@ -1257,7 +1258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json(automation);
     } catch (error) {
-      console.error("Create automation error:", error);
+      logger.error("Create automation error:", error);
       res.status(500).json({ message: "Failed to create automation" });
     }
   });
@@ -1273,7 +1274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const automations = await storage.getAutomations(filters);
       res.json(automations);
     } catch (error) {
-      console.error("Get automations error:", error);
+      logger.error("Get automations error:", error);
       res.status(500).json({ message: "Failed to fetch automations" });
     }
   });
@@ -1289,7 +1290,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(automation);
     } catch (error) {
-      console.error("Get automation error:", error);
+      logger.error("Get automation error:", error);
       res.status(500).json({ message: "Failed to fetch automation" });
     }
   });
@@ -1316,7 +1317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(automation);
     } catch (error) {
-      console.error("Update automation error:", error);
+      logger.error("Update automation error:", error);
       res.status(500).json({ message: "Failed to update automation" });
     }
   });
@@ -1343,7 +1344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(204).end();
     } catch (error) {
-      console.error("Delete automation error:", error);
+      logger.error("Delete automation error:", error);
       res.status(500).json({ message: "Failed to delete automation" });
     }
   });
@@ -1354,7 +1355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getPipelineStats();
       res.json(stats);
     } catch (error) {
-      console.error("Get pipeline stats error:", error);
+      logger.error("Get pipeline stats error:", error);
       res.status(500).json({ message: "Failed to fetch pipeline stats" });
     }
   });

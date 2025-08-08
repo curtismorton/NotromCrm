@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangleIcon, RefreshCwIcon } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { logger } from "../../../../../server/utils/logger";
 
 interface DevPlanBlockersProps {
   project: Project;
@@ -32,7 +33,7 @@ export const DevPlanBlockers = ({ project, tasks = [], devPlan }: DevPlanBlocker
         description: "Potential blockers have been identified.",
       });
     } catch (error) {
-      console.error("Error analyzing blockers:", error);
+      logger.error("Error analyzing blockers:", error);
       toast({
         title: "Analysis failed",
         description: "There was a problem identifying blockers.",
