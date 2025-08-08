@@ -11,11 +11,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  let capturedJsonResponse: string | undefined;
+  let jsonResponseTruncated = false;
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
+    // Capture a stringified version of the JSON response but limit
+    // the stored data to 500 characters so logs stay manageable.
+    const jsonString = JSON.stringify(bodyJson);
+    if (jsonString.length > 500) {
+      capturedJsonResponse = jsonString.slice(0, 500);
+      jsonResponseTruncated = true;
+    } else {
+      capturedJsonResponse = jsonString;
+    }
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
@@ -24,7 +33,11 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        logLine += ` :: ${capturedJsonResponse}`;
+        if (jsonResponseTruncated) {
+          // Make it clear in the log that the JSON was truncated.
+          logLine += " [truncated]";
+        }
       }
 
       if (logLine.length > 80) {
