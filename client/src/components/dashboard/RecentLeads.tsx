@@ -123,7 +123,7 @@ const MobileRecentLeads = () => {
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="overflow-x-auto">
-          <div className="space-y-2 min-w-0">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th
