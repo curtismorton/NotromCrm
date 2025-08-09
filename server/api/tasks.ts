@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../config/db";
 import { tasks, insertTaskSchema } from "@shared/schema";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { eq, and, isNull, desc, gte, lte } from "drizzle-orm";
 
 const router = Router();
 
@@ -16,23 +16,29 @@ router.get("/", async (req, res) => {
   }
 });
 
+export async function getDueSoonTasks(dbInstance: typeof db) {
+  const now = new Date();
+  const threeDaysFromNow = new Date(now);
+  threeDaysFromNow.setDate(now.getDate() + 3);
+
+  return dbInstance
+    .select()
+    .from(tasks)
+    .where(
+      and(
+        eq(tasks.status, "todo"),
+        isNull(tasks.completedAt),
+        gte(tasks.dueDate, now),
+        lte(tasks.dueDate, threeDaysFromNow)
+      )
+    )
+    .orderBy(tasks.dueDate);
+}
+
 // Get tasks due soon
 router.get("/due-soon", async (req, res) => {
   try {
-    const threeDaysFromNow = new Date();
-    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
-    
-    const dueSoonTasks = await db
-      .select()
-      .from(tasks)
-      .where(
-        and(
-          eq(tasks.status, "todo"),
-          isNull(tasks.completedAt)
-        )
-      )
-      .orderBy(tasks.dueDate);
-    
+    const dueSoonTasks = await getDueSoonTasks(db);
     res.json(dueSoonTasks);
   } catch (error) {
     console.error("Error fetching due soon tasks:", error);
