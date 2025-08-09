@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { google, gmail_v1, OAuth2Client } from 'googleapis';
 import OpenAI from 'openai';
 import { storage } from '../config/storage';
 import { emails, tasks, type InsertEmail, type InsertTask } from '@shared/schema';
@@ -11,8 +11,8 @@ const openai = new OpenAI({
 });
 
 export class GmailService {
-  private gmail: any;
-  private oauth2Client: any;
+  private gmail: gmail_v1.Gmail;
+  private oauth2Client: OAuth2Client;
 
   constructor() {
     this.oauth2Client = new google.auth.OAuth2(
@@ -87,10 +87,12 @@ export class GmailService {
         q: 'is:unread OR label:needs-response',
       });
 
-      const messages = response.data.messages || [];
-      
+      const messages = response.data.messages ?? [];
+
       for (const message of messages) {
-        await this.processMessage(message.id);
+        if (message.id) {
+          await this.processMessage(message.id);
+        }
       }
 
       logger.info(`Synced ${messages.length} emails`);
@@ -108,11 +110,12 @@ export class GmailService {
         format: 'full',
       });
 
-      const headers = message.data.payload.headers;
-      const subject = headers.find((h: any) => h.name === 'Subject')?.value || '';
-      const from = headers.find((h: any) => h.name === 'From')?.value || '';
-      const to = headers.find((h: any) => h.name === 'To')?.value || '';
-      const date = headers.find((h: any) => h.name === 'Date')?.value || '';
+      const payload = message.data.payload;
+      const headers = payload?.headers ?? [];
+      const subject = headers.find((h) => h.name === 'Subject')?.value || '';
+      const from = headers.find((h) => h.name === 'From')?.value || '';
+      const to = headers.find((h) => h.name === 'To')?.value || '';
+      const date = headers.find((h) => h.name === 'Date')?.value || '';
 
       // Extract email and name from "Name <email>" format
       const fromMatch = from.match(/^(.+?)\s*<(.+?)>$/) || [null, from, from];
@@ -120,7 +123,7 @@ export class GmailService {
       const fromEmail = fromMatch[2]?.trim() || from;
 
       // Get email body
-      const body = this.extractEmailBody(message.data.payload);
+      const body = this.extractEmailBody(payload);
       
       // Determine context and priority using AI
       const contextAnalysis = await this.analyzeEmailContext(subject, body, fromEmail);
@@ -133,13 +136,13 @@ export class GmailService {
         // Create email record
         const emailData: InsertEmail = {
           gmailId: messageId,
-          threadId: message.data.threadId,
+          threadId: message.data.threadId || '',
           subject,
           fromEmail,
           fromName,
           toEmail: to,
           body,
-          snippet: message.data.snippet,
+          snippet: message.data.snippet || '',
           status: 'unread',
           context: contextAnalysis.context,
           priority: contextAnalysis.priority,
@@ -175,7 +178,9 @@ export class GmailService {
     }
   }
 
-  private extractEmailBody(payload: any): string {
+  private extractEmailBody(payload: gmail_v1.Schema$MessagePart | undefined): string {
+    if (!payload) return '';
+
     if (payload.body?.data) {
       return Buffer.from(payload.body.data, 'base64').toString();
     }
@@ -186,7 +191,7 @@ export class GmailService {
           return Buffer.from(part.body.data, 'base64').toString();
         }
       }
-      
+
       // Fallback to HTML content
       for (const part of payload.parts) {
         if (part.mimeType === 'text/html' && part.body?.data) {
