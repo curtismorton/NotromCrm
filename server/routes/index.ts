@@ -45,6 +45,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // Helper for parsing numeric ID params
+  const parseIdParam = (value: string, res: any, name: string) => {
+    const id = parseInt(value, 10);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: `Invalid ${name} ID` });
+      return null;
+    }
+    return id;
+  };
+
   // Dashboard
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
@@ -118,7 +128,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/leads/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "lead");
+      if (id === null) return;
       const lead = await storage.getLead(id);
       
       if (!lead) {
@@ -136,7 +147,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/leads/:id", validateBody(insertLeadSchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "lead");
+      if (id === null) return;
       const lead = await storage.updateLead(id, req.validatedBody);
       
       if (!lead) {
@@ -162,7 +174,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/leads/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "lead");
+      if (id === null) return;
       const success = await storage.deleteLead(id);
       
       if (!success) {
@@ -188,7 +201,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Lead tags
   app.post("/api/leads/:id/tags/:tagId", async (req, res) => {
     try {
-      const leadId = parseInt(req.params.id);
+      const leadId = parseIdParam(req.params.id, res, "lead");
+      if (leadId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       const lead = await storage.getLead(leadId);
@@ -223,7 +237,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/leads/:id/tags/:tagId", async (req, res) => {
     try {
-      const leadId = parseInt(req.params.id);
+      const leadId = parseIdParam(req.params.id, res, "lead");
+      if (leadId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       await storage.removeTagFromLead(leadId, tagId);
@@ -274,7 +289,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "project");
+      if (id === null) return;
       const project = await storage.getProject(id);
       
       if (!project) {
@@ -292,7 +308,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects/:id/blockers", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "project");
+      if (id === null) return;
       const project = await storage.getProject(id);
       
       if (!project) {
@@ -317,7 +334,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/projects/:id", validateBody(insertProjectSchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "project");
+      if (id === null) return;
       const project = await storage.updateProject(id, req.validatedBody);
       
       if (!project) {
@@ -343,7 +361,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/projects/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "project");
+      if (id === null) return;
       const success = await storage.deleteProject(id);
       
       if (!success) {
@@ -369,7 +388,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project tags
   app.post("/api/projects/:id/tags/:tagId", async (req, res) => {
     try {
-      const projectId = parseInt(req.params.id);
+      const projectId = parseIdParam(req.params.id, res, "project");
+      if (projectId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       const project = await storage.getProject(projectId);
@@ -393,7 +413,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/projects/:id/tags/:tagId", async (req, res) => {
     try {
-      const projectId = parseInt(req.params.id);
+      const projectId = parseIdParam(req.params.id, res, "project");
+      if (projectId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       await storage.removeTagFromProject(projectId, tagId);
@@ -457,7 +478,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/clients/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "client");
+      if (id === null) return;
       const client = await storage.getClient(id);
       
       if (!client) {
@@ -478,7 +500,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/clients/:id", validateBody(insertClientSchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "client");
+      if (id === null) return;
       const client = await storage.updateClient(id, req.validatedBody);
       
       if (!client) {
@@ -504,7 +527,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/clients/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "client");
+      if (id === null) return;
       const success = await storage.deleteClient(id);
       
       if (!success) {
@@ -530,7 +554,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Client tags
   app.post("/api/clients/:id/tags/:tagId", async (req, res) => {
     try {
-      const clientId = parseInt(req.params.id);
+      const clientId = parseIdParam(req.params.id, res, "client");
+      if (clientId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       const client = await storage.getClient(clientId);
@@ -554,7 +579,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/clients/:id/tags/:tagId", async (req, res) => {
     try {
-      const clientId = parseInt(req.params.id);
+      const clientId = parseIdParam(req.params.id, res, "client");
+      if (clientId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       await storage.removeTagFromClient(clientId, tagId);
@@ -616,7 +642,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tasks/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "task");
+      if (id === null) return;
       const task = await storage.getTask(id);
       
       if (!task) {
@@ -634,7 +661,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/tasks/:id", validateBody(insertTaskSchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "task");
+      if (id === null) return;
       const task = await storage.updateTask(id, req.validatedBody);
       
       if (!task) {
@@ -660,7 +688,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/tasks/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "task");
+      if (id === null) return;
       const success = await storage.deleteTask(id);
       
       if (!success) {
@@ -686,7 +715,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task tags
   app.post("/api/tasks/:id/tags/:tagId", async (req, res) => {
     try {
-      const taskId = parseInt(req.params.id);
+      const taskId = parseIdParam(req.params.id, res, "task");
+      if (taskId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       const task = await storage.getTask(taskId);
@@ -710,7 +740,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/tasks/:id/tags/:tagId", async (req, res) => {
     try {
-      const taskId = parseInt(req.params.id);
+      const taskId = parseIdParam(req.params.id, res, "task");
+      if (taskId === null) return;
       const tagId = parseInt(req.params.tagId);
       
       await storage.removeTagFromTask(taskId, tagId);
@@ -760,7 +791,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/dev-plans/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "development plan");
+      if (id === null) return;
       const devPlan = await storage.getDevPlan(id);
       
       if (!devPlan) {
@@ -790,7 +822,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/dev-plans/:id", validateBody(insertDevPlanSchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "development plan");
+      if (id === null) return;
       const devPlan = await storage.updateDevPlan(id, req.validatedBody);
       
       if (!devPlan) {
@@ -816,7 +849,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/dev-plans/:id/stage", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "development plan");
+      if (id === null) return;
       const { stage, startDate, endDate } = req.body;
       
       if (!stage) {
@@ -858,7 +892,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/dev-plans/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "development plan");
+      if (id === null) return;
       const success = await storage.deleteDevPlan(id);
       
       if (!success) {
@@ -903,7 +938,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/tags/:id", validateBody(insertTagSchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "tag");
+      if (id === null) return;
       const tag = await storage.updateTag(id, req.validatedBody);
       
       if (!tag) {
@@ -918,7 +954,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/tags/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "tag");
+      if (id === null) return;
       const success = await storage.deleteTag(id);
       
       if (!success) {
@@ -1171,7 +1208,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/deliveries/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "delivery");
+      if (id === null) return;
       const delivery = await storage.getDelivery(id);
       
       if (!delivery) {
@@ -1187,7 +1225,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/deliveries/:id", validateBody(insertDeliverySchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "delivery");
+      if (id === null) return;
       const delivery = await storage.updateDelivery(id, req.validatedBody);
       
       if (!delivery) {
@@ -1214,7 +1253,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/deliveries/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "delivery");
+      if (id === null) return;
       const success = await storage.deleteDelivery(id);
       
       if (!success) {
@@ -1280,7 +1320,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/automations/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "automation");
+      if (id === null) return;
       const automation = await storage.getAutomation(id);
       
       if (!automation) {
@@ -1296,7 +1337,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/automations/:id", validateBody(insertAutomationSchema.partial()), async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "automation");
+      if (id === null) return;
       const automation = await storage.updateAutomation(id, req.validatedBody);
       
       if (!automation) {
@@ -1323,7 +1365,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/automations/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseIdParam(req.params.id, res, "automation");
+      if (id === null) return;
       const success = await storage.deleteAutomation(id);
       
       if (!success) {
