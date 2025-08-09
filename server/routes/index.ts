@@ -2,11 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "../config/storage";
 import { z } from "zod";
-import { 
-  insertLeadSchema, 
-  insertProjectSchema, 
-  insertClientSchema, 
-  insertTaskSchema, 
+import {
+  insertLeadSchema,
+  insertProjectSchema,
+  insertClientSchema,
+  insertTaskSchema,
   insertTagSchema,
   insertActivitySchema,
   insertDevPlanSchema,
@@ -15,6 +15,7 @@ import {
 } from "@shared/schema";
 import * as aiService from "../services/ai";
 import { GmailService } from "../services/gmailService";
+import { logger } from "../utils/logger";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Gmail service
@@ -41,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: details || null,
       });
     } catch (error) {
-      console.error("Failed to record activity:", error);
+      logger.error("Failed to record activity", { error, userId, action });
     }
   };
 
