@@ -124,12 +124,13 @@ const MobileRecentLeads = () => {
       <CardContent className="space-y-2">
         <div className="overflow-x-auto">
           <div className="space-y-2 min-w-0">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-                >
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                  >
                   Name
                 </th>
                 <th
@@ -233,8 +234,9 @@ const MobileRecentLeads = () => {
                   </td>
                 </tr>
               )}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </CardContent>
     </Card>
