@@ -127,6 +127,7 @@ export interface IStorage {
   
   // Emails
   createEmail(email: InsertEmail): Promise<Email>;
+  getEmailByGmailId(gmailId: string): Promise<Email | undefined>;
   getEmails(filters?: { context?: string; status?: string; limit?: number }): Promise<Email[]>;
   getEmailsNeedingResponse(): Promise<Email[]>;
   getEmailStats(): Promise<{
@@ -720,6 +721,14 @@ export class DatabaseStorage implements IStorage {
   async createEmail(email: InsertEmail): Promise<Email> {
     const [newEmail] = await db.insert(emails).values(email).returning();
     return newEmail;
+  }
+
+  async getEmailByGmailId(gmailId: string): Promise<Email | undefined> {
+    const [emailRecord] = await db
+      .select()
+      .from(emails)
+      .where(eq(emails.gmailId, gmailId));
+    return emailRecord;
   }
 
   async getEmails(filters?: { context?: string; status?: string; limit?: number }): Promise<Email[]> {

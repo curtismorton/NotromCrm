@@ -125,11 +125,10 @@ export class GmailService {
       // Determine context and priority using AI
       const contextAnalysis = await this.analyzeEmailContext(subject, body, fromEmail);
       
-      // Check if email already exists (simple check - could be improved)
+      // Check if email already exists
       try {
-        const existingEmails = await storage.getEmails({ limit: 1000 });
-        const existingEmail = existingEmails.find(e => e.gmailId === messageId);
-        
+        const existingEmail = await storage.getEmailByGmailId(messageId);
+
         if (!existingEmail) {
         // Create email record
         const emailData: InsertEmail = {
