@@ -23,7 +23,7 @@ import { useMedia } from "@/hooks/use-mobile";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 import { WorkspaceSwitcher } from "@/components/ui/workspace-switcher";
 import { WorkspaceHeader } from "@/components/ui/workspace-header";
-import { useWorkspace } from "@/hooks/use-workspace";
+import { useOptimizedWorkspace } from "@/hooks/use-optimized-workspace";
 
 type SidebarItemProps = {
   icon: ReactNode;
@@ -212,7 +212,7 @@ SidebarContent.displayName = "SidebarContent";
 
 // Home Logo Button Component with double-click logic
 function HomeLogoButton() {
-  const { currentWorkspace, allWorkspaces } = useWorkspace();
+  const { currentWorkspace, allWorkspaces, switchWorkspace } = useOptimizedWorkspace();
   const [location, navigate] = useLocation();
 
   const handleLogoClick = (e: React.MouseEvent) => {
@@ -231,12 +231,13 @@ function HomeLogoButton() {
                              (currentWorkspace.id === 'work' && location === '/');
     
     if (isAtWorkspaceHome) {
-      // Second click - switch to other workspace
+      // Second click - switch to other workspace with optimization
       const otherWorkspace = allWorkspaces.find(w => w.id !== currentWorkspace.id);
       if (otherWorkspace) {
         console.log('🔄 Logo second click - switching to:', otherWorkspace.id);
-        sessionStorage.setItem('lastWorkspace', otherWorkspace.id);
-        navigate(otherWorkspace.path);
+        switchWorkspace(otherWorkspace.id).then(() => {
+          navigate(otherWorkspace.path);
+        });
       }
     } else {
       // First click - go to current workspace home

@@ -39,14 +39,42 @@ export function WorkspaceSwitcher() {
 
     setIsTransitioning(true);
     
+    // Optimized prefetch strategy
+    const targetQueries = workspace.id === 'notrom'
+      ? ['/api/leads', '/api/projects', '/api/dashboard/pipeline-stats']
+      : ['/api/tasks', '/api/dashboard/stats'];
+
+    // Prefetch in parallel with navigation
+    const prefetchStart = performance.now();
+    const prefetchPromises = targetQueries.map(async queryKey => {
+      try {
+        const response = await fetch(queryKey, { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          queryClient.setQueryData([queryKey], data);
+        }
+      } catch (error) {
+        console.warn(`Failed to prefetch ${queryKey}:`, error);
+      }
+    });
+    
     // Store workspace preference immediately
     sessionStorage.setItem('lastWorkspace', workspace.id);
     
-    // Navigate immediately to the workspace
+    // Navigate immediately for better UX
     navigate(workspace.path);
     
-    // Complete transition
-    setTimeout(() => setIsTransitioning(false), 300);
+    // Complete prefetch and transition
+    Promise.allSettled(prefetchPromises).then(() => {
+      const prefetchTime = performance.now() - prefetchStart;
+      console.log(`Prefetch completed in ${prefetchTime.toFixed(2)}ms`);
+      
+      // Ensure minimum transition time for visual consistency
+      const minTransitionTime = 150;
+      const remainingTime = Math.max(0, minTransitionTime - prefetchTime);
+      
+      setTimeout(() => setIsTransitioning(false), remainingTime);
+    });
   };
 
   return (

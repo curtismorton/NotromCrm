@@ -36,12 +36,32 @@ export function WorkspaceHeader() {
     console.log('Header: Switching workspace from', currentWorkspace.id, 'to', workspace.id);
     setIsTransitioning(true);
     
+    // Preload critical data for target workspace
+    const targetQueries = workspace.id === 'notrom'
+      ? ['/api/leads', '/api/projects', '/api/clients', '/api/dashboard/pipeline-stats']
+      : ['/api/tasks', '/api/dashboard/stats'];
+
+    // Start prefetching immediately
+    const prefetchPromises = targetQueries.map(queryKey => 
+      fetch(queryKey, { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+          // Prime the cache with fresh data
+          queryClient.setQueryData([queryKey], data);
+        })
+        .catch(() => {}) // Silently fail prefetch errors
+    );
+    
     // Store workspace preference immediately
     sessionStorage.setItem('lastWorkspace', workspace.id);
     
+    // Navigate immediately for responsiveness
     navigate(workspace.path);
     
-    setTimeout(() => setIsTransitioning(false), 300);
+    // Wait for prefetch to complete before clearing transition state
+    Promise.allSettled(prefetchPromises).finally(() => {
+      setTimeout(() => setIsTransitioning(false), 150); // Reduced from 300
+    });
   };
   
   return (
