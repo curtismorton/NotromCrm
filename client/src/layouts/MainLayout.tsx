@@ -111,58 +111,77 @@ const SidebarContent = memo(({ location, stats }: SidebarContentProps) => (
         </div>
       </div>
 
-      {/* Life & Work Contexts */}
+      {/* Workspaces */}
       <div className="space-y-2">
-        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Life & Work</h3>
+        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Workspaces</h3>
         <div className="space-y-1">
           <SidebarItem
             icon={<Building2 className="w-5 h-5" />}
-            label="Notrom"
+            label="Notrom Business"
             href="/notrom"
             active={location.startsWith("/notrom")}
           />
           <SidebarItem
-            icon={<Mic className="w-5 h-5" />}
-            label="Podcast"
-            href="/podcast"
-            active={location.startsWith("/podcast")}
-          />
-          <SidebarItem
             icon={<Briefcase className="w-5 h-5" />}
-            label="Day Job"
-            href="/day-job"
-            active={location.startsWith("/day-job")}
+            label="Day-to-Day Work"
+            href="/work"
+            active={location.startsWith("/work")}
           />
         </div>
       </div>
 
-      {/* Business Management */}
-      <div className="space-y-2">
-        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</h3>
-        <div className="space-y-1">
-          <SidebarItem
-            icon={<Users className="w-5 h-5" />}
-            label="Leads"
-            href="/leads"
-            badgeCount={stats?.totalLeads}
-            active={location.startsWith("/leads")}
-          />
-          <SidebarItem
-            icon={<FolderKanban className="w-5 h-5" />}
-            label="Projects"
-            href="/projects"
-            badgeCount={stats?.activeProjects}
-            active={location.startsWith("/projects")}
-          />
-          <SidebarItem
-            icon={<Building2 className="w-5 h-5" />}
-            label="Clients"
-            href="/clients"
-            badgeCount={stats?.totalClients}
-            active={location.startsWith("/clients")}
-          />
-        </div>
-      </div>
+      {/* Legacy Access (only show when not in workspaces) */}
+      {!location.startsWith("/notrom") && !location.startsWith("/work") && (
+        <>
+          <div className="space-y-2">
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Legacy Access</h3>
+            <div className="space-y-1">
+              <SidebarItem
+                icon={<Mic className="w-5 h-5" />}
+                label="Podcast"
+                href="/podcast"
+                active={location.startsWith("/podcast")}
+              />
+              <SidebarItem
+                icon={<Briefcase className="w-5 h-5" />}
+                label="Day Job"
+                href="/day-job"
+                active={location.startsWith("/day-job")}
+              />
+            </div>
+          </div>
+
+          {/* Business Management */}
+          <div className="space-y-2">
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</h3>
+            <div className="space-y-1">
+              <SidebarItem
+                icon={<Users className="w-5 h-5" />}
+                label="Leads"
+                href="/leads"
+                badgeCount={stats?.totalLeads}
+                active={location.startsWith("/leads")}
+              />
+              <SidebarItem
+                icon={<FolderKanban className="w-5 h-5" />}
+                label="Projects"
+                href="/projects"
+                badgeCount={stats?.activeProjects}
+                active={location.startsWith("/projects")}
+              />
+              <SidebarItem
+                icon={<Building2 className="w-5 h-5" />}
+                label="Clients"
+                href="/clients"
+                badgeCount={stats?.totalClients}
+                active={location.startsWith("/clients")}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+
 
       {/* Settings */}
       <div className="pt-4 mt-auto border-t border-gray-200 space-y-1">

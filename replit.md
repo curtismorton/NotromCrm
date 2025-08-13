@@ -51,6 +51,16 @@ CurtisOS is a unified life and work management system that centralizes everythin
 - ✅ Added consistent badge styling for counts with better contrast
 - ✅ Implemented proper hover states and smooth transitions
 
+### Workspace Architecture Split (August 13, 2025)
+- ✅ Split entire application into two distinct workspaces
+- ✅ Created NotromWorkspace for business-focused activities (leads, projects, clients)
+- ✅ Created WorkWorkspace for personal day-to-day activities (tasks, podcast, day job)
+- ✅ Unified database with context-based filtering for workspace separation
+- ✅ Updated navigation to prioritize workspace selection over individual features
+- ✅ Implemented focused dashboard views for each workspace with relevant metrics
+- ✅ Added visual workspace cards for intuitive navigation within each context
+- ✅ Maintained legacy access for gradual transition from old navigation structure
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

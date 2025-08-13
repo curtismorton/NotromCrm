@@ -7,6 +7,8 @@ import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import MainLayout from "@/layouts/MainLayout";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
+import NotromWorkspace from "@/pages/NotromWorkspace";
+import WorkWorkspace from "@/pages/WorkWorkspace";
 import NotromPage from "@/pages/NotromPage";
 import PodcastPage from "@/pages/PodcastPage";
 import DayJobPage from "@/pages/DayJobPage";
@@ -26,7 +28,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/notrom" component={NotromPage} />
+      <Route path="/notrom" component={NotromWorkspace} />
+      <Route path="/work" component={WorkWorkspace} />
+      <Route path="/notrom/workspace" component={NotromPage} />
+      <Route path="/work/workspace" component={PodcastPage} />
       <Route path="/podcast" component={PodcastPage} />
       <Route path="/day-job" component={DayJobPage} />
       <Route path="/pipeline" component={PipelinePage} />
