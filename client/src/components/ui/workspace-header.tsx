@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useWorkspace } from "@/hooks/use-workspace";
@@ -112,9 +112,9 @@ export function WorkspaceHeader() {
                   workspace.borderColor,
                   "border"
                 )}>
-                  <span className={workspace.color}>
-                    {workspaceIcons[workspace.id]}
-                  </span>
+                  <div className={workspace.color}>
+                    {React.createElement(workspaceIcons[workspace.id], { className: "w-4 h-4" })}
+                  </div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">

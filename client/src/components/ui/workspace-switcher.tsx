@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,9 +21,9 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useWorkspace } from "@/hooks/use-workspace";
 
-const workspaceIcons = {
-  notrom: <Building2 className="w-4 h-4" />,
-  work: <Briefcase className="w-4 h-4" />
+const workspaceIcons: Record<string, any> = {
+  notrom: Building2,
+  work: Briefcase
 };
 
 export function WorkspaceSwitcher() {
@@ -72,7 +72,7 @@ export function WorkspaceSwitcher() {
               {isTransitioning ? (
                 <ArrowRightLeft className="w-4 h-4 animate-pulse" />
               ) : (
-                workspaceIcons[currentWorkspace.id]
+                React.createElement(workspaceIcons[currentWorkspace.id], { className: "w-4 h-4" })
               )}
               <div className="flex flex-col items-start">
                 <span className="font-medium text-sm">
@@ -127,9 +127,9 @@ export function WorkspaceSwitcher() {
                           workspace.borderColor,
                           "border"
                         )}>
-                          <span className={workspace.color}>
-                            {workspaceIcons[workspace.id]}
-                          </span>
+                          <div className={workspace.color}>
+                            {React.createElement(workspaceIcons[workspace.id], { className: "w-4 h-4" })}
+                          </div>
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
