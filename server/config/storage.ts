@@ -6,16 +6,7 @@ import {
   tasks,
   tags,
   activities,
-  leadTags,
-  projectTags,
-  clientTags,
-  taskTags,
   devPlans,
-  emails,
-  revenues,
-  reports,
-  deliveries,
-  automations,
   type User,
   type Lead,
   type Project,
@@ -24,24 +15,11 @@ import {
   type Tag,
   type Activity,
   type DevPlan,
-  type Email,
-  type Revenue,
-  type Report,
-  type Delivery,
-  type Automation,
   type UpsertUser,
   type InsertLead,
   type InsertProject,
   type InsertClient,
   type InsertTask,
-  type InsertTag,
-  type InsertActivity,
-  type InsertDevPlan,
-  type InsertEmail,
-  type InsertRevenue,
-  type InsertReport,
-  type InsertDelivery,
-  type InsertAutomation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, inArray, like, and, or, desc, sql, getTableColumns } from "drizzle-orm";
@@ -65,8 +43,8 @@ export interface IStorage {
   getProjects(filters?: Partial<Project>): Promise<Project[]>;
   updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
-  getProjectsByLead(leadId: number): Promise<Project[]>;
   getProjectsByClient(clientId: number): Promise<Project[]>;
+  searchProjects(term: string): Promise<Project[]>;
   
   // Clients
   createClient(client: InsertClient): Promise<Client>;
@@ -83,114 +61,23 @@ export interface IStorage {
   updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
   deleteTask(id: number): Promise<boolean>;
   getTasksByProject(projectId: number): Promise<Task[]>;
-  getTasksDueSoon(days: number): Promise<Task[]>;
-  getTasksByUser(userId: string): Promise<Task[]>;
+  searchTasks(term: string): Promise<Task[]>;
+  getOverdueTasks(): Promise<Task[]>;
+  getTasksDueThisWeek(): Promise<Task[]>;
   
-  // Tags
-  createTag(tag: InsertTag): Promise<Tag>;
-  getTag(id: number): Promise<Tag | undefined>;
-  getTags(): Promise<Tag[]>;
-  updateTag(id: number, tag: Partial<InsertTag>): Promise<Tag | undefined>;
-  deleteTag(id: number): Promise<boolean>;
-  
-  // Tag relationships
-  addTagToLead(leadId: number, tagId: number): Promise<void>;
-  removeTagFromLead(leadId: number, tagId: number): Promise<void>;
-  getTagsByLead(leadId: number): Promise<Tag[]>;
-  
-  addTagToProject(projectId: number, tagId: number): Promise<void>;
-  removeTagFromProject(projectId: number, tagId: number): Promise<void>;
-  getTagsByProject(projectId: number): Promise<Tag[]>;
-  
-  addTagToClient(clientId: number, tagId: number): Promise<void>;
-  removeTagFromClient(clientId: number, tagId: number): Promise<void>;
-  getTagsByClient(clientId: number): Promise<Tag[]>;
-  
-  addTagToTask(taskId: number, tagId: number): Promise<void>;
-  removeTagFromTask(taskId: number, tagId: number): Promise<void>;
-  getTagsByTask(taskId: number): Promise<Tag[]>;
-  
-  // Development Plans
-  createDevPlan(devPlan: InsertDevPlan): Promise<DevPlan>;
-  getDevPlan(id: number): Promise<DevPlan | undefined>;
-  getDevPlanByProject(projectId: number): Promise<DevPlan | undefined>;
-  getDevPlans(filters?: Partial<DevPlan>): Promise<DevPlan[]>;
-  updateDevPlan(id: number, devPlan: Partial<InsertDevPlan>): Promise<DevPlan | undefined>;
-  deleteDevPlan(id: number): Promise<boolean>;
-  updateDevPlanStage(id: number, stage: string, startDate?: Date, endDate?: Date): Promise<DevPlan | undefined>;
-  
-  // Activities
-  createActivity(activity: InsertActivity): Promise<Activity>;
-  getRecentActivities(limit: number): Promise<Activity[]>;
-  getActivitiesByUser(userId: string): Promise<Activity[]>;
-  getActivitiesByEntity(entityType: string, entityId: number): Promise<Activity[]>;
-  
-  // Emails
-  createEmail(email: InsertEmail): Promise<Email>;
-  getEmailByGmailId(gmailId: string): Promise<Email | undefined>;
-  getEmails(filters?: { context?: string; status?: string; limit?: number }): Promise<Email[]>;
-  getEmailsNeedingResponse(): Promise<Email[]>;
-  getEmailStats(): Promise<{
-    totalEmails: number;
-    needsResponse: number;
-    overdue: number;
-    contextBreakdown: Record<string, number>;
-  }>;
-  markEmailAsResponded(emailId: number): Promise<void>;
-
-  // Revenues
-  createRevenue(revenue: InsertRevenue): Promise<Revenue>;
-  getRevenues(filters?: { context?: string; startDate?: string; endDate?: string; limit?: number }): Promise<Revenue[]>;
-  getRevenueMetrics(context?: string): Promise<{
-    totalRevenue: number;
-    currentMonthRevenue: number;
-    lastMonthRevenue: number;
-    monthlyGrowth: number;
-    revenueByType: Record<string, number>;
-  }>;
-
-  // Reports
-  createReport(report: InsertReport): Promise<Report>;
-  getReports(context?: string, limit?: number): Promise<Report[]>;
-
-  // Deliveries
-  createDelivery(delivery: InsertDelivery): Promise<Delivery>;
-  getDelivery(id: number): Promise<Delivery | undefined>;
-  getDeliveries(filters?: Partial<Delivery>): Promise<Delivery[]>;
-  updateDelivery(id: number, delivery: Partial<InsertDelivery>): Promise<Delivery | undefined>;
-  deleteDelivery(id: number): Promise<boolean>;
-  getDeliveriesByClient(clientId: number): Promise<Delivery[]>;
-  getDeliveriesByStatus(status: string): Promise<Delivery[]>;
-
-  // Automations
-  createAutomation(automation: InsertAutomation): Promise<Automation>;
-  getAutomation(id: number): Promise<Automation | undefined>;
-  getAutomations(filters?: Partial<Automation>): Promise<Automation[]>;
-  updateAutomation(id: number, automation: Partial<InsertAutomation>): Promise<Automation | undefined>;
-  deleteAutomation(id: number): Promise<boolean>;
-  getAutomationsByStatus(status: string): Promise<Automation[]>;
-  getActiveAutomations(): Promise<Automation[]>;
-
-  // Dashboard data
+  // Dashboard stats
   getDashboardStats(): Promise<{
     totalLeads: number;
-    activeProjects: number;
     totalClients: number;
+    activeProjects: number;
+    totalTasks: number;
+    completedTasksThisWeek: number;
     overdueTasks: number;
-  }>;
-
-  // Pipeline-specific dashboard data
-  getPipelineStats(): Promise<{
-    todaysTasks: number;
-    thisWeekDeliveries: number;
-    leadsToFollowUp: number;
-    outstandingRevisions: number;
-    incompleteOnboardingForms: number;
   }>;
 }
 
 export class DatabaseStorage implements IStorage {
-  // User operations (required for auth)
+  // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
@@ -228,15 +115,14 @@ export class DatabaseStorage implements IStorage {
     if (filters) {
       const conditions = [];
       if (filters.status) conditions.push(eq(leads.status, filters.status));
-      if (filters.priority) conditions.push(eq(leads.priority, filters.priority));
-      if (filters.assignedTo) conditions.push(eq(leads.assignedTo, filters.assignedTo));
+      if (filters.source) conditions.push(eq(leads.source, filters.source));
       
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
       }
     }
     
-    return await query.orderBy(desc(leads.createdAt));
+    return query.orderBy(desc(leads.createdAt));
   }
 
   async updateLead(id: number, leadData: Partial<InsertLead>): Promise<Lead | undefined> {
@@ -261,8 +147,7 @@ export class DatabaseStorage implements IStorage {
         or(
           like(leads.companyName, `%${term}%`),
           like(leads.contactName, `%${term}%`),
-          like(leads.contactEmail, `%${term}%`),
-          like(leads.industry, `%${term}%`)
+          like(leads.email, `%${term}%`)
         )
       );
   }
@@ -284,7 +169,6 @@ export class DatabaseStorage implements IStorage {
     if (filters) {
       const conditions = [];
       if (filters.status) conditions.push(eq(projects.status, filters.status));
-      if (filters.leadId) conditions.push(eq(projects.leadId, filters.leadId));
       if (filters.clientId) conditions.push(eq(projects.clientId, filters.clientId));
       
       if (conditions.length > 0) {
@@ -292,7 +176,7 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    return await query.orderBy(desc(projects.createdAt));
+    return query.orderBy(desc(projects.createdAt));
   }
 
   async updateProject(id: number, projectData: Partial<InsertProject>): Promise<Project | undefined> {
@@ -309,12 +193,15 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  async getProjectsByLead(leadId: number): Promise<Project[]> {
-    return await db.select().from(projects).where(eq(projects.leadId, leadId));
-  }
-
   async getProjectsByClient(clientId: number): Promise<Project[]> {
     return await db.select().from(projects).where(eq(projects.clientId, clientId));
+  }
+
+  async searchProjects(term: string): Promise<Project[]> {
+    return await db
+      .select()
+      .from(projects)
+      .where(like(projects.title, `%${term}%`));
   }
 
   // Clients
@@ -330,18 +217,7 @@ export class DatabaseStorage implements IStorage {
 
   async getClients(filters?: Partial<Client>): Promise<Client[]> {
     let query = db.select().from(clients);
-    
-    if (filters) {
-      const conditions = [];
-      if (filters.industry) conditions.push(eq(clients.industry, filters.industry));
-      if (filters.upsellOpportunity !== undefined) conditions.push(eq(clients.upsellOpportunity, filters.upsellOpportunity));
-      
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
-    }
-    
-    return await query.orderBy(desc(clients.createdAt));
+    return query.orderBy(desc(clients.createdAt));
   }
 
   async updateClient(id: number, clientData: Partial<InsertClient>): Promise<Client | undefined> {
@@ -364,10 +240,8 @@ export class DatabaseStorage implements IStorage {
       .from(clients)
       .where(
         or(
-          like(clients.companyName, `%${term}%`),
-          like(clients.contactName, `%${term}%`),
-          like(clients.contactEmail, `%${term}%`),
-          like(clients.industry, `%${term}%`)
+          like(clients.name, `%${term}%`),
+          like(clients.email, `%${term}%`)
         )
       );
   }
@@ -390,26 +264,24 @@ export class DatabaseStorage implements IStorage {
       const conditions = [];
       if (filters.status) conditions.push(eq(tasks.status, filters.status));
       if (filters.priority) conditions.push(eq(tasks.priority, filters.priority));
-      if (filters.assignedTo) conditions.push(eq(tasks.assignedTo, filters.assignedTo));
+      if (filters.ownerId) conditions.push(eq(tasks.ownerId, filters.ownerId));
       if (filters.projectId) conditions.push(eq(tasks.projectId, filters.projectId));
+      if (filters.context) conditions.push(eq(tasks.context, filters.context));
       
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
       }
     }
     
-    return await query.orderBy(desc(tasks.createdAt));
+    return query.orderBy(desc(tasks.createdAt));
   }
 
   async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
-    // If updating to completed status, set completedAt
-    if (taskData.status === 'completed' && !taskData.completedAt) {
-      taskData.completedAt = new Date();
-    }
+    const updates = { ...taskData, updatedAt: new Date() };
     
     const [updated] = await db
       .update(tasks)
-      .set({ ...taskData, updatedAt: new Date() })
+      .set(updates)
       .where(eq(tasks.id, id))
       .returning();
     return updated;
@@ -424,630 +296,88 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(tasks).where(eq(tasks.projectId, projectId));
   }
 
-  async getTasksDueSoon(days: number): Promise<Task[]> {
-    const now = new Date();
-    const future = new Date();
-    future.setDate(future.getDate() + days);
-    
+  async searchTasks(term: string): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .where(
+        or(
+          like(tasks.title, `%${term}%`),
+          like(tasks.description, `%${term}%`)
+        )
+      );
+  }
+
+  async getOverdueTasks(): Promise<Task[]> {
     return await db
       .select()
       .from(tasks)
       .where(
         and(
-          sql`${tasks.dueDate} >= ${now}`,
-          sql`${tasks.dueDate} <= ${future}`,
-          eq(tasks.status, 'todo')
+          eq(tasks.status, 'todo'),
+          sql`${tasks.dueAt} < NOW()`
         )
-      )
-      .orderBy(tasks.dueDate);
+      );
   }
 
-  async getTasksByUser(userId: string): Promise<Task[]> {
+  async getTasksDueThisWeek(): Promise<Task[]> {
     return await db
       .select()
       .from(tasks)
-      .where(eq(tasks.assignedTo, userId))
-      .orderBy(tasks.dueDate);
-  }
-
-  // Tags
-  async createTag(tagData: InsertTag): Promise<Tag> {
-    const [tag] = await db.insert(tags).values(tagData).returning();
-    return tag;
-  }
-
-  async getTag(id: number): Promise<Tag | undefined> {
-    const [tag] = await db.select().from(tags).where(eq(tags.id, id));
-    return tag;
-  }
-
-  async getTags(): Promise<Tag[]> {
-    return await db.select().from(tags).orderBy(tags.name);
-  }
-
-  async updateTag(id: number, tagData: Partial<InsertTag>): Promise<Tag | undefined> {
-    const [updated] = await db
-      .update(tags)
-      .set(tagData)
-      .where(eq(tags.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteTag(id: number): Promise<boolean> {
-    const result = await db.delete(tags).where(eq(tags.id, id)).returning({ id: tags.id });
-    return result.length > 0;
-  }
-
-  // Tag relationships
-  async addTagToLead(leadId: number, tagId: number): Promise<void> {
-    await db.insert(leadTags).values({ leadId, tagId }).onConflictDoNothing();
-  }
-
-  async removeTagFromLead(leadId: number, tagId: number): Promise<void> {
-    await db.delete(leadTags).where(
-      and(
-        eq(leadTags.leadId, leadId),
-        eq(leadTags.tagId, tagId)
-      )
-    );
-  }
-
-  async getTagsByLead(leadId: number): Promise<Tag[]> {
-    return await db
-      .select({ id: tags.id, name: tags.name, color: tags.color })
-      .from(tags)
-      .innerJoin(leadTags, eq(tags.id, leadTags.tagId))
-      .where(eq(leadTags.leadId, leadId));
-  }
-
-  async addTagToProject(projectId: number, tagId: number): Promise<void> {
-    await db.insert(projectTags).values({ projectId, tagId }).onConflictDoNothing();
-  }
-
-  async removeTagFromProject(projectId: number, tagId: number): Promise<void> {
-    await db.delete(projectTags).where(
-      and(
-        eq(projectTags.projectId, projectId),
-        eq(projectTags.tagId, tagId)
-      )
-    );
-  }
-
-  async getTagsByProject(projectId: number): Promise<Tag[]> {
-    return await db
-      .select({ id: tags.id, name: tags.name, color: tags.color })
-      .from(tags)
-      .innerJoin(projectTags, eq(tags.id, projectTags.tagId))
-      .where(eq(projectTags.projectId, projectId));
-  }
-
-  async addTagToClient(clientId: number, tagId: number): Promise<void> {
-    await db.insert(clientTags).values({ clientId, tagId }).onConflictDoNothing();
-  }
-
-  async removeTagFromClient(clientId: number, tagId: number): Promise<void> {
-    await db.delete(clientTags).where(
-      and(
-        eq(clientTags.clientId, clientId),
-        eq(clientTags.tagId, tagId)
-      )
-    );
-  }
-
-  async getTagsByClient(clientId: number): Promise<Tag[]> {
-    return await db
-      .select({ id: tags.id, name: tags.name, color: tags.color })
-      .from(tags)
-      .innerJoin(clientTags, eq(tags.id, clientTags.tagId))
-      .where(eq(clientTags.clientId, clientId));
-  }
-
-  async addTagToTask(taskId: number, tagId: number): Promise<void> {
-    await db.insert(taskTags).values({ taskId, tagId }).onConflictDoNothing();
-  }
-
-  async removeTagFromTask(taskId: number, tagId: number): Promise<void> {
-    await db.delete(taskTags).where(
-      and(
-        eq(taskTags.taskId, taskId),
-        eq(taskTags.tagId, tagId)
-      )
-    );
-  }
-
-  async getTagsByTask(taskId: number): Promise<Tag[]> {
-    return await db
-      .select({ id: tags.id, name: tags.name, color: tags.color })
-      .from(tags)
-      .innerJoin(taskTags, eq(tags.id, taskTags.tagId))
-      .where(eq(taskTags.taskId, taskId));
-  }
-
-  // Activities
-  async createActivity(activityData: InsertActivity): Promise<Activity> {
-    const [activity] = await db.insert(activities).values(activityData).returning();
-    return activity;
-  }
-
-  async getRecentActivities(limit: number = 10): Promise<Activity[]> {
-    return await db
-      .select()
-      .from(activities)
-      .orderBy(desc(activities.createdAt))
-      .limit(limit);
-  }
-
-  async getActivitiesByUser(userId: string): Promise<Activity[]> {
-    return await db
-      .select()
-      .from(activities)
-      .where(eq(activities.userId, userId))
-      .orderBy(desc(activities.createdAt));
-  }
-
-  async getActivitiesByEntity(entityType: string, entityId: number): Promise<Activity[]> {
-    return await db
-      .select()
-      .from(activities)
       .where(
         and(
-          eq(activities.entityType, entityType),
-          eq(activities.entityId, entityId)
+          eq(tasks.status, 'todo'),
+          sql`${tasks.dueAt} BETWEEN NOW() AND NOW() + INTERVAL '7 days'`
         )
-      )
-      .orderBy(desc(activities.createdAt));
+      );
   }
 
-  // Development Plans
-  async createDevPlan(devPlanData: InsertDevPlan): Promise<DevPlan> {
-    const [devPlan] = await db.insert(devPlans).values(devPlanData).returning();
-    return devPlan;
-  }
+  // Dashboard stats
+  async getDashboardStats() {
+    const [leadStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(leads);
 
-  async getDevPlan(id: number): Promise<DevPlan | undefined> {
-    const [devPlan] = await db.select().from(devPlans).where(eq(devPlans.id, id));
-    return devPlan;
-  }
+    const [clientStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(clients);
 
-  async getDevPlanByProject(projectId: number): Promise<DevPlan | undefined> {
-    const [devPlan] = await db.select().from(devPlans).where(eq(devPlans.projectId, projectId));
-    return devPlan;
-  }
-
-  async getDevPlans(filters?: Partial<DevPlan>): Promise<DevPlan[]> {
-    let query = db.select().from(devPlans);
-    
-    if (filters) {
-      const conditions = [];
-      if (filters.currentStage) conditions.push(eq(devPlans.currentStage, filters.currentStage));
-      if (filters.projectId) conditions.push(eq(devPlans.projectId, filters.projectId));
-      
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
-    }
-    
-    return await query.orderBy(desc(devPlans.createdAt));
-  }
-
-  async updateDevPlan(id: number, devPlanData: Partial<InsertDevPlan>): Promise<DevPlan | undefined> {
-    const [updated] = await db
-      .update(devPlans)
-      .set({ ...devPlanData, updatedAt: new Date() })
-      .where(eq(devPlans.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteDevPlan(id: number): Promise<boolean> {
-    const result = await db.delete(devPlans).where(eq(devPlans.id, id)).returning({ id: devPlans.id });
-    return result.length > 0;
-  }
-
-  async updateDevPlanStage(id: number, stage: string, startDate?: Date, endDate?: Date): Promise<DevPlan | undefined> {
-    // Get the current dev plan
-    const currentPlan = await this.getDevPlan(id);
-    if (!currentPlan) return undefined;
-    
-    const updates: Partial<InsertDevPlan> = {
-      currentStage: stage as any, // Cast to satisfy TypeScript
-    };
-    
-    // Set stage-specific date fields based on the stage
-    switch (stage) {
-      case 'planning':
-        if (startDate) updates.planningStartDate = startDate;
-        if (endDate) updates.planningEndDate = endDate;
-        break;
-      case 'build':
-        if (startDate) updates.buildStartDate = startDate;
-        if (endDate) updates.buildEndDate = endDate;
-        break;
-      case 'revise':
-        if (startDate) updates.reviseStartDate = startDate;
-        if (endDate) updates.reviseEndDate = endDate;
-        break;
-      case 'live':
-        if (startDate) updates.liveStartDate = startDate;
-        break;
-    }
-    
-    return await this.updateDevPlan(id, updates);
-  }
-
-  // Dashboard data
-  async getDashboardStats(): Promise<{
-    totalLeads: number;
-    activeProjects: number;
-    totalClients: number;
-    overdueTasks: number;
-  }> {
-    // Get total leads
-    const [leadCount] = await db.select({ count: sql`count(*)` }).from(leads);
-    
-    // Get active projects
-    const [projectCount] = await db
-      .select({ count: sql`count(*)` })
+    const [activeProjectStats] = await db
+      .select({ count: sql<number>`count(*)` })
       .from(projects)
-      .where(
-        eq(projects.status, 'in_progress')
-      );
-    
-    // Get total clients
-    const [clientCount] = await db.select({ count: sql`count(*)` }).from(clients);
-    
-    // Get overdue tasks
-    const now = new Date();
-    const [taskCount] = await db
-      .select({ count: sql`count(*)` })
+      .where(sql`${projects.status} != 'completed'`);
+
+    const [taskStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(tasks);
+
+    const [completedTasksStats] = await db
+      .select({ count: sql<number>`count(*)` })
       .from(tasks)
       .where(
         and(
-          sql`${tasks.dueDate} < ${now}`,
-          eq(tasks.status, 'todo')
+          eq(tasks.status, 'completed'),
+          sql`${tasks.updatedAt} >= NOW() - INTERVAL '7 days'`
         )
       );
-    
-    return {
-      totalLeads: Number(leadCount?.count || 0),
-      activeProjects: Number(projectCount?.count || 0),
-      totalClients: Number(clientCount?.count || 0),
-      overdueTasks: Number(taskCount?.count || 0),
-    };
-  }
 
-  // Email operations
-  async createEmail(email: InsertEmail): Promise<Email> {
-    const [newEmail] = await db.insert(emails).values(email).returning();
-    return newEmail;
-  }
-
-  async getEmailByGmailId(gmailId: string): Promise<Email | undefined> {
-    const [emailRecord] = await db
-      .select()
-      .from(emails)
-      .where(eq(emails.gmailId, gmailId));
-    return emailRecord;
-  }
-
-  async getEmails(filters?: { context?: string; status?: string; limit?: number }): Promise<Email[]> {
-    let query = db.select().from(emails);
-    
-    const conditions = [];
-    if (filters?.context) conditions.push(eq(emails.context, filters.context as any));
-    if (filters?.status) conditions.push(eq(emails.status, filters.status as any));
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-    
-    const results = await query
-      .orderBy(desc(emails.receivedAt))
-      .limit(filters?.limit || 50);
-    
-    return results;
-  }
-
-  async getEmailsNeedingResponse(): Promise<Email[]> {
-    return await db
-      .select()
-      .from(emails)
-      .where(eq(emails.status, 'needs_response'))
-      .orderBy(desc(emails.responseNeededBy));
-  }
-
-  async getEmailStats(): Promise<{
-    totalEmails: number;
-    needsResponse: number;
-    overdue: number;
-    contextBreakdown: Record<string, number>;
-  }> {
-    const allEmails = await db.select().from(emails);
-    const needsResponse = allEmails.filter(e => e.status === 'needs_response').length;
-    const overdue = allEmails.filter(e => 
-      e.responseNeededBy && 
-      new Date(e.responseNeededBy) < new Date() && 
-      e.status === 'needs_response'
-    ).length;
-    
-    const contextBreakdown = allEmails.reduce((acc, email) => {
-      acc[email.context] = (acc[email.context] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return {
-      totalEmails: allEmails.length,
-      needsResponse,
-      overdue,
-      contextBreakdown,
-    };
-  }
-
-  async markEmailAsResponded(emailId: number): Promise<void> {
-    await db
-      .update(emails)
-      .set({ 
-        status: 'responded',
-        updatedAt: new Date(),
-      })
-      .where(eq(emails.id, emailId));
-  }
-
-  // Revenue operations
-  async createRevenue(revenue: InsertRevenue): Promise<Revenue> {
-    const [newRevenue] = await db.insert(revenues).values(revenue).returning();
-    return newRevenue;
-  }
-
-  async getRevenues(filters?: { context?: string; startDate?: string; endDate?: string; limit?: number }): Promise<Revenue[]> {
-    let query = db.select().from(revenues);
-    
-    const conditions = [];
-    if (filters?.context) conditions.push(eq(revenues.context, filters.context as any));
-    if (filters?.startDate) conditions.push(sql`${revenues.receivedAt} >= ${new Date(filters.startDate)}`);
-    if (filters?.endDate) conditions.push(sql`${revenues.receivedAt} <= ${new Date(filters.endDate)}`);
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-    
-    const results = await query
-      .orderBy(desc(revenues.receivedAt))
-      .limit(filters?.limit || 50);
-    
-    // Convert amounts back to dollars
-    return results.map(r => ({
-      ...r,
-      amount: r.amount / 100,
-    }));
-  }
-
-  async getRevenueMetrics(context?: string): Promise<{
-    totalRevenue: number;
-    currentMonthRevenue: number;
-    lastMonthRevenue: number;
-    monthlyGrowth: number;
-    revenueByType: Record<string, number>;
-  }> {
-    let query = db.select().from(revenues);
-    
-    if (context) {
-      query = query.where(eq(revenues.context, context as any));
-    }
-    
-    const allRevenues = await query;
-    
-    const currentMonth = new Date();
-    currentMonth.setDate(1);
-    currentMonth.setHours(0, 0, 0, 0);
-    
-    const lastMonth = new Date(currentMonth);
-    lastMonth.setMonth(lastMonth.getMonth() - 1);
-    
-    const currentMonthRevenue = allRevenues
-      .filter(r => new Date(r.receivedAt) >= currentMonth)
-      .reduce((sum, r) => sum + r.amount, 0) / 100;
-    
-    const lastMonthRevenue = allRevenues
-      .filter(r => new Date(r.receivedAt) >= lastMonth && new Date(r.receivedAt) < currentMonth)
-      .reduce((sum, r) => sum + r.amount, 0) / 100;
-    
-    const totalRevenue = allRevenues.reduce((sum, r) => sum + r.amount, 0) / 100;
-    
-    const monthlyGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0;
-    
-    const revenueByType = allRevenues.reduce((acc, r) => {
-      acc[r.type] = (acc[r.type] || 0) + r.amount / 100;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    return {
-      totalRevenue,
-      currentMonthRevenue,
-      lastMonthRevenue,
-      monthlyGrowth,
-      revenueByType,
-    };
-  }
-
-  // Report operations
-  async createReport(report: InsertReport): Promise<Report> {
-    const [newReport] = await db.insert(reports).values(report).returning();
-    return newReport;
-  }
-
-  async getReports(context?: string, limit?: number): Promise<Report[]> {
-    let query = db.select().from(reports);
-    
-    if (context) {
-      query = query.where(eq(reports.context, context as any));
-    }
-    
-    return await query.orderBy(desc(reports.generatedAt)).limit(limit || 10);
-  }
-
-  // Delivery operations
-  async createDelivery(delivery: InsertDelivery): Promise<Delivery> {
-    const [newDelivery] = await db.insert(deliveries).values(delivery).returning();
-    return newDelivery;
-  }
-
-  async getDelivery(id: number): Promise<Delivery | undefined> {
-    const [delivery] = await db.select().from(deliveries).where(eq(deliveries.id, id));
-    return delivery;
-  }
-
-  async getDeliveries(filters?: Partial<Delivery>): Promise<Delivery[]> {
-    let query = db.select().from(deliveries);
-    
-    if (filters?.status) {
-      query = query.where(eq(deliveries.status, filters.status as any));
-    }
-    if (filters?.clientId) {
-      query = query.where(eq(deliveries.clientId, filters.clientId));
-    }
-    
-    return await query.orderBy(desc(deliveries.createdAt));
-  }
-
-  async updateDelivery(id: number, delivery: Partial<InsertDelivery>): Promise<Delivery | undefined> {
-    const [updated] = await db
-      .update(deliveries)
-      .set({ ...delivery, updatedAt: new Date() })
-      .where(eq(deliveries.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteDelivery(id: number): Promise<boolean> {
-    const result = await db.delete(deliveries).where(eq(deliveries.id, id)).returning({ id: deliveries.id });
-    return result.length > 0;
-  }
-
-  async getDeliveriesByClient(clientId: number): Promise<Delivery[]> {
-    return await db.select().from(deliveries)
-      .where(eq(deliveries.clientId, clientId))
-      .orderBy(desc(deliveries.createdAt));
-  }
-
-  async getDeliveriesByStatus(status: string): Promise<Delivery[]> {
-    return await db.select().from(deliveries)
-      .where(eq(deliveries.status, status as any))
-      .orderBy(desc(deliveries.createdAt));
-  }
-
-  // Automation operations
-  async createAutomation(automation: InsertAutomation): Promise<Automation> {
-    const [newAutomation] = await db.insert(automations).values(automation).returning();
-    return newAutomation;
-  }
-
-  async getAutomation(id: number): Promise<Automation | undefined> {
-    const [automation] = await db.select().from(automations).where(eq(automations.id, id));
-    return automation;
-  }
-
-  async getAutomations(filters?: Partial<Automation>): Promise<Automation[]> {
-    let query = db.select().from(automations);
-    
-    if (filters?.status) {
-      query = query.where(eq(automations.status, filters.status as any));
-    }
-    if (filters?.tool) {
-      query = query.where(eq(automations.tool, filters.tool as any));
-    }
-    if (filters?.isActive !== undefined) {
-      query = query.where(eq(automations.isActive, filters.isActive));
-    }
-    
-    return await query.orderBy(desc(automations.createdAt));
-  }
-
-  async updateAutomation(id: number, automation: Partial<InsertAutomation>): Promise<Automation | undefined> {
-    const [updated] = await db
-      .update(automations)
-      .set({ ...automation, updatedAt: new Date() })
-      .where(eq(automations.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteAutomation(id: number): Promise<boolean> {
-    const result = await db.delete(automations).where(eq(automations.id, id)).returning({ id: automations.id });
-    return result.length > 0;
-  }
-
-  async getAutomationsByStatus(status: string): Promise<Automation[]> {
-    return await db.select().from(automations)
-      .where(eq(automations.status, status as any))
-      .orderBy(desc(automations.createdAt));
-  }
-
-  async getActiveAutomations(): Promise<Automation[]> {
-    return await db.select().from(automations)
-      .where(eq(automations.isActive, true))
-      .orderBy(desc(automations.createdAt));
-  }
-
-  // Pipeline-specific dashboard data
-  async getPipelineStats(): Promise<{
-    todaysTasks: number;
-    thisWeekDeliveries: number;
-    leadsToFollowUp: number;
-    outstandingRevisions: number;
-    incompleteOnboardingForms: number;
-  }> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const thisWeekStart = new Date(today);
-    thisWeekStart.setDate(today.getDate() - today.getDay());
-    
-    const thisWeekEnd = new Date(thisWeekStart);
-    thisWeekEnd.setDate(thisWeekStart.getDate() + 7);
-
-    // Today's tasks
-    const todaysTasks = await db.select({ count: sql<number>`count(*)` })
+    const [overdueTasksStats] = await db
+      .select({ count: sql<number>`count(*)` })
       .from(tasks)
       .where(
         and(
-          sql`DATE(due_date) = DATE(${today.toISOString()})`,
-          eq(tasks.status, 'todo')
+          eq(tasks.status, 'todo'),
+          sql`${tasks.dueAt} < NOW()`
         )
       );
-
-    // This week's deliveries
-    const thisWeekDeliveries = await db.select({ count: sql<number>`count(*)` })
-      .from(deliveries)
-      .where(
-        and(
-          sql`delivery_date >= ${thisWeekStart.toISOString()}`,
-          sql`delivery_date < ${thisWeekEnd.toISOString()}`
-        )
-      );
-
-    // Leads to follow up (contacted status)
-    const leadsToFollowUp = await db.select({ count: sql<number>`count(*)` })
-      .from(leads)
-      .where(eq(leads.status, 'contacted'));
-
-    // Outstanding revisions
-    const outstandingRevisions = await db.select({ count: sql<number>`count(*)` })
-      .from(leads)
-      .where(eq(leads.status, 'revision_round'));
-
-    // Incomplete onboarding forms
-    const incompleteOnboardingForms = await db.select({ count: sql<number>`count(*)` })
-      .from(leads)
-      .where(eq(leads.onboardingFormReceived, false));
 
     return {
-      todaysTasks: todaysTasks[0]?.count || 0,
-      thisWeekDeliveries: thisWeekDeliveries[0]?.count || 0,
-      leadsToFollowUp: leadsToFollowUp[0]?.count || 0,
-      outstandingRevisions: outstandingRevisions[0]?.count || 0,
-      incompleteOnboardingForms: incompleteOnboardingForms[0]?.count || 0,
+      totalLeads: leadStats?.count || 0,
+      totalClients: clientStats?.count || 0,
+      activeProjects: activeProjectStats?.count || 0,
+      totalTasks: taskStats?.count || 0,
+      completedTasksThisWeek: completedTasksStats?.count || 0,
+      overdueTasks: overdueTasksStats?.count || 0,
     };
   }
 }
