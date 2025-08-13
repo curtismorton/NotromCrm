@@ -36,6 +36,9 @@ export function WorkspaceHeader() {
     console.log('Header: Switching workspace from', currentWorkspace.id, 'to', workspace.id);
     setIsTransitioning(true);
     
+    // Store workspace preference immediately
+    sessionStorage.setItem('lastWorkspace', workspace.id);
+    
     navigate(workspace.path);
     
     setTimeout(() => setIsTransitioning(false), 300);

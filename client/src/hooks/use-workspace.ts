@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 export type WorkspaceType = 'notrom' | 'work';
 
@@ -39,12 +39,32 @@ export function useWorkspace() {
   
   const currentWorkspace = useMemo((): Workspace => {
     console.log('useWorkspace - Current location:', location);
+    
+    // Always check for explicit notrom workspace first
     if (location.startsWith('/notrom')) {
       console.log('useWorkspace - Detected notrom workspace');
+      // Store workspace preference 
+      sessionStorage.setItem('lastWorkspace', 'notrom');
       return workspaces.notrom;
     }
+    
+    // For business-focused pages, check if we should preserve notrom context
+    const businessPaths = ['/leads', '/projects', '/clients', '/pipeline'];
+    if (businessPaths.some(path => location.startsWith(path))) {
+      const lastWorkspace = sessionStorage.getItem('lastWorkspace');
+      if (lastWorkspace === 'notrom') {
+        console.log('useWorkspace - Preserving notrom workspace for business page');
+        return workspaces.notrom;
+      }
+    }
+    
+    // Clear workspace preference for non-business pages
+    if (location !== '/' && !businessPaths.some(path => location.startsWith(path))) {
+      sessionStorage.setItem('lastWorkspace', 'work');
+    }
+    
     console.log('useWorkspace - Detected work workspace (default)');
-    return workspaces.work; // Default to work workspace for all other paths
+    return workspaces.work;
   }, [location]);
 
   const isInWorkspace = (workspaceId: WorkspaceType): boolean => {

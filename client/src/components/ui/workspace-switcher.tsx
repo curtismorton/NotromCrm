@@ -39,6 +39,9 @@ export function WorkspaceSwitcher() {
 
     setIsTransitioning(true);
     
+    // Store workspace preference immediately
+    sessionStorage.setItem('lastWorkspace', workspace.id);
+    
     // Navigate immediately to the workspace
     navigate(workspace.path);
     
