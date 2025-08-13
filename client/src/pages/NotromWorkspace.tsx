@@ -22,6 +22,9 @@ import LeadsPage from "@/pages/leads/LeadsPage";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
 import ClientsPage from "@/pages/clients/ClientsPage";
 import PipelinePage from "@/pages/PipelinePage";
+import NotromTasksPage from "@/pages/NotromTasksPage";
+import RevenuePage from "@/pages/RevenuePage";
+import CalendarPage from "@/pages/CalendarPage";
 
 function NotromDashboard() {
   const { data: stats } = useQuery<{
@@ -244,6 +247,9 @@ export default function NotromWorkspace() {
       <Route path="/notrom/clients" component={ClientsPage} />
       <Route path="/notrom/clients/:id" component={ClientsPage} />
       <Route path="/notrom/pipeline" component={PipelinePage} />
+      <Route path="/notrom/tasks" component={NotromTasksPage} />
+      <Route path="/notrom/revenue" component={RevenuePage} />
+      <Route path="/notrom/calendar" component={CalendarPage} />
       <Route path="/leads" component={LeadsPage} />
       <Route path="/projects" component={ProjectsPage} />
       <Route path="/clients" component={ClientsPage} />

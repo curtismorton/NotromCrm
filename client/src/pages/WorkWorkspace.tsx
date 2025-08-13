@@ -22,6 +22,9 @@ import { useQuery } from "@tanstack/react-query";
 import TasksPage from "@/pages/tasks/TasksPage";
 import PodcastPage from "@/pages/PodcastPage";
 import DayJobPage from "@/pages/DayJobPage";
+import CalendarPage from "@/pages/CalendarPage";
+import GoalsPage from "@/pages/GoalsPage";
+import LifeTrackingPage from "@/pages/LifeTrackingPage";
 
 function WorkDashboard() {
   const { data: stats } = useQuery<{
@@ -230,6 +233,9 @@ export default function WorkWorkspace() {
       <Route path="/work/podcast" component={PodcastPage} />
       <Route path="/work/dayjob" component={DayJobPage} />
       <Route path="/work/day-job" component={DayJobPage} />
+      <Route path="/work/calendar" component={CalendarPage} />
+      <Route path="/work/goals" component={GoalsPage} />
+      <Route path="/work/habits" component={LifeTrackingPage} />
       <Route path="/tasks" component={TasksPage} />
       <Route path="/podcast" component={PodcastPage} />
       <Route path="/day-job" component={DayJobPage} />
