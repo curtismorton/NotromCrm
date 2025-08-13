@@ -12,7 +12,12 @@ import {
   Mic,
   Briefcase,
   Workflow,
-  Home
+  Home,
+  Inbox,
+  TrendingUp,
+  FileText,
+  Calendar,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +26,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 import { useMedia } from "@/hooks/use-mobile";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
-import { WorkspaceSwitcher } from "@/components/ui/workspace-switcher";
-import { WorkspaceHeader } from "@/components/ui/workspace-header";
-import { useOptimizedWorkspace } from "@/hooks/use-optimized-workspace";
+// Removed workspace-specific imports
 
 type SidebarItemProps = {
   icon: ReactNode;
@@ -87,102 +90,103 @@ const SidebarContent = memo(({ location, stats }: SidebarContentProps) => {
   <div className="flex flex-col h-full bg-white border-r border-gray-200">
     {/* Logo Header */}
     <div className="flex flex-col p-4 border-b border-gray-200">
-      <div className="flex items-center justify-center mb-3">
+      <div className="flex items-center justify-center">
         <HomeLogoButton />
       </div>
-      <WorkspaceSwitcher />
     </div>
 
     {/* Navigation */}
     <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-      {/* Main Navigation - Now Context Aware */}
-      {location.startsWith("/notrom") ? (
-        // Notrom Business Navigation
-        <>
-          <div className="space-y-2">
-            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business Dashboard</h3>
-            <div className="space-y-1">
-              <SidebarItem
-                icon={<LayoutDashboard className="w-5 h-5" />}
-                label="Dashboard"
-                href="/notrom"
-                active={location === "/notrom"}
-              />
-              <SidebarItem
-                icon={<Workflow className="w-5 h-5" />}
-                label="Pipeline"
-                href="/notrom/pipeline"
-                active={location.startsWith("/notrom/pipeline")}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business Operations</h3>
-            <div className="space-y-1">
-              <SidebarItem
-                icon={<Users className="w-5 h-5" />}
-                label="Leads"
-                href="/notrom/leads"
-                badgeCount={stats?.totalLeads}
-                active={location.startsWith("/notrom/leads")}
-              />
-              <SidebarItem
-                icon={<FolderKanban className="w-5 h-5" />}
-                label="Projects"
-                href="/notrom/projects"
-                badgeCount={stats?.activeProjects}
-                active={location.startsWith("/notrom/projects")}
-              />
-              <SidebarItem
-                icon={<Building2 className="w-5 h-5" />}
-                label="Clients"
-                href="/notrom/clients"
-                badgeCount={stats?.totalClients}
-                active={location.startsWith("/notrom/clients")}
-              />
-            </div>
-          </div>
-        </>
-      ) : (
-        // Work Navigation (Default for all other paths)
-        <>
-          <div className="space-y-2">
-            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Personal Dashboard</h3>
-            <div className="space-y-1">
-              <SidebarItem
-                icon={<LayoutDashboard className="w-5 h-5" />}
-                label="Dashboard"
-                href="/work"
-                active={location === "/work" || location === "/"}
-              />
-              <SidebarItem
-                icon={<CheckSquare className="w-5 h-5" />}
-                label="Tasks"
-                href="/work/tasks"
-                badgeCount={stats?.totalTasks}
-                active={location.startsWith("/work/tasks") || location.startsWith("/tasks")}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Life Management</h3>
-            <div className="space-y-1">
-              <SidebarItem
-                icon={<Mic className="w-5 h-5" />}
-                label="Podcast"
-                href="/work/podcast"
-                active={location.startsWith("/work/podcast") || location.startsWith("/podcast")}
-              />
-              <SidebarItem
-                icon={<Briefcase className="w-5 h-5" />}
-                label="Day Job"
-                href="/work/dayjob"
-                active={location.startsWith("/work/dayjob") || location.startsWith("/dayjob")}
-              />
-            </div>
-          </div>
-        </>
-      )}
+      {/* Main Navigation */}
+      <div className="space-y-2">
+        <div className="space-y-1">
+          <SidebarItem
+            icon={<LayoutDashboard className="w-5 h-5" />}
+            label="Dashboard"
+            href="/"
+            active={location === "/"}
+          />
+          <SidebarItem
+            icon={<Inbox className="w-5 h-5" />}
+            label="Inbox"
+            href="/inbox"
+            active={location.startsWith("/inbox")}
+          />
+          <SidebarItem
+            icon={<CheckSquare className="w-5 h-5" />}
+            label="Tasks"
+            href="/tasks"
+            badgeCount={stats?.totalTasks}
+            active={location.startsWith("/tasks")}
+          />
+        </div>
+      </div>
+
+      {/* Business Operations */}
+      <div className="space-y-2">
+        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</h3>
+        <div className="space-y-1">
+          <SidebarItem
+            icon={<Users className="w-5 h-5" />}
+            label="Leads"
+            href="/leads"
+            badgeCount={stats?.totalLeads}
+            active={location.startsWith("/leads")}
+          />
+          <SidebarItem
+            icon={<TrendingUp className="w-5 h-5" />}
+            label="Deals"
+            href="/deals"
+            active={location.startsWith("/deals")}
+          />
+          <SidebarItem
+            icon={<FolderKanban className="w-5 h-5" />}
+            label="Projects"
+            href="/projects"
+            badgeCount={stats?.activeProjects}
+            active={location.startsWith("/projects")}
+          />
+          <SidebarItem
+            icon={<Building2 className="w-5 h-5" />}
+            label="Clients"
+            href="/clients"
+            badgeCount={stats?.totalClients}
+            active={location.startsWith("/clients")}
+          />
+        </div>
+      </div>
+
+      {/* Content & Schedule */}
+      <div className="space-y-2">
+        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Content & Schedule</h3>
+        <div className="space-y-1">
+          <SidebarItem
+            icon={<FileText className="w-5 h-5" />}
+            label="Content"
+            href="/content"
+            active={location.startsWith("/content")}
+          />
+          <SidebarItem
+            icon={<Calendar className="w-5 h-5" />}
+            label="Calendar"
+            href="/calendar"
+            active={location.startsWith("/calendar")}
+          />
+        </div>
+      </div>
+
+      {/* Reports & Settings */}
+      <div className="space-y-2">
+        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Analytics</h3>
+        <div className="space-y-1">
+          <SidebarItem
+            icon={<BarChart3 className="w-5 h-5" />}
+            label="Reports"
+            href="/reports"
+            active={location.startsWith("/reports")}
+          />
+        </div>
+      </div>
 
 
 
@@ -210,40 +214,15 @@ const SidebarContent = memo(({ location, stats }: SidebarContentProps) => {
 
 SidebarContent.displayName = "SidebarContent";
 
-// Home Logo Button Component with double-click logic
+// Simple Home Logo Button
 function HomeLogoButton() {
-  const { currentWorkspace, allWorkspaces, switchWorkspace } = useOptimizedWorkspace();
   const [location, navigate] = useLocation();
 
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('🏠 Logo clicked - Current workspace:', currentWorkspace.id, 'Current location:', location);
-    
-    // Define workspace home paths
-    const workspaceHomes = {
-      notrom: '/notrom',
-      work: '/work'
-    };
-    
-    const currentWorkspaceHome = workspaceHomes[currentWorkspace.id];
-    const isAtWorkspaceHome = location === currentWorkspaceHome || 
-                             (currentWorkspace.id === 'work' && location === '/');
-    
-    if (isAtWorkspaceHome) {
-      // Second click - switch to other workspace with optimization
-      const otherWorkspace = allWorkspaces.find(w => w.id !== currentWorkspace.id);
-      if (otherWorkspace) {
-        console.log('🔄 Logo second click - switching to:', otherWorkspace.id);
-        switchWorkspace(otherWorkspace.id).then(() => {
-          navigate(otherWorkspace.path);
-        });
-      }
-    } else {
-      // First click - go to current workspace home
-      console.log('🏡 Logo first click - going to workspace home:', currentWorkspaceHome);
-      navigate(currentWorkspaceHome);
-    }
+    console.log('🏠 Logo clicked - navigating to dashboard');
+    navigate('/');
   };
 
   return (
@@ -291,14 +270,27 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Workspace Header - always show since all pages are now workspace-based */}
-        <WorkspaceHeader />
-
-        {/* Page Content with proper scroll container */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 overscroll-contain">
-          <div className="min-h-full">
-            {children}
+        {/* Mobile Header */}
+        {isMobile && (
+          <div className="lg:hidden bg-white border-b border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-lg font-semibold text-gray-900">
+                CurtisOS
+              </h1>
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+              </Sheet>
+            </div>
           </div>
+        )}
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          {children}
         </main>
       </div>
 

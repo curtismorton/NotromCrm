@@ -1,0 +1,170 @@
+1) Immediate cleanup, then a stable baseline
+
+Branch
+	•	Create chore/separate-notrom
+
+Repo metadata
+	•	package.json name to curtisos
+	•	Update README title and description
+	•	Remove Notrom logos, copy, and images in /public, /assets
+
+Env and config
+	•	Remove any Firebase or Stripe envs left from Notrom exploration
+	•	Keep your current PostgreSQL, Express, TanStack Query stack
+	•	Prune unused libs in package.json and lockfile
+	•	Run a dep audit and fix high severity items
+
+Routes and UI
+	•	Remove any Notrom pages, routes, or nav items
+	•	Update nav to: Dashboard, Inbox, Tasks, Projects, Clients, Leads, Content, Calendar, Deals, Reports, Settings
+
+Docs
+	•	New short README section: purpose, local dev steps, build steps, env var list
+
+Commit flow
+	•	One commit per area above, then PR named “Separate Notrom and reset CurtisOS scope”
+
+2) Data model refocus for work
+
+PostgreSQL, keep it simple and future proof. Here is the core set.
+
+brands
+	•	id, name, website, sector, notes, created_at, updated_at
+
+talent
+	•	id, name, handles jsonb, agent_email, tier, notes, created_at, updated_at
+
+contacts
+(brand or talent or general)
+	•	id, first_name, last_name, email, phone, role, org_type enum, org_id, notes, created_at, updated_at
+
+leads
+	•	id, source enum, brand_id, contact_id, status enum, value_estimate, next_action_at, notes, created_at, updated_at
+
+deals
+	•	id, brand_id, talent_id null, stage enum, deal_type enum, amount numeric, currency, start_date, end_date, owner_id, notes, created_at, updated_at
+
+projects
+	•	id, title, project_type enum, brand_id, talent_id null, status enum, kickoff_date, due_date, notes, created_at, updated_at
+
+tasks
+	•	id, title, owner_id, related_type enum, related_id, priority enum, due_at, status enum, created_at, updated_at
+
+content_items
+	•	id, project_id, platform enum, status enum, url, brief text, due_at, posted_at, metrics jsonb, created_at, updated_at
+
+meetings
+	•	id, title, start_at, end_at, location, attendees jsonb, related_type, related_id, notes, created_at, updated_at
+
+activity_log
+	•	id, actor_id, action, target_type, target_id, payload jsonb, created_at
+
+This gives you one source of truth for brands, deals, projects, content, and tasks without dragging in Notrom-specific automation.
+
+3) API routes to match
+
+Express routes, all with auth and role checks.
+	•	/api/brands CRUD and search
+	•	/api/talent CRUD and search
+	•	/api/contacts CRUD, link to brand or talent
+	•	/api/leads CRUD, advance status, set next_action
+	•	/api/deals CRUD, stage moves, amount updates
+	•	/api/projects CRUD, status moves, due dates
+	•	/api/tasks CRUD, quick actions, bulk complete
+	•	/api/content CRUD, set platform status, attach metrics
+	•	/api/meetings CRUD, attendee handling, quick copy to calendar
+	•	/api/activity list with filters
+
+4) Frontend refactor targets
+
+Keep your React + TypeScript, TanStack Query.
+
+Navigation
+	•	Compact left rail with icons and labels
+	•	Top bar: search, quick add, profile
+
+Pages
+	•	Dashboard: today view, pipeline tiles, urgent tasks, calendar peek, clips due
+	•	Inbox: email-like list of new leads, new brand pings, transcripts to process, approvals due
+	•	Tasks: My tasks by due date and priority, quick filters, keyboard first
+	•	Leads: Kanban by status, inline next step
+	•	Deals: Pipeline by stage, totals by stage, win rate
+	•	Projects: Board and table views, health indicators, red flags
+	•	Clients: unified view for brands, contacts, past deals, live projects, files
+	•	Content: calendar by platform, “clips due today”, status rollup
+	•	Calendar: unified meetings and content deadlines
+	•	Reports: monthly performance, deal value, platform output
+	•	Settings: fields, enums, automations toggles
+
+UX quick wins
+	•	Global Quick Add (Q) to add Task, Lead, Deal, Project, Content
+	•	Inline edits everywhere, optimistic updates
+	•	“Related” side panel for any record, shows tasks, meetings, files, log
+
+5) Fast integrations that matter to you now
+
+Keep it lean and free where possible.
+	•	Google Calendar read and write for meetings and key deadlines
+	•	Gmail send for templates, store thread ids on deals and leads
+	•	Basic webhook in for transcript dumps from your recorder or Zap workflow
+	•	Export to CSV for Reports while we design proper charts later
+
+6) One week sprint to land it
+
+Day 1
+	•	Branch, repo scrub, remove Notrom, tighten envs
+	•	Update nav and routing, empty screens in place
+
+Day 2
+	•	Migrations for the data model above
+	•	Seed minimal data for dev
+
+Day 3
+	•	Brands, Contacts, Leads pages with CRUD
+	•	Quick Add working
+
+Day 4
+	•	Deals pipeline view
+	•	Tasks list with filters and keyboard actions
+
+Day 5
+	•	Projects and Content pages basic
+	•	Activity log on every detail view
+
+Day 6
+	•	Gmail template send on Leads and Deals
+	•	Calendar write for Meetings and Content deadlines
+
+Day 7
+	•	Reports simple totals
+	•	Polishing, error states, auth guards, tests for core flows
+
+7) Smart defaults for enums
+	•	Lead status: New, Contacted, Qualified, Proposed, Won, Lost
+	•	Deal stage: Discovery, Proposal, Negotiation, Contract, Won, Lost
+	•	Task priority: P1, P2, P3
+	•	Project status: Planning, In Production, Review, Live, On Hold
+	•	Platform: YouTube, TikTok, Instagram, X, Facebook, Shorts, Reels
+	•	Content status: Brief, Editing, Scheduled, Published, Needs Revision
+
+8) Security and logging
+	•	JWT with rotation, short access token, long refresh
+	•	Row level authorization in queries by owner_id and team role
+	•	Central error handler with correlation id
+	•	Audit log writes for create, update, delete on key tables
+
+9) Email templates you can ship today
+	•	“New lead hello” with a one click slot link
+	•	“Proposal sent” follow up
+	•	“Gentle nudge” after 3 days
+	•	“Contract and next steps” on deal won
+
+We will store these in the DB so you can edit them without redeploys.
+
+10) Hand-over checklist for this PR
+	•	Screenshots of each page stub
+	•	Schema migration SQL files
+	•	Postman collection for the API
+	•	Env sample file with comments
+	•	Seed script for demo data
+	•	README with one page setup and a short “how to use”

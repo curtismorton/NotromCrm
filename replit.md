@@ -6,6 +6,16 @@ CurtisOS is a unified life and work management system that centralizes everythin
 
 ## Recent Changes
 
+### CurtisOS Major Refactoring - Notrom Separation (August 13, 2025)
+- ✅ Completely removed Notrom-specific business content from CurtisOS
+- ✅ Simplified navigation structure from dual-workspace to single work-focused approach
+- ✅ Updated database schema to focus on core work management entities
+- ✅ Cleaned up navigation with simplified sections: Dashboard, Tasks, Business Operations, Content & Schedule, Analytics
+- ✅ Removed workspace switching complexity and performance optimizations that are no longer needed
+- ✅ Maintained backward compatibility with stub tables during transition
+- ✅ Updated MainLayout.tsx to remove workspace-specific components and logic
+- ✅ Successfully restarted application server after schema refactoring
+
 ### CurtisOS Transformation (July 2025)
 - ✅ Updated database schema with context enum for task categorization
 - ✅ Added podcast episodes and life trackers tables
