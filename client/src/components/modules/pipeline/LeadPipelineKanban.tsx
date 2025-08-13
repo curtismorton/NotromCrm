@@ -96,11 +96,11 @@ export function LeadPipelineKanban() {
 
   const updateLeadMutation = useMutation({
     mutationFn: async ({ leadId, status }: { leadId: number; status: string }) => {
-      return apiRequest(`/api/leads/${leadId}`, {
+      return fetch(`/api/leads/${leadId}`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
         headers: { 'Content-Type': 'application/json' }
-      });
+      }).then(res => res.json());
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
@@ -114,6 +114,19 @@ export function LeadPipelineKanban() {
       });
     },
   });
+
+  // Filter leads by context - moved BEFORE early return to fix hook order
+  const { notromLeads, dayJobLeads, notromLeadCount, dayJobLeadCount } = useMemo(() => {
+    const notrom = leads.filter(lead => lead.context === 'notrom');
+    const dayJob = leads.filter(lead => lead.context === 'day_job');
+    console.count('LeadPipelineKanban filtering');
+    return {
+      notromLeads: notrom,
+      dayJobLeads: dayJob,
+      notromLeadCount: notrom.length,
+      dayJobLeadCount: dayJob.length,
+    };
+  }, [leads]);
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -131,19 +144,6 @@ export function LeadPipelineKanban() {
   if (isLoading) {
     return <div className="flex justify-center p-8">Loading pipeline...</div>;
   }
-
-  // Filter leads by context
-  const { notromLeads, dayJobLeads, notromLeadCount, dayJobLeadCount } = useMemo(() => {
-    const notrom = leads.filter(lead => lead.context === 'notrom');
-    const dayJob = leads.filter(lead => lead.context === 'day_job');
-    console.count('LeadPipelineKanban filtering');
-    return {
-      notromLeads: notrom,
-      dayJobLeads: dayJob,
-      notromLeadCount: notrom.length,
-      dayJobLeadCount: dayJob.length,
-    };
-  }, [leads]);
 
   const renderKanbanBoard = (contextLeads: Lead[], context: 'notrom' | 'day_job') => (
     <DragDropContext onDragEnd={onDragEnd}>
