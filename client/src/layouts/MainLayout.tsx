@@ -215,8 +215,10 @@ function HomeLogoButton() {
   const { currentWorkspace, allWorkspaces } = useWorkspace();
   const [location, navigate] = useLocation();
 
-  const handleLogoClick = () => {
-    console.log('Logo clicked - Current workspace:', currentWorkspace.id, 'Current location:', location);
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🏠 Logo clicked - Current workspace:', currentWorkspace.id, 'Current location:', location);
     
     // Define workspace home paths
     const workspaceHomes = {
@@ -232,13 +234,13 @@ function HomeLogoButton() {
       // Second click - switch to other workspace
       const otherWorkspace = allWorkspaces.find(w => w.id !== currentWorkspace.id);
       if (otherWorkspace) {
-        console.log('Logo second click - switching to:', otherWorkspace.id);
+        console.log('🔄 Logo second click - switching to:', otherWorkspace.id);
         sessionStorage.setItem('lastWorkspace', otherWorkspace.id);
         navigate(otherWorkspace.path);
       }
     } else {
       // First click - go to current workspace home
-      console.log('Logo first click - going to workspace home:', currentWorkspaceHome);
+      console.log('🏡 Logo first click - going to workspace home:', currentWorkspaceHome);
       navigate(currentWorkspaceHome);
     }
   };
@@ -246,7 +248,8 @@ function HomeLogoButton() {
   return (
     <button 
       onClick={handleLogoClick}
-      className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+      className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer w-full"
+      type="button"
     >
       <Home className="w-5 h-5 text-gray-600" />
       <h2 className="text-xl font-bold text-gray-900">CurtisOS</h2>
