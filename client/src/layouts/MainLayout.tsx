@@ -20,6 +20,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 import { useMedia } from "@/hooks/use-mobile";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
+import { WorkspaceSwitcher } from "@/components/ui/workspace-switcher";
+import { WorkspaceHeader } from "@/components/ui/workspace-header";
 
 type SidebarItemProps = {
   icon: ReactNode;
@@ -79,8 +81,11 @@ interface SidebarContentProps {
 const SidebarContent = memo(({ location, stats }: SidebarContentProps) => (
   <div className="flex flex-col h-full bg-white border-r border-gray-200">
     {/* Logo Header */}
-    <div className="flex items-center justify-center h-16 px-6 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-700">
-      <h2 className="text-xl font-bold text-white">CurtisOS</h2>
+    <div className="flex flex-col p-4 border-b border-gray-200">
+      <div className="flex items-center justify-center mb-3">
+        <h2 className="text-xl font-bold text-gray-900">CurtisOS</h2>
+      </div>
+      <WorkspaceSwitcher />
     </div>
 
     {/* Navigation */}
@@ -237,27 +242,31 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          {isMobile && (
-            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="lg:hidden">
-                  <Menu className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
-            </Sheet>
-          )}
-          
-          <div className="flex-1" />
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="text-gray-500">
-              <span className="sr-only">Notifications</span>
-              🔔
-            </Button>
-          </div>
-        </header>
+        {/* Workspace Header */}
+        {(location.startsWith("/notrom") || location.startsWith("/work")) ? (
+          <WorkspaceHeader />
+        ) : (
+          <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between h-16">
+            {isMobile && (
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="lg:hidden">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+              </Sheet>
+            )}
+            
+            <div className="flex-1" />
+            
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="sm" className="text-gray-500">
+                <span className="sr-only">Notifications</span>
+                🔔
+              </Button>
+            </div>
+          </header>
+        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
