@@ -28,8 +28,14 @@ import ExportPage from "@/pages/ExportPage";
 function Router() {
   return (
     <Switch>
-      {/* Root redirects to work workspace by default */}
-      <Route path="/" component={WorkWorkspace} />
+      {/* Root defaults to work workspace but checks session storage */}
+      <Route path="/" component={() => {
+        const lastWorkspace = sessionStorage.getItem('lastWorkspace');
+        if (lastWorkspace === 'notrom') {
+          return <NotromWorkspace />;
+        }
+        return <WorkWorkspace />;
+      }} />
       
       {/* Workspace routes */}
       <Route path="/notrom" component={NotromWorkspace} />

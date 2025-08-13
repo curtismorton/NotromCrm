@@ -48,6 +48,13 @@ export function useWorkspace() {
       return workspaces.notrom;
     }
     
+    // Always check for explicit work workspace
+    if (location.startsWith('/work')) {
+      console.log('useWorkspace - Detected work workspace');
+      sessionStorage.setItem('lastWorkspace', 'work');
+      return workspaces.work;
+    }
+    
     // For business-focused pages, check if we should preserve notrom context
     const businessPaths = ['/leads', '/projects', '/clients', '/pipeline'];
     if (businessPaths.some(path => location.startsWith(path))) {
@@ -58,9 +65,13 @@ export function useWorkspace() {
       }
     }
     
-    // Clear workspace preference for non-business pages
-    if (location !== '/' && !businessPaths.some(path => location.startsWith(path))) {
-      sessionStorage.setItem('lastWorkspace', 'work');
+    // For home path ('/'), check last workspace preference
+    if (location === '/') {
+      const lastWorkspace = sessionStorage.getItem('lastWorkspace');
+      if (lastWorkspace === 'notrom') {
+        console.log('useWorkspace - Using notrom workspace from session storage');
+        return workspaces.notrom;
+      }
     }
     
     console.log('useWorkspace - Detected work workspace (default)');

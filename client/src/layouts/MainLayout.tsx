@@ -11,7 +11,8 @@ import {
   Menu, 
   Mic,
   Briefcase,
-  Workflow
+  Workflow,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ import { useMedia } from "@/hooks/use-mobile";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 import { WorkspaceSwitcher } from "@/components/ui/workspace-switcher";
 import { WorkspaceHeader } from "@/components/ui/workspace-header";
+import { useWorkspace } from "@/hooks/use-workspace";
 
 type SidebarItemProps = {
   icon: ReactNode;
@@ -86,7 +88,7 @@ const SidebarContent = memo(({ location, stats }: SidebarContentProps) => {
     {/* Logo Header */}
     <div className="flex flex-col p-4 border-b border-gray-200">
       <div className="flex items-center justify-center mb-3">
-        <h2 className="text-xl font-bold text-gray-900">CurtisOS</h2>
+        <HomeLogoButton />
       </div>
       <WorkspaceSwitcher />
     </div>
@@ -207,6 +209,50 @@ const SidebarContent = memo(({ location, stats }: SidebarContentProps) => {
 });
 
 SidebarContent.displayName = "SidebarContent";
+
+// Home Logo Button Component with double-click logic
+function HomeLogoButton() {
+  const { currentWorkspace, allWorkspaces } = useWorkspace();
+  const [location, navigate] = useLocation();
+
+  const handleLogoClick = () => {
+    console.log('Logo clicked - Current workspace:', currentWorkspace.id, 'Current location:', location);
+    
+    // Define workspace home paths
+    const workspaceHomes = {
+      notrom: '/notrom',
+      work: '/work'
+    };
+    
+    const currentWorkspaceHome = workspaceHomes[currentWorkspace.id];
+    const isAtWorkspaceHome = location === currentWorkspaceHome || 
+                             (currentWorkspace.id === 'work' && location === '/');
+    
+    if (isAtWorkspaceHome) {
+      // Second click - switch to other workspace
+      const otherWorkspace = allWorkspaces.find(w => w.id !== currentWorkspace.id);
+      if (otherWorkspace) {
+        console.log('Logo second click - switching to:', otherWorkspace.id);
+        sessionStorage.setItem('lastWorkspace', otherWorkspace.id);
+        navigate(otherWorkspace.path);
+      }
+    } else {
+      // First click - go to current workspace home
+      console.log('Logo first click - going to workspace home:', currentWorkspaceHome);
+      navigate(currentWorkspaceHome);
+    }
+  };
+
+  return (
+    <button 
+      onClick={handleLogoClick}
+      className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+    >
+      <Home className="w-5 h-5 text-gray-600" />
+      <h2 className="text-xl font-bold text-gray-900">CurtisOS</h2>
+    </button>
+  );
+}
 
 interface MainLayoutProps {
   children: ReactNode;
