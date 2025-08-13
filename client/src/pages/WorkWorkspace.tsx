@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation, Switch, Route } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,12 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
-export default function WorkWorkspace() {
+// Import individual pages
+import TasksPage from "@/pages/tasks/TasksPage";
+import PodcastPage from "@/pages/PodcastPage";
+import DayJobPage from "@/pages/DayJobPage";
+
+function WorkDashboard() {
   const { data: stats } = useQuery<{
     totalLeads: number;
     activeProjects: number;
@@ -211,5 +216,26 @@ export default function WorkWorkspace() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WorkWorkspace() {
+  const [location] = useLocation();
+  
+  return (
+    <Switch>
+      <Route path="/work" component={WorkDashboard} />
+      <Route path="/work/tasks" component={TasksPage} />
+      <Route path="/work/tasks/:id" component={TasksPage} />
+      <Route path="/work/podcast" component={PodcastPage} />
+      <Route path="/work/dayjob" component={DayJobPage} />
+      <Route path="/work/day-job" component={DayJobPage} />
+      <Route path="/tasks" component={TasksPage} />
+      <Route path="/podcast" component={PodcastPage} />
+      <Route path="/day-job" component={DayJobPage} />
+      <Route path="/dayjob" component={DayJobPage} />
+      <Route path="/" component={WorkDashboard} />
+      <Route component={WorkDashboard} />
+    </Switch>
   );
 }

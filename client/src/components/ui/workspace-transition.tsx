@@ -24,27 +24,15 @@ export function WorkspaceTransition({ children }: WorkspaceTransitionProps) {
       };
     }
     
-    if (path.startsWith('/work')) {
-      return {
-        initial: { opacity: 0, y: 20, scale: 0.98 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: -20, scale: 0.98 },
-        transition: { 
-          duration: 0.4, 
-          ease: [0.4, 0.0, 0.2, 1],
-          layout: { duration: 0.3 }
-        }
-      };
-    }
-
-    // Default transition for legacy view
+    // Default to work workspace transition for all other paths
     return {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
+      initial: { opacity: 0, y: 20, scale: 0.98 },
+      animate: { opacity: 1, y: 0, scale: 1 },
+      exit: { opacity: 0, y: -20, scale: 0.98 },
       transition: { 
-        duration: 0.3,
-        ease: "easeInOut"
+        duration: 0.4, 
+        ease: [0.4, 0.0, 0.2, 1],
+        layout: { duration: 0.3 }
       }
     };
   };

@@ -23,8 +23,7 @@ import { useWorkspace } from "@/hooks/use-workspace";
 
 const workspaceIcons = {
   notrom: <Building2 className="w-4 h-4" />,
-  work: <Briefcase className="w-4 h-4" />,
-  legacy: <Zap className="w-4 h-4" />
+  work: <Briefcase className="w-4 h-4" />
 };
 
 export function WorkspaceSwitcher() {

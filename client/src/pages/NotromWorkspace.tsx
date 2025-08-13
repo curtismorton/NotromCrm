@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation, Switch, Route } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +15,15 @@ import {
   Plus
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useWorkspace } from "@/hooks/use-workspace";
 
-export default function NotromWorkspace() {
+// Import individual pages
+import LeadsPage from "@/pages/leads/LeadsPage";
+import ProjectsPage from "@/pages/projects/ProjectsPage";
+import ClientsPage from "@/pages/clients/ClientsPage";
+import PipelinePage from "@/pages/PipelinePage";
+
+function NotromDashboard() {
   const { data: stats } = useQuery<{
     totalLeads: number;
     activeProjects: number;
@@ -221,5 +228,27 @@ export default function NotromWorkspace() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NotromWorkspace() {
+  const [location] = useLocation();
+  
+  return (
+    <Switch>
+      <Route path="/notrom" component={NotromDashboard} />
+      <Route path="/notrom/leads" component={LeadsPage} />
+      <Route path="/notrom/leads/:id" component={LeadsPage} />
+      <Route path="/notrom/projects" component={ProjectsPage} />
+      <Route path="/notrom/projects/:id" component={ProjectsPage} />
+      <Route path="/notrom/clients" component={ClientsPage} />
+      <Route path="/notrom/clients/:id" component={ClientsPage} />
+      <Route path="/notrom/pipeline" component={PipelinePage} />
+      <Route path="/leads" component={LeadsPage} />
+      <Route path="/projects" component={ProjectsPage} />
+      <Route path="/clients" component={ClientsPage} />
+      <Route path="/pipeline" component={PipelinePage} />
+      <Route component={NotromDashboard} />
+    </Switch>
   );
 }

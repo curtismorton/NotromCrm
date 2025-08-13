@@ -1,18 +1,16 @@
 import { motion } from "framer-motion";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { cn } from "@/lib/utils";
-import { Building2, Briefcase, Zap } from "lucide-react";
+import { Building2, Briefcase } from "lucide-react";
 
 const workspaceIcons = {
   notrom: Building2,
-  work: Briefcase,
-  legacy: Zap
+  work: Briefcase
 };
 
 const workspaceGradients = {
   notrom: "from-blue-600 to-blue-700",
-  work: "from-emerald-600 to-emerald-700", 
-  legacy: "from-gray-600 to-gray-700"
+  work: "from-emerald-600 to-emerald-700"
 };
 
 export function WorkspaceHeader() {

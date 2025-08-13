@@ -28,24 +28,31 @@ import ExportPage from "@/pages/ExportPage";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      {/* Root redirects to work workspace by default */}
+      <Route path="/" component={WorkWorkspace} />
+      
+      {/* Workspace routes */}
       <Route path="/notrom" component={NotromWorkspace} />
+      <Route path="/notrom/:page*" component={NotromWorkspace} />
       <Route path="/work" component={WorkWorkspace} />
-      <Route path="/notrom/workspace" component={NotromPage} />
-      <Route path="/work/workspace" component={PodcastPage} />
-      <Route path="/podcast" component={PodcastPage} />
-      <Route path="/day-job" component={DayJobPage} />
-      <Route path="/pipeline" component={PipelinePage} />
-      <Route path="/leads" component={LeadsPage} />
-      <Route path="/leads/:id" component={LeadDetailsPage} />
-      <Route path="/projects" component={ProjectsPage} />
-      <Route path="/projects/:id" component={ProjectDetailsPage} />
-      <Route path="/clients" component={ClientsPage} />
-      <Route path="/clients/:id" component={ClientDetailsPage} />
-      <Route path="/tasks" component={TasksPage} />
-      <Route path="/tasks/:id" component={TaskDetailsPage} />
+      <Route path="/work/:page*" component={WorkWorkspace} />
+      
+      {/* Legacy routes now redirect through workspaces */}
+      <Route path="/leads" component={() => <NotromWorkspace />} />
+      <Route path="/leads/:id" component={() => <NotromWorkspace />} />
+      <Route path="/projects" component={() => <NotromWorkspace />} />
+      <Route path="/projects/:id" component={() => <NotromWorkspace />} />
+      <Route path="/clients" component={() => <NotromWorkspace />} />
+      <Route path="/clients/:id" component={() => <NotromWorkspace />} />
+      <Route path="/tasks" component={() => <WorkWorkspace />} />
+      <Route path="/tasks/:id" component={() => <WorkWorkspace />} />
+      <Route path="/pipeline" component={() => <NotromWorkspace />} />
+      <Route path="/podcast" component={() => <WorkWorkspace />} />
+      <Route path="/day-job" component={() => <WorkWorkspace />} />
+      <Route path="/dayjob" component={() => <WorkWorkspace />} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/export" component={ExportPage} />
+      
       <Route component={NotFound} />
     </Switch>
   );

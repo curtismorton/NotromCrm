@@ -90,101 +90,96 @@ const SidebarContent = memo(({ location, stats }: SidebarContentProps) => (
 
     {/* Navigation */}
     <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-      {/* Main Section */}
-      <div className="space-y-2">
-        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h3>
-        <div className="space-y-1">
-          <SidebarItem
-            icon={<LayoutDashboard className="w-5 h-5" />}
-            label="Dashboard"
-            href="/"
-            active={location === "/"}
-          />
-          <SidebarItem
-            icon={<CheckSquare className="w-5 h-5" />}
-            label="Tasks"
-            href="/tasks"
-            badgeCount={stats?.totalTasks}
-            active={location.startsWith("/tasks")}
-          />
-          <SidebarItem
-            icon={<Workflow className="w-5 h-5" />}
-            label="Pipeline"
-            href="/pipeline"
-            active={location.startsWith("/pipeline")}
-          />
-        </div>
-      </div>
-
-      {/* Workspaces */}
-      <div className="space-y-2">
-        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Workspaces</h3>
-        <div className="space-y-1">
-          <SidebarItem
-            icon={<Building2 className="w-5 h-5" />}
-            label="Notrom Business"
-            href="/notrom"
-            active={location.startsWith("/notrom")}
-          />
-          <SidebarItem
-            icon={<Briefcase className="w-5 h-5" />}
-            label="Day-to-Day Work"
-            href="/work"
-            active={location.startsWith("/work")}
-          />
-        </div>
-      </div>
-
-      {/* Legacy Access (only show when not in workspaces) */}
-      {!location.startsWith("/notrom") && !location.startsWith("/work") && (
+      {/* Main Navigation - Now Context Aware */}
+      {location.startsWith("/notrom") ? (
+        // Notrom Business Navigation
         <>
           <div className="space-y-2">
-            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Legacy Access</h3>
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business Dashboard</h3>
             <div className="space-y-1">
               <SidebarItem
-                icon={<Mic className="w-5 h-5" />}
-                label="Podcast"
-                href="/podcast"
-                active={location.startsWith("/podcast")}
+                icon={<LayoutDashboard className="w-5 h-5" />}
+                label="Dashboard"
+                href="/notrom"
+                active={location === "/notrom"}
               />
               <SidebarItem
-                icon={<Briefcase className="w-5 h-5" />}
-                label="Day Job"
-                href="/day-job"
-                active={location.startsWith("/day-job")}
+                icon={<Workflow className="w-5 h-5" />}
+                label="Pipeline"
+                href="/notrom/pipeline"
+                active={location.startsWith("/notrom/pipeline")}
               />
             </div>
           </div>
-
-          {/* Business Management */}
           <div className="space-y-2">
-            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</h3>
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business Operations</h3>
             <div className="space-y-1">
               <SidebarItem
                 icon={<Users className="w-5 h-5" />}
                 label="Leads"
-                href="/leads"
+                href="/notrom/leads"
                 badgeCount={stats?.totalLeads}
-                active={location.startsWith("/leads")}
+                active={location.startsWith("/notrom/leads")}
               />
               <SidebarItem
                 icon={<FolderKanban className="w-5 h-5" />}
                 label="Projects"
-                href="/projects"
+                href="/notrom/projects"
                 badgeCount={stats?.activeProjects}
-                active={location.startsWith("/projects")}
+                active={location.startsWith("/notrom/projects")}
               />
               <SidebarItem
                 icon={<Building2 className="w-5 h-5" />}
                 label="Clients"
-                href="/clients"
+                href="/notrom/clients"
                 badgeCount={stats?.totalClients}
-                active={location.startsWith("/clients")}
+                active={location.startsWith("/notrom/clients")}
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        // Work Navigation (Default for all other paths)
+        <>
+          <div className="space-y-2">
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Personal Dashboard</h3>
+            <div className="space-y-1">
+              <SidebarItem
+                icon={<LayoutDashboard className="w-5 h-5" />}
+                label="Dashboard"
+                href="/work"
+                active={location === "/work" || location === "/"}
+              />
+              <SidebarItem
+                icon={<CheckSquare className="w-5 h-5" />}
+                label="Tasks"
+                href="/work/tasks"
+                badgeCount={stats?.totalTasks}
+                active={location.startsWith("/work/tasks") || location.startsWith("/tasks")}
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Life Management</h3>
+            <div className="space-y-1">
+              <SidebarItem
+                icon={<Mic className="w-5 h-5" />}
+                label="Podcast"
+                href="/work/podcast"
+                active={location.startsWith("/work/podcast") || location.startsWith("/podcast")}
+              />
+              <SidebarItem
+                icon={<Briefcase className="w-5 h-5" />}
+                label="Day Job"
+                href="/work/dayjob"
+                active={location.startsWith("/work/dayjob") || location.startsWith("/dayjob")}
               />
             </div>
           </div>
         </>
       )}
+
+
 
 
 
@@ -242,35 +237,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Workspace Header */}
-        {(location.startsWith("/notrom") || location.startsWith("/work")) ? (
-          <WorkspaceHeader />
-        ) : (
-          <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between h-16">
-            {isMobile && (
-              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="sm" className="lg:hidden">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-              </Sheet>
-            )}
-            
-            <div className="flex-1" />
-            
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" className="text-gray-500">
-                <span className="sr-only">Notifications</span>
-                🔔
-              </Button>
-            </div>
-          </header>
-        )}
+        {/* Workspace Header - always show since all pages are now workspace-based */}
+        <WorkspaceHeader />
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
-          {children}
+        {/* Page Content with proper scroll container */}
+        <main className="flex-1 overflow-y-auto bg-gray-50 overscroll-contain">
+          <div className="min-h-full">
+            {children}
+          </div>
         </main>
       </div>
 

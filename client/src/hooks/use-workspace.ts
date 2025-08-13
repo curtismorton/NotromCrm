@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useMemo } from "react";
 
-export type WorkspaceType = 'notrom' | 'work' | 'legacy';
+export type WorkspaceType = 'notrom' | 'work';
 
 export interface Workspace {
   id: WorkspaceType;
@@ -31,15 +31,6 @@ export const workspaces: Record<WorkspaceType, Workspace> = {
     color: 'text-emerald-700',
     bgColor: 'bg-emerald-50',
     borderColor: 'border-emerald-200'
-  },
-  legacy: {
-    id: 'legacy',
-    name: 'Legacy View',
-    description: 'Traditional full-app navigation',
-    path: '/',
-    color: 'text-gray-700',
-    bgColor: 'bg-gray-50',
-    borderColor: 'border-gray-200'
   }
 };
 
@@ -48,8 +39,7 @@ export function useWorkspace() {
   
   const currentWorkspace = useMemo((): Workspace => {
     if (location.startsWith('/notrom')) return workspaces.notrom;
-    if (location.startsWith('/work')) return workspaces.work;
-    return workspaces.legacy;
+    return workspaces.work; // Default to work workspace for all other paths
   }, [location]);
 
   const isInWorkspace = (workspaceId: WorkspaceType): boolean => {
@@ -63,7 +53,7 @@ export function useWorkspace() {
       case 'work':
         return ['podcast', 'day_job', 'general', 'personal', 'work_personal'];
       default:
-        return []; // No filter for legacy view
+        return ['podcast', 'day_job', 'general', 'personal', 'work_personal'];
     }
   };
 
