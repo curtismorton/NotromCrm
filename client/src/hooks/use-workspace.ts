@@ -38,7 +38,12 @@ export function useWorkspace() {
   const [location] = useLocation();
   
   const currentWorkspace = useMemo((): Workspace => {
-    if (location.startsWith('/notrom')) return workspaces.notrom;
+    console.log('useWorkspace - Current location:', location);
+    if (location.startsWith('/notrom')) {
+      console.log('useWorkspace - Detected notrom workspace');
+      return workspaces.notrom;
+    }
+    console.log('useWorkspace - Detected work workspace (default)');
     return workspaces.work; // Default to work workspace for all other paths
   }, [location]);
 

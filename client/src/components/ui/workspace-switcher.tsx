@@ -34,11 +34,12 @@ export function WorkspaceSwitcher() {
   const handleWorkspaceSwitch = async (workspace: any) => {
     if (workspace.id === currentWorkspace.id || isTransitioning) return;
 
+    console.log('Switching workspace from', currentWorkspace.id, 'to', workspace.id);
+    console.log('Current location:', location, 'Target path:', workspace.path);
+
     setIsTransitioning(true);
     
-    // Smooth transition delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
+    // Navigate immediately to the workspace
     navigate(workspace.path);
     
     // Complete transition
@@ -102,7 +103,12 @@ export function WorkspaceSwitcher() {
                 transition={{ duration: 0.2, delay: index * 0.05 }}
               >
                 <DropdownMenuItem
-                  onClick={() => handleWorkspaceSwitch(workspace)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('DropdownMenuItem clicked for workspace:', workspace.id);
+                    handleWorkspaceSwitch(workspace);
+                  }}
                   className={cn(
                     "p-0 cursor-pointer",
                     workspace.id === currentWorkspace.id && "bg-gray-50"

@@ -78,7 +78,10 @@ interface SidebarContentProps {
   stats?: DashboardStats;
 }
 
-const SidebarContent = memo(({ location, stats }: SidebarContentProps) => (
+const SidebarContent = memo(({ location, stats }: SidebarContentProps) => {
+  console.log('SidebarContent render with location:', location);
+  
+  return (
   <div className="flex flex-col h-full bg-white border-r border-gray-200">
     {/* Logo Header */}
     <div className="flex flex-col p-4 border-b border-gray-200">
@@ -200,7 +203,8 @@ const SidebarContent = memo(({ location, stats }: SidebarContentProps) => (
       </div>
     </nav>
   </div>
-));
+  );
+});
 
 SidebarContent.displayName = "SidebarContent";
 
