@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { TaskCardList } from "@/components/modules/tasks/TaskCardList";
 import { TaskModal } from "@/components/modules/tasks/TaskModal";
+import { BulkTaskActions } from "@/components/productivity/BulkTaskActions";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlusCircle, Building2, Briefcase, Mic, Home, CheckSquare, AlertTriangle, Clock, Loader2 } from "lucide-react";
+import { PlusCircle, Building2, Briefcase, Mic, Home, CheckSquare, AlertTriangle, Clock, Loader2, FileText, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "@shared/schema";
 import { useQuickFilters } from "@/hooks/use-quick-filters";
@@ -14,6 +15,7 @@ import { getTaskCounts, getOverdueTasks, getDueTodayTasks, getHighPriorityTasks 
 
 export default function TasksPage() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState<number[]>([]);
   
   const { data: allTasks = [], isLoading, error } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
@@ -90,6 +92,18 @@ export default function TasksPage() {
               Due Today ({todayTasks.length})
             </Link>
           </Button>
+          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/tasks/templates">
+              <FileText className="w-4 h-4 mr-2" />
+              Templates
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/analytics">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics
+            </Link>
+          </Button>
           <Button 
             onClick={() => setIsTaskModalOpen(true)}
             className="w-full sm:w-auto"
@@ -154,6 +168,16 @@ export default function TasksPage() {
           </p>
         </div>
       )}
+
+      {/* Bulk Actions */}
+      <BulkTaskActions 
+        tasks={tasks}
+        selectedTasks={selectedTasks}
+        onSelectionChange={setSelectedTasks}
+        onActionComplete={() => {
+          // Refresh task counts after bulk actions
+        }}
+      />
 
       {/* Tabbed Task Views */}
       <Tabs defaultValue="all" className="space-y-4">

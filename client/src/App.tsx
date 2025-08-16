@@ -58,6 +58,8 @@ function Router() {
       <Route path="/dayjob" component={() => <WorkWorkspace />} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/export" component={ExportPage} />
+      <Route path="/analytics" component={() => <WorkWorkspace />} />
+      <Route path="/tasks/templates" component={() => <WorkWorkspace />} />
       
       <Route component={NotFound} />
     </Switch>
