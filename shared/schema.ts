@@ -111,12 +111,16 @@ export const clients = pgTable("clients", {
 
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
-  title: varchar("title", { length: 255 }).notNull(),
+  name: varchar("name", { length: 255 }),
+  description: text("description"),
+  status: varchar("status", { length: 50 }),
+  startDate: timestamp("start_date"),
+  deadline: timestamp("deadline"),
+  completedDate: timestamp("completed_date"),
+  budget: integer("budget"),
+  leadId: integer("lead_id").references(() => leads.id),
   clientId: integer("client_id").references(() => clients.id),
-  status: projectStatusEnum("status").notNull().default("planning"),
-  kickoffDate: date("kickoff_date"),
-  dueDate: date("due_date"),
-  notes: text("notes"),
+  contractSigned: boolean("contract_signed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -246,7 +246,12 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(projects)
-      .where(like(projects.title, `%${term}%`));
+      .where(
+        or(
+          like(projects.name, `%${term}%`),
+          like(projects.description, `%${term}%`)
+        )
+      );
   }
 
   // Clients
@@ -427,6 +432,30 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Pipeline stats method
+  async getPipelineStats(): Promise<any> {
+    const [totalLeads] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(leads);
+
+    const [qualifiedLeads] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(leads)
+      .where(sql`${leads.status} = 'qualified'`);
+
+    const [convertedLeads] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(leads)
+      .where(sql`${leads.status} = 'won'`);
+
+    return {
+      totalLeads: totalLeads?.count || 0,
+      qualifiedLeads: qualifiedLeads?.count || 0,
+      convertedLeads: convertedLeads?.count || 0,
+      conversionRate: totalLeads?.count > 0 ? ((convertedLeads?.count || 0) / totalLeads.count * 100).toFixed(1) : '0'
+    };
+  }
+
   // Legacy stub methods - return empty arrays/objects to prevent crashes
   async getRecentActivities(limit: number): Promise<any[]> {
     return [];
@@ -448,12 +477,126 @@ export class DatabaseStorage implements IStorage {
     return [];
   }
 
+  async getTagsByClient(clientId: number): Promise<any[]> {
+    return [];
+  }
+
+  async getTagsByTask(taskId: number): Promise<any[]> {
+    return [];
+  }
+
   async addTagToLead(leadId: number, tagId: number): Promise<void> {
     // Stub method
   }
 
   async removeTagFromLead(leadId: number, tagId: number): Promise<void> {
     // Stub method
+  }
+
+  async addTagToProject(projectId: number, tagId: number): Promise<void> {
+    // Stub method
+  }
+
+  async removeTagFromProject(projectId: number, tagId: number): Promise<void> {
+    // Stub method
+  }
+
+  async addTagToClient(clientId: number, tagId: number): Promise<void> {
+    // Stub method
+  }
+
+  async removeTagFromClient(clientId: number, tagId: number): Promise<void> {
+    // Stub method
+  }
+
+  async addTagToTask(taskId: number, tagId: number): Promise<void> {
+    // Stub method
+  }
+
+  async removeTagFromTask(taskId: number, tagId: number): Promise<void> {
+    // Stub method
+  }
+
+  async createTag(tagData: any): Promise<any> {
+    return { id: 1, ...tagData };
+  }
+
+  async getTags(): Promise<any[]> {
+    return [];
+  }
+
+  async updateTag(id: number, tagData: any): Promise<any> {
+    return { id, ...tagData };
+  }
+
+  async deleteTag(id: number): Promise<boolean> {
+    return true;
+  }
+
+  async getTasksDueSoon(): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.status, 'todo'),
+          sql`${tasks.dueDate} BETWEEN NOW() AND NOW() + INTERVAL '3 days'`
+        )
+      );
+  }
+
+  async createDevPlan(devPlanData: any): Promise<any> {
+    return { id: 1, ...devPlanData };
+  }
+
+  async getDevPlans(): Promise<any[]> {
+    return [];
+  }
+
+  async getDevPlan(id: number): Promise<any> {
+    return { id, title: "Default Dev Plan", status: "planning" };
+  }
+
+  async getDevPlanByProject(projectId: number): Promise<any> {
+    return { id: 1, projectId, title: "Default Dev Plan", status: "planning" };
+  }
+
+  async updateDevPlan(id: number, devPlanData: any): Promise<any> {
+    return { id, ...devPlanData };
+  }
+
+  async updateDevPlanStage(id: number, stage: string): Promise<any> {
+    return { id, currentStage: stage };
+  }
+
+  async deleteDevPlan(id: number): Promise<boolean> {
+    return true;
+  }
+
+  async getEmails(): Promise<any[]> {
+    return [];
+  }
+
+  async getEmailStats(): Promise<any> {
+    return {
+      totalEmails: 0,
+      unreadEmails: 0,
+      emailsNeedingResponse: 0,
+      responseRate: '0%'
+    };
+  }
+
+  async getEmailsNeedingResponse(): Promise<any[]> {
+    return [];
+  }
+
+  async getRevenueMetrics(): Promise<any> {
+    return {
+      totalRevenue: 0,
+      monthlyRevenue: 0,
+      projectedRevenue: 0,
+      averageDealValue: 0
+    };
   }
 
   async createAutomation(automation: any): Promise<any> {
