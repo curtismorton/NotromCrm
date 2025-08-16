@@ -438,21 +438,16 @@ export class DatabaseStorage implements IStorage {
       .select({ count: sql<number>`count(*)` })
       .from(leads);
 
-    const [qualifiedLeads] = await db
+    const [completeLeads] = await db
       .select({ count: sql<number>`count(*)` })
       .from(leads)
-      .where(sql`${leads.status} = 'qualified'`);
-
-    const [convertedLeads] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(leads)
-      .where(sql`${leads.status} = 'won'`);
+      .where(eq(leads.status, 'complete'));
 
     return {
       totalLeads: totalLeads?.count || 0,
-      qualifiedLeads: qualifiedLeads?.count || 0,
-      convertedLeads: convertedLeads?.count || 0,
-      conversionRate: totalLeads?.count > 0 ? ((convertedLeads?.count || 0) / totalLeads.count * 100).toFixed(1) : '0'
+      activeLeads: (totalLeads?.count || 0) - (completeLeads?.count || 0),
+      completeLeads: completeLeads?.count || 0,
+      conversionRate: totalLeads?.count > 0 ? ((completeLeads?.count || 0) / totalLeads.count * 100).toFixed(1) : '0'
     };
   }
 
@@ -571,10 +566,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDevPlan(id: number): Promise<boolean> {
     return true;
-  }
-
-  async getEmails(): Promise<any[]> {
-    return [];
   }
 
   async getEmailStats(): Promise<any> {
