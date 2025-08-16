@@ -55,16 +55,16 @@ function Router() {
       <Route path="/demo-tasks" component={TasksPageNew} />
       
       {/* Legacy workspace routes for backward compatibility */}
-      <Route path="/work-old" component={() => <WorkWorkspace />} />
-      <Route path="/tasks/:id" component={() => <WorkWorkspace />} />
-      <Route path="/pipeline" component={() => <NotromWorkspace />} />
-      <Route path="/podcast" component={() => <WorkWorkspace />} />
-      <Route path="/day-job" component={() => <WorkWorkspace />} />
-      <Route path="/dayjob" component={() => <WorkWorkspace />} />
+      <Route path="/work-old" component={() => <WorkWorkspaceFixed />} />
+      <Route path="/tasks/:id" component={() => <WorkWorkspaceFixed />} />
+      <Route path="/pipeline" component={() => <NotromWorkspaceFixed />} />
+      <Route path="/podcast" component={() => <WorkWorkspaceFixed />} />
+      <Route path="/day-job" component={() => <WorkWorkspaceFixed />} />
+      <Route path="/dayjob" component={() => <WorkWorkspaceFixed />} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/export" component={ExportPage} />
-      <Route path="/analytics" component={() => <WorkWorkspace />} />
-      <Route path="/tasks/templates" component={() => <WorkWorkspace />} />
+      <Route path="/analytics" component={() => <WorkWorkspaceFixed />} />
+      <Route path="/tasks/templates" component={() => <WorkWorkspaceFixed />} />
       
       <Route component={NotFound} />
     </Switch>
