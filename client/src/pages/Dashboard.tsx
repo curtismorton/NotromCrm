@@ -73,87 +73,85 @@ export default function Dashboard() {
     {
       id: 'life-work-sections',
       component: (
-        <Card className="h-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Life & Work Contexts</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              Manage tasks across different areas of your life. Click any section to view details.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="card h-full">
+          <div className="card__header">
+            <h3 className="card__title">Life & Work Contexts</h3>
+            <p className="card__meta">Manage tasks across different areas of your life. Click any section to view details.</p>
+          </div>
+          <div className="card__content space-y-12">
             <Link href="/notrom">
-              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-md">
-                    <Code className="h-4 w-4 text-blue-600" />
+              <div className="flex items-center justify-between p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ border: '1px solid var(--border-1)' }}>
+                <div className="flex items-center gap-12">
+                  <div className="p-8 rounded-lg" style={{ background: 'var(--action-cyan-500)', opacity: '0.2' }}>
+                    <Code className="h-4 w-4" style={{ color: 'var(--action-cyan-500)' }} />
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm">Notrom Business</h4>
-                    <p className="text-xs text-muted-foreground">Web development & client work</p>
+                    <h4 className="font-medium text-sm text-ink-200">Notrom Business</h4>
+                    <p className="text-xs text-meta">Web development & client work</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold">{notromTasks.length}</div>
-                  <p className="text-xs text-muted-foreground">tasks</p>
+                  <div className="text-lg font-bold text-ink-200">{notromTasks.length}</div>
+                  <p className="text-xs text-meta">tasks</p>
                 </div>
               </div>
             </Link>
             
             <Link href="/podcast">
-              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded-md">
-                    <Mic className="h-4 w-4 text-purple-600" />
+              <div className="flex items-center justify-between p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ border: '1px solid var(--border-1)' }}>
+                <div className="flex items-center gap-12">
+                  <div className="p-8 rounded-lg" style={{ background: 'var(--warn-500)', opacity: '0.2' }}>
+                    <Mic className="h-4 w-4" style={{ color: 'var(--warn-500)' }} />
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm">Behind The Screens</h4>
-                    <p className="text-xs text-muted-foreground">Podcast production & content</p>
+                    <h4 className="font-medium text-sm text-ink-200">Behind The Screens</h4>
+                    <p className="text-xs text-meta">Podcast production & content</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold">{podcastTasks.length}</div>
-                  <p className="text-xs text-muted-foreground">tasks</p>
+                  <div className="text-lg font-bold text-ink-200">{podcastTasks.length}</div>
+                  <p className="text-xs text-meta">tasks</p>
                 </div>
               </div>
             </Link>
             
             <Link href="/day-job">
-              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-md">
-                    <Briefcase className="h-4 w-4 text-green-600" />
+              <div className="flex items-center justify-between p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ border: '1px solid var(--border-1)' }}>
+                <div className="flex items-center gap-12">
+                  <div className="p-8 rounded-lg" style={{ background: 'var(--ok-500)', opacity: '0.2' }}>
+                    <Briefcase className="h-4 w-4" style={{ color: 'var(--ok-500)' }} />
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm">Socially Powerful</h4>
-                    <p className="text-xs text-muted-foreground">Full-time employment tasks</p>
+                    <h4 className="font-medium text-sm text-ink-200">Socially Powerful</h4>
+                    <p className="text-xs text-meta">Full-time employment tasks</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold">{dayJobTasks.length}</div>
-                  <p className="text-xs text-muted-foreground">tasks</p>
+                  <div className="text-lg font-bold text-ink-200">{dayJobTasks.length}</div>
+                  <p className="text-xs text-meta">tasks</p>
                 </div>
               </div>
             </Link>
             
             <Link href="/tasks">
-              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 rounded-md">
-                    <CheckSquare className="h-4 w-4 text-orange-600" />
+              <div className="flex items-center justify-between p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ border: '1px solid var(--border-1)' }}>
+                <div className="flex items-center gap-12">
+                  <div className="p-8 rounded-lg" style={{ background: 'var(--danger-500)', opacity: '0.2' }}>
+                    <CheckSquare className="h-4 w-4" style={{ color: 'var(--danger-500)' }} />
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm">General Tasks</h4>
-                    <p className="text-xs text-muted-foreground">Personal & miscellaneous</p>
+                    <h4 className="font-medium text-sm text-ink-200">General Tasks</h4>
+                    <p className="text-xs text-meta">Personal & miscellaneous</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold">{generalTasks.length}</div>
-                  <p className="text-xs text-muted-foreground">tasks</p>
+                  <div className="text-lg font-bold text-ink-200">{generalTasks.length}</div>
+                  <p className="text-xs text-meta">tasks</p>
                 </div>
               </div>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ),
       title: 'Life & Work Contexts',
       size: 'large' as const,
@@ -162,63 +160,67 @@ export default function Dashboard() {
     {
       id: 'stats-overview',
       component: (
-        <Card className="h-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Business Overview</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              Key metrics for your business performance. Click any stat to view details.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
+        <div className="card h-full">
+          <div className="card__header">
+            <h3 className="card__title">Business Overview</h3>
+            <p className="card__meta">Key metrics for your business performance. Click any stat to view details.</p>
+          </div>
+          <div className="card__content">
+            <div className="grid grid-cols-2 gap-12">
               <Link href="/projects">
-                <div className="p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-blue-600" />
-                    <span className="text-xs font-medium text-muted-foreground">PROJECTS</span>
+                <div className="p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ border: '1px solid var(--border-1)' }}>
+                  <div className="flex items-center gap-8 mb-8">
+                    <TrendingUp className="h-4 w-4" style={{ color: 'var(--action-cyan-500)' }} />
+                    <span className="text-xs font-medium text-meta">PROJECTS</span>
                   </div>
-                  <div className="text-xl font-bold">{stats?.activeProjects || 0}</div>
-                  <p className="text-xs text-muted-foreground">Active & in progress</p>
+                  <div className="text-xl font-bold text-ink-200">{stats?.activeProjects || 0}</div>
+                  <p className="text-xs text-meta">Active & in progress</p>
                 </div>
               </Link>
               
               <Link href="/leads">
-                <div className="p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span className="text-xs font-medium text-muted-foreground">LEADS</span>
+                <div className="p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ border: '1px solid var(--border-1)' }}>
+                  <div className="flex items-center gap-8 mb-8">
+                    <TrendingUp className="h-4 w-4" style={{ color: 'var(--ok-500)' }} />
+                    <span className="text-xs font-medium text-meta">LEADS</span>
                   </div>
-                  <div className="text-xl font-bold">{stats?.totalLeads || 0}</div>
-                  <p className="text-xs text-muted-foreground">Potential opportunities</p>
+                  <div className="text-xl font-bold text-ink-200">{stats?.totalLeads || 0}</div>
+                  <p className="text-xs text-meta">Potential opportunities</p>
                 </div>
               </Link>
               
               <Link href="/clients">
-                <div className="p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Briefcase className="h-4 w-4 text-purple-600" />
-                    <span className="text-xs font-medium text-muted-foreground">CLIENTS</span>
+                <div className="p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ border: '1px solid var(--border-1)' }}>
+                  <div className="flex items-center gap-8 mb-8">
+                    <Briefcase className="h-4 w-4" style={{ color: 'var(--warn-500)' }} />
+                    <span className="text-xs font-medium text-meta">CLIENTS</span>
                   </div>
-                  <div className="text-xl font-bold">{stats?.totalClients || 0}</div>
-                  <p className="text-xs text-muted-foreground">Active relationships</p>
+                  <div className="text-xl font-bold text-ink-200">{stats?.totalClients || 0}</div>
+                  <p className="text-xs text-meta">Active relationships</p>
                 </div>
               </Link>
               
               <Link href="/tasks">
-                <div className={`p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer ${stats?.overdueTasks && stats.overdueTasks > 0 ? 'border-red-200 bg-red-50' : ''}`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className={`h-4 w-4 ${stats?.overdueTasks && stats.overdueTasks > 0 ? 'text-red-600' : 'text-orange-600'}`} />
-                    <span className="text-xs font-medium text-muted-foreground">OVERDUE</span>
+                <div className="p-12 rounded-lg cursor-pointer transition-all hover:bg-surface-2" style={{ 
+                  border: stats?.overdueTasks && stats.overdueTasks > 0 ? '1px solid var(--danger-500)' : '1px solid var(--border-1)',
+                  background: stats?.overdueTasks && stats.overdueTasks > 0 ? 'var(--danger-500)' : 'transparent',
+                  backgroundOpacity: stats?.overdueTasks && stats.overdueTasks > 0 ? '0.1' : '1'
+                }}>
+                  <div className="flex items-center gap-8 mb-8">
+                    <AlertCircle className="h-4 w-4" style={{ 
+                      color: stats?.overdueTasks && stats.overdueTasks > 0 ? 'var(--danger-500)' : 'var(--warn-500)' 
+                    }} />
+                    <span className="text-xs font-medium text-meta">OVERDUE</span>
                   </div>
-                  <div className={`text-xl font-bold ${stats?.overdueTasks && stats.overdueTasks > 0 ? 'text-red-600' : ''}`}>
+                  <div className="text-xl font-bold text-ink-200">
                     {stats?.overdueTasks || 0}
                   </div>
-                  <p className="text-xs text-muted-foreground">Tasks need attention</p>
+                  <p className="text-xs text-meta">Tasks need attention</p>
                 </div>
               </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ),
       title: 'Business Overview',
       size: 'medium' as const,
@@ -227,19 +229,19 @@ export default function Dashboard() {
     {
       id: 'email-widget', 
       component: (
-        <Card className="h-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <div className="card h-full">
+          <div className="card__header">
+            <h3 className="card__title flex items-center gap-8">
               📧 Email Management
-            </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
+            </h3>
+            <p className="card__meta">
               Monitor important emails and response times. Connect Gmail to get started.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="card__content">
             <EmailWidget />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ),
       title: 'Email Management',
       size: 'medium' as const,
@@ -248,19 +250,19 @@ export default function Dashboard() {
     {
       id: 'revenue-chart',
       component: (
-        <Card className="h-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <div className="card h-full">
+          <div className="card__header">
+            <h3 className="card__title flex items-center gap-8">
               💰 Revenue Analytics
-            </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
+            </h3>
+            <p className="card__meta">
               Track your income, expenses, and profitability over time.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="card__content">
             <RevenueChart />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ),
       title: 'Revenue Analytics',
       size: 'medium' as const,

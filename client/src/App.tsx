@@ -12,8 +12,8 @@ import DashboardPage from "@/pages/DashboardPage";
 import InboxPageFixed from "@/pages/InboxPageFixed";
 import CalendarPageFixed from "@/pages/CalendarPageFixed";
 import TasksPageNew from "@/pages/TasksPageNew";
-import NotromWorkspace from "@/pages/NotromWorkspace";
-import WorkWorkspace from "@/pages/WorkWorkspace";
+import NotromWorkspaceFixed from "@/pages/NotromWorkspaceFixed";
+import WorkWorkspaceFixed from "@/pages/WorkWorkspaceFixed";
 import NotromPage from "@/pages/NotromPage";
 import PodcastPage from "@/pages/PodcastPage";
 import DayJobPage from "@/pages/DayJobPage";
@@ -36,18 +36,18 @@ function Router() {
       <Route path="/" component={DashboardPage} />
       
       {/* Workspace routes */}
-      <Route path="/notrom" component={NotromWorkspace} />
-      <Route path="/notrom/:page*" component={NotromWorkspace} />
-      <Route path="/work" component={WorkWorkspace} />
-      <Route path="/work/:page*" component={WorkWorkspace} />
+      <Route path="/notrom" component={NotromWorkspaceFixed} />
+      <Route path="/notrom/:page*" component={NotromWorkspaceFixed} />
+      <Route path="/work" component={WorkWorkspaceFixed} />
+      <Route path="/work/:page*" component={WorkWorkspaceFixed} />
       
       {/* Legacy routes now redirect through workspaces */}
-      <Route path="/leads" component={() => <NotromWorkspace />} />
-      <Route path="/leads/:id" component={() => <NotromWorkspace />} />
-      <Route path="/projects" component={() => <NotromWorkspace />} />
-      <Route path="/projects/:id" component={() => <NotromWorkspace />} />
-      <Route path="/clients" component={() => <NotromWorkspace />} />
-      <Route path="/clients/:id" component={() => <NotromWorkspace />} />
+      <Route path="/leads" component={() => <NotromWorkspaceFixed />} />
+      <Route path="/leads/:id" component={() => <NotromWorkspaceFixed />} />
+      <Route path="/projects" component={() => <NotromWorkspaceFixed />} />
+      <Route path="/projects/:id" component={() => <NotromWorkspaceFixed />} />
+      <Route path="/clients" component={() => <NotromWorkspaceFixed />} />
+      <Route path="/clients/:id" component={() => <NotromWorkspaceFixed />} />
       <Route path="/tasks" component={TasksPageNew} />
       <Route path="/inbox" component={InboxPageFixed} />
       <Route path="/calendar" component={CalendarPageFixed} />

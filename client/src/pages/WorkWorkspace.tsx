@@ -37,88 +37,87 @@ function WorkDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center space-x-3">
-            <Briefcase className="w-12 h-12 text-emerald-600" />
-            <h1 className="text-4xl font-bold text-gray-900">Day-to-Day Work</h1>
+    <div className="space-y-24">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-h1 mb-8">Day-to-Day Work</h1>
+          <p className="text-meta">Your personal workspace for daily tasks, career goals, and life management.</p>
+        </div>
+        <div className="flex items-center gap-12">
+          <Briefcase className="w-8 h-8" style={{ color: 'var(--ok-500)' }} />
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-24">
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Daily Tasks</p>
+                <p className="text-3xl font-bold text-ink-200">0</p>
+              </div>
+              <CheckSquare className="w-8 h-8" style={{ color: 'var(--ok-500)' }} />
+            </div>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Your personal workspace for daily tasks, career goals, and life management
-          </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-emerald-200 bg-emerald-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-emerald-600">Daily Tasks</p>
-                  <p className="text-3xl font-bold text-emerald-900">0</p>
-                </div>
-                <CheckSquare className="w-8 h-8 text-emerald-500" />
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Podcast Episodes</p>
+                <p className="text-3xl font-bold text-ink-200">0</p>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 bg-purple-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-600">Podcast Episodes</p>
-                  <p className="text-3xl font-bold text-purple-900">0</p>
-                </div>
-                <Mic className="w-8 h-8 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-600">Day Job Tasks</p>
-                  <p className="text-3xl font-bold text-blue-900">0</p>
-                </div>
-                <Briefcase className="w-8 h-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-orange-200 bg-orange-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-600">Personal Goals</p>
-                  <p className="text-3xl font-bold text-orange-900">0</p>
-                </div>
-                <Target className="w-8 h-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
+              <Mic className="w-8 h-8" style={{ color: 'var(--warn-500)' }} />
+            </div>
+          </div>
         </div>
 
-        {/* Main Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Link href="/work/tasks">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-emerald-300">
-              <CardHeader className="text-center pb-4">
-                <CheckSquare className="w-16 h-16 mx-auto text-emerald-600 mb-4" />
-                <CardTitle className="text-xl">Personal Tasks</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-center mb-4">
-                  Manage your daily personal and general work tasks
-                </p>
-                <div className="flex justify-center">
-                  <Badge variant="secondary">0 tasks</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Day Job Tasks</p>
+                <p className="text-3xl font-bold text-ink-200">0</p>
+              </div>
+              <Briefcase className="w-8 h-8" style={{ color: 'var(--action-cyan-500)' }} />
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Personal Goals</p>
+                <p className="text-3xl font-bold text-ink-200">0</p>
+              </div>
+              <Target className="w-8 h-8" style={{ color: 'var(--danger-500)' }} />
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Main Navigation Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-24">
+        <Link href="/work/tasks">
+          <div className="card cursor-pointer transition-all hover:scale-105">
+            <div className="card__header text-center">
+              <CheckSquare className="w-16 h-16 mx-auto mb-16" style={{ color: 'var(--ok-500)' }} />
+              <h3 className="card__title">Personal Tasks</h3>
+            </div>
+            <div className="card__content">
+              <p className="text-meta text-center mb-16">
+                Manage your daily personal and general work tasks
+              </p>
+              <div className="flex justify-center">
+                <div className="glass-pill">0 tasks</div>
+              </div>
+            </div>
+          </div>
+        </Link>
 
           <Link href="/work/podcast">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-purple-300">

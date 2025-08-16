@@ -49,88 +49,87 @@ function NotromDashboard() {
   const notromProjects = projects.filter((project: any) => project.context === 'notrom');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center space-x-3">
-            <Building2 className="w-12 h-12 text-blue-600" />
-            <h1 className="text-4xl font-bold text-gray-900">Notrom Business</h1>
+    <div className="space-y-24">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-h1 mb-8">Notrom Business</h1>
+          <p className="text-meta">Your dedicated workspace for web development business, client management, and project delivery.</p>
+        </div>
+        <div className="flex items-center gap-12">
+          <Building2 className="w-8 h-8" style={{ color: 'var(--action-cyan-500)' }} />
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-24">
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Active Leads</p>
+                <p className="text-3xl font-bold text-ink-200">{notromLeads.length}</p>
+              </div>
+              <Users className="w-8 h-8" style={{ color: 'var(--action-cyan-500)' }} />
+            </div>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Your dedicated workspace for web development business, client management, and project delivery
-          </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-600">Active Leads</p>
-                  <p className="text-3xl font-bold text-blue-900">{notromLeads.length}</p>
-                </div>
-                <Users className="w-8 h-8 text-blue-500" />
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Projects</p>
+                <p className="text-3xl font-bold text-ink-200">{notromProjects.length}</p>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-600">Projects</p>
-                  <p className="text-3xl font-bold text-green-900">{notromProjects.length}</p>
-                </div>
-                <FolderKanban className="w-8 h-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 bg-purple-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-600">Revenue</p>
-                  <p className="text-3xl font-bold text-purple-900">$0</p>
-                </div>
-                <DollarSign className="w-8 h-8 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-orange-200 bg-orange-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-600">Tasks</p>
-                  <p className="text-3xl font-bold text-orange-900">0</p>
-                </div>
-                <CheckSquare className="w-8 h-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
+              <FolderKanban className="w-8 h-8" style={{ color: 'var(--ok-500)' }} />
+            </div>
+          </div>
         </div>
 
-        {/* Main Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Link href="/notrom/pipeline">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-blue-300">
-              <CardHeader className="text-center pb-4">
-                <Workflow className="w-16 h-16 mx-auto text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Sales Pipeline</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-center mb-4">
-                  Track leads through your sales process from contact to completion
-                </p>
-                <div className="flex justify-center">
-                  <Badge variant="secondary">{notromLeads.length} active leads</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Revenue</p>
+                <p className="text-3xl font-bold text-ink-200">$0</p>
+              </div>
+              <DollarSign className="w-8 h-8" style={{ color: 'var(--warn-500)' }} />
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card__content">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-meta">Tasks</p>
+                <p className="text-3xl font-bold text-ink-200">0</p>
+              </div>
+              <CheckSquare className="w-8 h-8" style={{ color: 'var(--danger-500)' }} />
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Main Navigation Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-24">
+        <Link href="/notrom/pipeline">
+          <div className="card cursor-pointer transition-all hover:scale-105">
+            <div className="card__header text-center">
+              <Workflow className="w-16 h-16 mx-auto mb-16" style={{ color: 'var(--action-cyan-500)' }} />
+              <h3 className="card__title">Sales Pipeline</h3>
+            </div>
+            <div className="card__content">
+              <p className="text-meta text-center mb-16">
+                Track leads through your sales process from contact to completion
+              </p>
+              <div className="flex justify-center">
+                <div className="glass-pill">{notromLeads.length} active leads</div>
+              </div>
+            </div>
+          </div>
+        </Link>
 
           <Link href="/notrom/projects">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-green-300">
