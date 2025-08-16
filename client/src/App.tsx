@@ -31,14 +31,8 @@ import ExportPage from "@/pages/ExportPage";
 function Router() {
   return (
     <Switch>
-      {/* Root defaults to work workspace but checks session storage */}
-      <Route path="/" component={() => {
-        const lastWorkspace = sessionStorage.getItem('lastWorkspace');
-        if (lastWorkspace === 'notrom') {
-          return <NotromWorkspace />;
-        }
-        return <WorkWorkspace />;
-      }} />
+      {/* Root defaults to new dashboard */}
+      <Route path="/" component={DashboardPage} />
       
       {/* Workspace routes */}
       <Route path="/notrom" component={NotromWorkspace} />
@@ -53,10 +47,13 @@ function Router() {
       <Route path="/projects/:id" component={() => <NotromWorkspace />} />
       <Route path="/clients" component={() => <NotromWorkspace />} />
       <Route path="/clients/:id" component={() => <NotromWorkspace />} />
-      <Route path="/tasks" component={() => <WorkWorkspace />} />
+      <Route path="/tasks" component={TasksPageNew} />
       <Route path="/inbox" component={InboxPage} />
       <Route path="/demo-dashboard" component={DashboardPage} />
       <Route path="/demo-tasks" component={TasksPageNew} />
+      
+      {/* Legacy workspace routes for backward compatibility */}
+      <Route path="/work-old" component={() => <WorkWorkspace />} />
       <Route path="/tasks/:id" component={() => <WorkWorkspace />} />
       <Route path="/pipeline" component={() => <NotromWorkspace />} />
       <Route path="/podcast" component={() => <WorkWorkspace />} />
