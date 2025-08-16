@@ -4,6 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import CurtisOS Neon Noir Design System */
+@import './styles/curtisos.css';
+
 :root {
   --background: 0 0% 98%;
   --foreground: 222 84% 5%;

@@ -8,6 +8,9 @@ import { WorkspaceTransition } from "@/components/ui/workspace-transition";
 import MainLayout from "@/layouts/MainLayout";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
+import DashboardPage from "@/pages/DashboardPage";
+import InboxPage from "@/pages/InboxPage";
+import TasksPageNew from "@/pages/TasksPageNew";
 import NotromWorkspace from "@/pages/NotromWorkspace";
 import WorkWorkspace from "@/pages/WorkWorkspace";
 import NotromPage from "@/pages/NotromPage";
@@ -51,6 +54,9 @@ function Router() {
       <Route path="/clients" component={() => <NotromWorkspace />} />
       <Route path="/clients/:id" component={() => <NotromWorkspace />} />
       <Route path="/tasks" component={() => <WorkWorkspace />} />
+      <Route path="/inbox" component={InboxPage} />
+      <Route path="/demo-dashboard" component={DashboardPage} />
+      <Route path="/demo-tasks" component={TasksPageNew} />
       <Route path="/tasks/:id" component={() => <WorkWorkspace />} />
       <Route path="/pipeline" component={() => <NotromWorkspace />} />
       <Route path="/podcast" component={() => <WorkWorkspace />} />

@@ -1,0 +1,224 @@
+You are building the CurtisOS web app visual identity and base UI. 
+Adopt the “Neon Noir” art direction. Dark first. Calm by default. Punchy accents only where action is expected.
+
+OUTPUT
+1) A production-ready stylesheet at src/styles/curtisos.css that defines tokens, utilities, and component skins.
+2) A small design-tokens module at src/styles/tokens.ts exporting the same values as a typed object.
+3) Primitive React components in src/components that consume only the tokens and CSS classes. No UI libraries.
+4) An AppShell layout and three example pages that demonstrate the identity: Dashboard, Inbox, Tasks. 
+5) A README.md that documents how to use tokens, states, and motion.
+
+TECH BASELINES
+• React + TypeScript + Vite. 
+• CSS Modules are fine. Global tokens must live in :root. 
+• Respect prefers-reduced-motion and color-scheme. 
+• All text meets WCAG AA 4.5:1 minimum. 
+• Zero external fonts. Use system stack with sane fallbacks.
+
+VISUAL IDENTITY. “NEON NOIR”
+Scene and lighting
+• Background uses a deep charcoal with a very soft vertical gradient plus a subtle vignette. 
+• A tiny grain layer reduces banding. Keep it below 6% opacity.
+• Only active or actionable elements glow. Everything else is matte.
+
+Color tokens (dark theme)
+--bg-950: #0A0A0C
+--surface-0: #0E0E11
+--surface-1: #121216
+--surface-2: #16161C
+--surface-3: #1B1B22
+--border-1: rgba(255,255,255,0.06)
+--border-2: rgba(255,255,255,0.10)
+--ink-100: #EBF0F3
+--ink-200: #D2D8DC
+--ink-300: #AAB2BA
+--ink-400: #888E96
+--action-cyan-600: #00FFF5
+--action-cyan-500: #00E6E0
+--action-cyan-400: #00CFCB
+--momentum-pink-500: #FF007F
+--alert-yellow-500: #FFDD44
+--ok-500: #27D3A6
+--warn-500: #FF9F1C
+--danger-500: #FF4D6D
+
+State ramps
+• Text on surfaces: ink-100 on surface-1 or darker. ink-300 for meta. 
+• Borders: border-1 as default. border-2 for raised cards.
+• Focus ring: 0 0 0 3px rgba(0,255,245,0.35) placed outside the element.
+• Active glow: cyan ring with a soft outer blur only for primary actions and selected nav.
+
+Typography
+• System stack: Inter, SF, Segoe UI, Roboto, Ubuntu, Arial, sans-serif.
+• Base size 16px. Line height 1.35. 
+• Headings: 20 / 24 / 28 with weight 600. 
+• Labels weight 500. Meta 12px with letter-spacing 0.2px.
+• Use tabular numerals for metrics where available.
+
+Spacing and radius
+• Spacing scale in px: 8, 12, 16, 24, 32, 48.
+• Card radius 14. Inputs radius 10. Pills radius 999.
+• Grid rhythm 16.
+
+Elevation and depth
+• Two levels only.
+  Level 0: surface-1 or surface-2. Border-1. No shadow.
+  Level 1: surface-1. Border-2. Shadow 0 8px 24px rgba(0,0,0,0.35). 
+• Hover adds a light inner highlight (inset 0 1px 0 rgba(255,255,255,0.06)). 
+• Replace heavy shadows with a gentle “sheen” gradient on hover.
+
+Motion
+• Duration range 140–180ms. Use standard easing: cubic-bezier(0.2, 0.8, 0.2, 1).
+• TranslateY 1–2px on hover for raised cards.
+• Selection animates a 2px cyan edge that slides in from the left.
+• Respect prefers-reduced-motion. If reduced, remove transforms and glows.
+
+Utility layers to implement in CSS
+• .bg-scene adds the vertical gradient and vignette via pseudo elements.
+• .noise applies a very subtle grain overlay.
+• .glow-cyan applies the active ring: box-shadow 0 0 0 2px rgba(0,255,245,0.25), 0 0 24px rgba(0,255,245,0.18).
+• .glass-pill builds a translucent pill: background rgba(255,255,255,0.08), border rgba(255,255,255,0.18), inner highlight rgba(255,255,255,0.06).
+• .capsule-bar styles progress bars with rounded ends and a cyan fill segment.
+
+Core skins
+Buttons
+• Primary: surface-2 background with cyan glow on focus and active. Label uses ink-100. Hover adds inner highlight and lifts by 1px. Disabled removes glow and uses ink-400.
+• Secondary: surface-2 with border-1. Hover only inner highlight. 
+• Destructive: danger-500 text with border rgba(255,77,109,0.4). No red fills.
+
+Inputs
+• Background surface-2. Border-1. On focus apply focus ring and slight outer glow. 
+• Placeholder ink-400. 
+• Support a compact density flag that reduces padding by 2px all around.
+
+Chips and badges
+• Use .glass-pill with text in ink-100 for selected, ink-300 for default.
+• Priority chips color accents: Urgent danger-500 text. High warn-500. Medium ok-500. Low action-cyan-500.
+
+Cards
+• Use Level 1 elevation. Border-2. 
+• Title at 14–15px ink-200. Meta at 12px ink-400.
+• Optional left priority spine 2px wide for task cards.
+
+Focus and keyboard
+• Every interactive element must support :focus-visible with the cyan ring.
+• Do not rely on color only for state. Add icons or spines where needed.
+
+Iconography
+• Duotone look. Idle is outline with ink-300. Active adds a soft inner glow using action cyan. 
+• Use only SVGs and currentColor for tinting.
+
+Charts
+• Lines 2px with rounded caps. Use action cyan for primary. 
+• Areas use momentum pink at low alpha for subtle depth. 
+• Axis labels ink-400. Gridlines rgba(255,255,255,0.05).
+• Small “spark” charts inside metric cards combine a blurred pink area with short cyan bars.
+
+Components to implement
+• Button, IconButton, SplitButton
+• Input, Select, Combobox, DatePicker
+• Tag, Badge, Avatar
+• Tooltip, Toast
+• Sheet, Modal, Drawer
+• Table (dense), Column chooser, Sticky header
+• Progress capsule (.capsule-bar)
+• Skeleton loader with diagonal shimmer that obeys reduced motion
+
+Layout primitives
+• AppShell grid: left nav 240px. Top bar 56px. Right drawer 360px. Content fills remaining. 
+• Left nav uses matte buttons. The active item has a cyan glow and a subtle background tint. 
+• Right drawer is slightly frosted. Use surface-1 with a stronger border and a soft glow on its top border only.
+
+Page demos to build
+
+Dashboard
+• Top metric band with three cards. The first card is double width. 
+  Card content:
+  – Title: Followers, Win rate, Utilization.
+  – Value set. Use tabular numerals.
+  – Delta glass pill on the right. 
+  – Spark mini chart at the bottom that uses the duotone style.
+• Two middle panels.
+  – My Day: three task items with a left priority spine and two glass pills for Due and Priority.
+  – Calendar preview: a 7x5 rounded grid. Busy days are tinted cyan at 15–30% alpha. Today uses a thin yellow outline.
+• Active Projects grid: two by two. Each card has a 56px cover strip at left, a state glass pill at top right, a capsule progress bar, and a small “Progress 62%” label.
+
+Inbox
+• Three column split. 
+  – Left list: media cards with avatar chip, bold subject, muted preview. Selected row shows a cyan spine and a gentle cyan background tint at 8% alpha.
+  – Center detail: typeset the body at a 56–64 character measure with improved line height. Action row uses Primary button “Turn into task” then neutral pills for the rest. 
+  – Lower center: AI Parse stepper with three steps. Each step is a card row with an “Apply” glass pill. 
+• Right drawer: “Insights” card with a glow button “Slot this”.
+
+Tasks
+• Tabs across the top. Active tab glows slightly. 
+• Toolbar with Primary “New task” and view toggle “List” and “Kanban”.
+• List table: five columns. Each row uses a left color spine based on priority. SLA uses a yellow glass pill. 
+• Board preview: four columns, two cards each, with stacked shadows and mild tilt on drag.
+
+CSS recipe examples to include in curtisos.css (add full, working rules, not pseudo code)
+
+:root {
+  color-scheme: dark;
+  --bg-950:#0A0A0C;
+  --surface-0:#0E0E11;
+  --surface-1:#121216;
+  --surface-2:#16161C;
+  --surface-3:#1B1B22;
+  --border-1:rgba(255,255,255,.06);
+  --border-2:rgba(255,255,255,.10);
+  --ink-100:#EBF0F3;
+  --ink-200:#D2D8DC;
+  --ink-300:#AAB2BA;
+  --ink-400:#888E96;
+  --action-cyan-600:#00FFF5;
+  --action-cyan-500:#00E6E0;
+  --action-cyan-400:#00CFCB;
+  --momentum-pink-500:#FF007F;
+  --alert-yellow-500:#FFDD44;
+  --ok-500:#27D3A6;
+  --warn-500:#FF9F1C;
+  --danger-500:#FF4D6D;
+  --r-card:14px; --r-input:10px;
+  --sp-8:8px; --sp-12:12px; --sp-16:16px; --sp-24:24px; --sp-32:32px; --sp-48:48px;
+  --shadow-raise:0 8px 24px rgba(0,0,0,.35);
+  --focus-ring:0 0 0 3px rgba(0,255,245,.35);
+}
+
+.bg-scene { background: radial-gradient(1200px 800px at 80% 20%, rgba(255,255,255,.02), transparent), linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
+.card { background: var(--surface-1); border:1px solid var(--border-2); border-radius:var(--r-card); box-shadow: var(--shadow-raise); }
+.card:hover { box-shadow: var(--shadow-raise), inset 0 1px 0 rgba(255,255,255,.06); transform: translateY(-1px); transition: box-shadow 160ms, transform 160ms; }
+.btn { border-radius: 10px; padding: 10px 12px; border:1px solid var(--border-1); background: var(--surface-2); color: var(--ink-200); }
+.btn.primary { color:#002; background: linear-gradient(180deg, rgba(0,255,245,.16), rgba(0,0,0,.0)); border-color: rgba(0,255,245,.35); box-shadow: 0 0 0 2px rgba(0,255,245,.20), 0 0 24px rgba(0,255,245,.16); }
+.btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.input { background: var(--surface-2); border:1px solid var(--border-1); border-radius: var(--r-input); color: var(--ink-200); }
+.kbd { border:1px solid var(--border-1); border-radius:6px; font-size:12px; color:var(--ink-300); padding:2px 6px; }
+.pill { border-radius:999px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 4px 10px; }
+.pill--cyan { color: var(--ink-100); box-shadow: 0 0 0 2px rgba(0,255,245,.18); }
+.priority-spine { width:2px; align-self:stretch; background: var(--ok-500); }
+.priority--High .priority-spine { background: var(--warn-500); }
+.priority--Urgent .priority-spine { background: var(--danger-500); }
+.spark { height:42px; border-radius:8px; background: linear-gradient(180deg, rgba(255,0,127,.10), transparent); }
+.progress { height:10px; border-radius:10px; background: rgba(255,255,255,.06); }
+.progress > span { display:block; height:100%; border-radius:10px; background: linear-gradient(90deg, var(--action-cyan-500), rgba(255,0,127,.35)); }
+
+Accessibility
+• Ensure every interactive control has a visible focus state that is not color only. 
+• Provide aria labels for icons and the Command bar. 
+• Use role="status" for toasts and live regions.
+
+Acceptance tests. All must pass
+1) The active nav item shows a cyan glow and a matte background tint. 
+2) Metric cards display a duotone spark with cyan bars and a faint pink area. 
+3) The Inbox selected row shows a cyan spine and a soft cyan background tint. 
+4) The Tasks list rows show a left color spine that reflects priority. 
+5) All buttons show the cyan focus ring on keyboard focus. 
+6) prefers-reduced-motion disables glows and movement. 
+7) All text passes AA on surfaces. 
+8) No element uses pure black or pure white. 
+9) Shadows appear only on raised cards. 
+10) Pills render with the glass effect. 
+11) Calendar busy days show cyan at low alpha. Today uses a thin yellow outline. 
+12) The README documents tokens, ramps, and when glows are allowed.
+
+Now implement everything. Generate the CSS, tokens module, primitive components, AppShell, and the three pages that demonstrate this identity.
