@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, Target, Users, CheckSquare, Calendar as CalendarIcon, Zap } from "lucide-react";
-import { AppShell } from "@/components/ui/AppShell";
 
 interface DashboardStats {
   totalLeads: number;
@@ -121,8 +120,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <AppShell>
-      <div className="space-y-24">
+    <div className="space-y-24">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -261,7 +259,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      </div>
-    </AppShell>
+    </div>
   );
 }

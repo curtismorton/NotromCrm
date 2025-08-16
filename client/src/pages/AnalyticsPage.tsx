@@ -2,8 +2,21 @@ import { ProductivityDashboard } from "@/components/analytics/ProductivityDashbo
 
 export default function AnalyticsPage() {
   return (
-    <div className="min-h-screen p-3 sm:p-4 lg:p-6">
-      <ProductivityDashboard />
+    <div className="space-y-24">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-h1 mb-8">Analytics</h1>
+          <p className="text-meta">Track your performance and productivity metrics.</p>
+        </div>
+      </div>
+
+      {/* Analytics Dashboard */}
+      <div className="card">
+        <div className="card__content">
+          <ProductivityDashboard />
+        </div>
+      </div>
     </div>
   );
 }

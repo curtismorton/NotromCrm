@@ -9,7 +9,8 @@ import MainLayout from "@/layouts/MainLayout";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import DashboardPage from "@/pages/DashboardPage";
-import InboxPage from "@/pages/InboxPage";
+import InboxPageFixed from "@/pages/InboxPageFixed";
+import CalendarPageFixed from "@/pages/CalendarPageFixed";
 import TasksPageNew from "@/pages/TasksPageNew";
 import NotromWorkspace from "@/pages/NotromWorkspace";
 import WorkWorkspace from "@/pages/WorkWorkspace";
@@ -48,7 +49,8 @@ function Router() {
       <Route path="/clients" component={() => <NotromWorkspace />} />
       <Route path="/clients/:id" component={() => <NotromWorkspace />} />
       <Route path="/tasks" component={TasksPageNew} />
-      <Route path="/inbox" component={InboxPage} />
+      <Route path="/inbox" component={InboxPageFixed} />
+      <Route path="/calendar" component={CalendarPageFixed} />
       <Route path="/demo-dashboard" component={DashboardPage} />
       <Route path="/demo-tasks" component={TasksPageNew} />
       

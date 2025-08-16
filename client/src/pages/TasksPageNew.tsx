@@ -4,7 +4,6 @@ import { PlusCircle, List, LayoutGrid, FileText, BarChart3, Filter } from "lucid
 import { Task } from "@shared/schema";
 import { format, isToday, isPast, parseISO } from "date-fns";
 import { BulkTaskActions } from "@/components/productivity/BulkTaskActions";
-import { AppShell } from "@/components/ui/AppShell";
 
 type ViewMode = "list" | "kanban";
 type TabType = "my-day" | "next" | "waiting" | "someday";
@@ -78,8 +77,7 @@ export default function TasksPage() {
   ];
 
   return (
-    <AppShell>
-      <div className="space-y-24">
+    <div className="space-y-24">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -264,7 +262,6 @@ export default function TasksPage() {
           </div>
         </div>
       )}
-      </div>
-    </AppShell>
+    </div>
   );
 }

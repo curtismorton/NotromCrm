@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Zap, Archive, UserPlus } from "lucide-react";
+import { Zap, Archive, UserPlus, Search, Star, ChevronDown } from "lucide-react";
 
 interface InboxItem {
   id: string;
@@ -69,10 +69,32 @@ export default function InboxPage() {
   const selectedEmail = inboxItems.find(item => item.id === selectedItem);
 
   return (
-    <div className="grid grid-cols-12 gap-0 h-full" style={{ height: 'calc(100vh - 120px)' }}>
-      {/* Left Column - Inbox List */}
-      <div className="col-span-4 border-r" style={{ borderColor: 'var(--border-1)' }}>
-        <div className="p-16">
+    <div className="space-y-24">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-h1 mb-8">Inbox</h1>
+          <p className="text-meta">Process incoming items and organize your workflow.</p>
+        </div>
+        <div className="flex items-center gap-12">
+          <div className="search-box">
+            <Search className="search-box__icon" />
+            <input 
+              className="search-box__input" 
+              placeholder="Search inbox..."
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-5 gap-24 h-full">
+        {/* Left Column - Inbox List */}
+        <div className="col-span-2 card">
+          <div className="card__header">
+            <h3 className="card__title">Messages</h3>
+            <div className="glass-pill">{inboxItems.length}</div>
+          </div>
+          <div className="card__content p-0">
           <h2 className="text-h2 mb-8">Inbox</h2>
           <p className="text-meta">One big problem. One new big. Archive. Assign. Or close.</p>
         </div>
