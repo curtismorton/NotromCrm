@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, Target, Users, CheckSquare, Calendar as CalendarIcon, Zap } from "lucide-react";
+import { AppShell } from "@/components/ui/AppShell";
 
 interface DashboardStats {
   totalLeads: number;
@@ -120,7 +121,8 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="space-y-24">
+    <AppShell>
+      <div className="space-y-24">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -202,8 +204,8 @@ export default function DashboardPage() {
           </div>
           <div className="card__content">
             <div className="grid grid-cols-7 gap-4">
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                <div key={day} className="text-center text-meta p-8">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                <div key={`day-header-${index}`} className="text-center text-meta p-8">
                   {day}
                 </div>
               ))}
@@ -259,6 +261,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 }
