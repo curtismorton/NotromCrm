@@ -461,12 +461,20 @@ body {
 .app-shell {
   display: grid;
   grid-template-areas: 
-    "nav header header"
-    "nav main drawer";
-  grid-template-columns: 240px 1fr 360px;
+    "nav header"
+    "nav main";
+  grid-template-columns: 240px 1fr;
   grid-template-rows: 56px 1fr;
   height: 100vh;
   overflow: hidden;
+}
+
+/* When drawer is present */
+.app-shell--with-drawer {
+  grid-template-areas: 
+    "nav header header"
+    "nav main drawer";
+  grid-template-columns: 240px 1fr 360px;
 }
 
 .app-shell__nav {
@@ -491,7 +499,8 @@ body {
   grid-area: main;
   background: var(--bg-950);
   overflow-y: auto;
-  padding: var(--sp-24);
+  padding: var(--sp-32);
+  width: 100%;
 }
 
 .app-shell__drawer {

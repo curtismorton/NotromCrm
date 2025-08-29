@@ -46,7 +46,7 @@ export function AppShell({ children, drawer }: AppShellProps) {
   };
 
   return (
-    <div className="app-shell bg-scene noise">
+    <div className={`app-shell bg-scene noise ${drawer ? 'app-shell--with-drawer' : ''}`}>
       {/* Navigation */}
       <nav className="app-shell__nav">
         <div className="p-16 mb-16">
