@@ -16,11 +16,12 @@
   --border-1: rgba(255,255,255,0.06);
   --border-2: rgba(255,255,255,0.10);
   
-  /* Text */
-  --ink-100: #EBF0F3;
-  --ink-200: #D2D8DC;
-  --ink-300: #AAB2BA;
-  --ink-400: #888E96;
+  /* Text - Enhanced for better visibility */
+  --ink-100: #F8FAFC;  /* Brightest white for primary headings */
+  --ink-200: #E2E8F0;  /* High contrast for body text */
+  --ink-300: #CBD5E1;  /* Medium contrast for secondary text */
+  --ink-400: #94A3B8;  /* Lower contrast for meta text */
+  --ink-500: #64748B;  /* Subtle text for tertiary content */
   
   /* Action colors */
   --action-cyan-600: #00FFF5;
@@ -155,14 +156,15 @@ body {
 .card__title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--ink-200);
+  color: var(--ink-100);
   margin: 0 0 var(--sp-8) 0;
 }
 
 .card__meta {
   font-size: var(--font-size-meta);
-  color: var(--ink-400);
+  color: var(--ink-300);
   letter-spacing: 0.2px;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -181,10 +183,10 @@ body {
   justify-content: center;
   gap: var(--sp-8);
   padding: 10px 12px;
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--border-2);
   border-radius: var(--r-input);
   background: var(--surface-2);
-  color: var(--ink-200);
+  color: var(--ink-100);
   font-family: inherit;
   font-size: var(--font-size-base);
   font-weight: 500;
@@ -244,16 +246,16 @@ body {
   width: 100%;
   padding: 10px 12px;
   background: var(--surface-2);
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--border-2);
   border-radius: var(--r-input);
-  color: var(--ink-200);
+  color: var(--ink-100);
   font-family: inherit;
   font-size: var(--font-size-base);
   transition: border-color var(--motion-duration) var(--motion-easing);
 }
 
 .input::placeholder {
-  color: var(--ink-400);
+  color: var(--ink-300);
 }
 
 .input:focus {
@@ -325,16 +327,17 @@ body {
   align-items: center;
   gap: var(--sp-12);
   padding: var(--sp-12) var(--sp-16);
-  color: var(--ink-300);
+  color: var(--ink-200);
   text-decoration: none;
   border-radius: var(--r-input);
   margin: 2px var(--sp-8);
   transition: all var(--motion-duration) var(--motion-easing);
+  font-weight: 500;
 }
 
 .nav__item:hover {
-  background: var(--surface-1);
-  color: var(--ink-200);
+  background: var(--surface-2);
+  color: var(--ink-100);
 }
 
 .nav__item--active {
@@ -346,7 +349,7 @@ body {
 .nav__icon {
   width: 20px;
   height: 20px;
-  opacity: 0.7;
+  opacity: 0.9;
 }
 
 .nav__item--active .nav__icon {
@@ -371,9 +374,9 @@ body {
 .table__header-cell {
   padding: var(--sp-12) var(--sp-16);
   text-align: left;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
-  color: var(--ink-300);
+  color: var(--ink-200);
 }
 
 .table__row {
@@ -402,26 +405,29 @@ body {
   gap: var(--sp-8);
   padding: 4px 8px;
   background: var(--surface-2);
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--border-2);
   border-radius: var(--r-pill);
   font-size: var(--font-size-meta);
   font-weight: 500;
-  color: var(--ink-300);
+  color: var(--ink-200);
 }
 
 .badge--priority-high {
   color: var(--warn-500);
-  border-color: rgba(255,159,28,0.3);
+  background: rgba(255,159,28,0.12);
+  border-color: rgba(255,159,28,0.4);
 }
 
 .badge--priority-urgent {
   color: var(--danger-500);
-  border-color: rgba(255,77,109,0.3);
+  background: rgba(255,77,109,0.12);
+  border-color: rgba(255,77,109,0.4);
 }
 
 .badge--status-completed {
   color: var(--ok-500);
-  border-color: rgba(39,211,166,0.3);
+  background: rgba(39,211,166,0.12);
+  border-color: rgba(39,211,166,0.4);
 }
 
 /* Progress indicators */
@@ -547,12 +553,12 @@ body {
   }
 }
 
-/* Typography utilities */
+/* Typography utilities - Enhanced visibility */
 .text-h1 { font-size: 28px; font-weight: 600; color: var(--ink-100); }
 .text-h2 { font-size: 24px; font-weight: 600; color: var(--ink-100); }
 .text-h3 { font-size: 20px; font-weight: 600; color: var(--ink-200); }
 .text-body { font-size: var(--font-size-base); color: var(--ink-200); }
-.text-meta { font-size: var(--font-size-meta); color: var(--ink-400); letter-spacing: 0.2px; }
+.text-meta { font-size: var(--font-size-meta); color: var(--ink-300); letter-spacing: 0.2px; font-weight: 500; }
 
 /* Utility spacing */
 .mt-0 { margin-top: 0; }

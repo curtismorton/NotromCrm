@@ -199,9 +199,9 @@ export default function TasksPage() {
                     </td>
                     <td className="table__cell">
                       <div>
-                        <p className="font-medium text-ink-200">{task.title}</p>
+                        <p className="font-medium" style={{ color: 'var(--ink-100)' }}>{task.title}</p>
                         {task.description && (
-                          <p className="text-meta text-sm mt-2">{task.description}</p>
+                          <p className="text-sm mt-2" style={{ color: 'var(--ink-300)' }}>{task.description}</p>
                         )}
                       </div>
                     </td>
@@ -213,7 +213,7 @@ export default function TasksPage() {
                       )}
                     </td>
                     <td className="table__cell">
-                      <div className="text-ink-300">{task.assignedTo || 'Unassigned'}</div>
+                      <div style={{ color: 'var(--ink-200)' }}>{task.assignedTo || 'Unassigned'}</div>
                     </td>
                     <td className="table__cell">
                       <div className={`badge ${task.status ? getStatusBadge(task.status) : ''}`}>
