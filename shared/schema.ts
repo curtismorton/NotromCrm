@@ -88,7 +88,7 @@ export const leads = pgTable("leads", {
   buildUrl: varchar("build_url", { length: 255 }),
   deadline: timestamp("deadline"),
   deliveryEta: timestamp("delivery_eta"),
-  status: varchar("status", { length: 50 }),
+  status: leadStatusEnum("status"),
   budget: integer("budget"),
   context: contextEnum("context"),
 });
@@ -113,7 +113,7 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }),
   description: text("description"),
-  status: varchar("status", { length: 50 }),
+  status: projectStatusEnum("status"),
   startDate: timestamp("start_date"),
   deadline: timestamp("deadline"),
   completedDate: timestamp("completed_date"),
@@ -129,7 +129,7 @@ export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  status: varchar("status", { length: 50 }),
+  status: taskStatusEnum("status"),
   priority: priorityEnum("priority"),
   dueDate: timestamp("due_date"),
   assignedTo: varchar("assigned_to", { length: 255 }),
@@ -143,11 +143,11 @@ export const tasks = pgTable("tasks", {
 // Legacy tables (keep for data migration)
 export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
-  actorId: varchar("actor_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
   action: varchar("action", { length: 100 }).notNull(),
-  targetType: varchar("target_type", { length: 50 }).notNull(),
-  targetId: integer("target_id").notNull(),
-  payload: json("payload"),
+  entityType: varchar("entity_type", { length: 50 }).notNull(),
+  entityId: integer("entity_id").notNull(),
+  details: json("details"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
