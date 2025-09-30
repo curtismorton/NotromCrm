@@ -1110,14 +1110,14 @@ export class DatabaseStorage implements IStorage {
       );
 
     return {
-      activeCampaigns: activeCampaignsStats?.count || 0,
-      deliverablesDueToday: deliverablesDueTodayStats?.count || 0,
-      deliverablesDueThisWeek: deliverablesDueThisWeekStats?.count || 0,
+      activeCampaigns: Number(activeCampaignsStats?.count) || 0,
+      deliverablesDueToday: Number(deliverablesDueTodayStats?.count) || 0,
+      deliverablesDueThisWeek: Number(deliverablesDueThisWeekStats?.count) || 0,
       pipelineValue: pipelineStats?.value || '0',
-      pipelineCount: pipelineStats?.count || 0,
-      overdueInvoicesCount: overdueInvoicesStats?.count || 0,
+      pipelineCount: Number(pipelineStats?.count) || 0,
+      overdueInvoicesCount: Number(overdueInvoicesStats?.count) || 0,
       overdueInvoicesAmount: overdueInvoicesStats?.amount || '0',
-      usageExpiringCount: usageExpiringStats?.count || 0,
+      usageExpiringCount: Number(usageExpiringStats?.count) || 0,
     };
   }
 }
