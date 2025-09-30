@@ -16,6 +16,7 @@ import {
 import * as aiService from "../services/ai";
 import { GmailService } from "../services/gmailService";
 import { logger } from "../utils/logger";
+import talentRoutes from "./talent";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Gmail service
@@ -1402,6 +1403,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch pipeline stats" });
     }
   });
+
+  // Talent Management routes
+  app.use(talentRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

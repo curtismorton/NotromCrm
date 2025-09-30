@@ -291,6 +291,329 @@ export async function generateDashboardInsights(dashboardData: any) {
 }
 
 /**
+ * Triage email and determine priority/action needed
+ */
+export async function triageEmail(emailSubject: string, emailBody: string, senderEmail: string) {
+  try {
+    const prompt = `
+      As an AI email triage assistant for a talent management platform, analyze this email and determine its priority and suggested action.
+      
+      From: ${senderEmail}
+      Subject: ${emailSubject}
+      Body: ${emailBody}
+      
+      Categorize this email into one of these priorities:
+      - "urgent": Requires immediate response (contract issues, urgent deliverable questions, payment problems)
+      - "high": Important but not urgent (new campaign opportunities, deliverable approvals needed)
+      - "medium": Normal follow-up needed (status updates, general questions)
+      - "low": FYI or can wait (newsletters, general updates)
+      
+      Also suggest the best action:
+      - "reply": Needs a response
+      - "review": Needs review but no immediate response
+      - "archive": Can be filed away
+      - "task": Should create a task/deliverable
+      
+      Extract any key information like:
+      - Campaign mentioned
+      - Deliverable mentioned
+      - Due dates mentioned
+      - Action items
+      
+      Return in this JSON format:
+      {
+        "priority": "urgent|high|medium|low",
+        "suggestedAction": "reply|review|archive|task",
+        "summary": "One-sentence summary of what this email is about",
+        "keyPoints": ["Point 1", "Point 2"],
+        "extractedData": {
+          "campaignName": "if mentioned",
+          "deliverableName": "if mentioned",
+          "dueDate": "YYYY-MM-DD if mentioned",
+          "talentName": "if mentioned"
+        }
+      }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      return { 
+        priority: "medium",
+        suggestedAction: "review",
+        summary: "Unable to analyze email",
+        keyPoints: [],
+        extractedData: {}
+      };
+    }
+    
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error triaging email:", error);
+    return { 
+      priority: "medium",
+      suggestedAction: "review",
+      summary: "Error analyzing email",
+      keyPoints: [],
+      extractedData: {},
+      error: "Failed to triage email"
+    };
+  }
+}
+
+/**
+ * Generate smart reply suggestions for an email
+ */
+export async function generateEmailReply(emailSubject: string, emailBody: string, senderEmail: string, context?: string) {
+  try {
+    const prompt = `
+      As an AI assistant for a talent management professional, generate a professional email reply.
+      
+      Original Email:
+      From: ${senderEmail}
+      Subject: ${emailSubject}
+      Body: ${emailBody}
+      
+      ${context ? `Additional context: ${context}` : ''}
+      
+      Generate 3 different reply options:
+      1. "quick": A brief, professional response (1-2 sentences)
+      2. "detailed": A thorough, professional response with all details
+      3. "friendly": A warm, personable response that builds relationship
+      
+      Each reply should:
+      - Address the sender's needs
+      - Be professional and clear
+      - Include a clear call-to-action if needed
+      
+      Return in this JSON format:
+      {
+        "quick": "Brief reply text",
+        "detailed": "Detailed reply text",
+        "friendly": "Friendly reply text"
+      }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      return { 
+        quick: "Thank you for your email. I'll get back to you shortly.",
+        detailed: "Thank you for your email. I'll get back to you shortly.",
+        friendly: "Thank you for your email. I'll get back to you shortly."
+      };
+    }
+    
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error generating email reply:", error);
+    return { 
+      quick: "Thank you for your email. I'll get back to you shortly.",
+      detailed: "Thank you for your email. I'll get back to you shortly.",
+      friendly: "Thank you for your email. I'll get back to you shortly.",
+      error: "Failed to generate reply suggestions"
+    };
+  }
+}
+
+/**
+ * Calculate deal health score for a campaign
+ */
+export async function calculateDealHealth(campaignData: any) {
+  try {
+    const prompt = `
+      As an AI analyst for talent management, calculate a health score for this campaign/deal.
+      
+      Campaign Data:
+      ${JSON.stringify(campaignData, null, 2)}
+      
+      Analyze these factors:
+      - Communication frequency (last touchpoint date vs current date)
+      - Deliverable status (on track, at risk, overdue)
+      - Payment status (invoices paid, overdue, pending)
+      - Contract compliance (usage rights expiring, terms being met)
+      - Response time patterns
+      
+      Calculate a health score from 0-100 where:
+      - 80-100: Healthy (green) - Everything on track
+      - 60-79: Needs attention (yellow) - Some minor issues
+      - 40-59: At risk (orange) - Significant concerns
+      - 0-39: Critical (red) - Urgent intervention needed
+      
+      Return in this JSON format:
+      {
+        "score": 85,
+        "status": "healthy|attention|at_risk|critical",
+        "factors": {
+          "communication": { "score": 90, "note": "Regular contact" },
+          "deliverables": { "score": 80, "note": "On track" },
+          "payment": { "score": 85, "note": "Payments current" },
+          "compliance": { "score": 85, "note": "All terms met" }
+        },
+        "risks": ["Risk 1 if any", "Risk 2 if any"],
+        "recommendations": ["Action 1", "Action 2"]
+      }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      return { 
+        score: 50,
+        status: "attention",
+        factors: {},
+        risks: ["Unable to calculate health score"],
+        recommendations: ["Review campaign manually"]
+      };
+    }
+    
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error calculating deal health:", error);
+    return { 
+      score: 50,
+      status: "attention",
+      factors: {},
+      risks: ["Error calculating health score"],
+      recommendations: ["Review campaign manually"],
+      error: "Failed to calculate deal health"
+    };
+  }
+}
+
+/**
+ * Generate nudge copy for follow-ups
+ */
+export async function generateNudgeCopy(context: string, recipientName: string, lastContactDate?: string) {
+  try {
+    const prompt = `
+      As an AI copywriter for talent management, generate a friendly nudge/follow-up message.
+      
+      Context: ${context}
+      Recipient: ${recipientName}
+      ${lastContactDate ? `Last contacted: ${lastContactDate}` : ''}
+      
+      Generate 3 different nudge options:
+      1. "gentle": A soft, friendly reminder
+      2. "direct": Clear and to-the-point
+      3. "urgent": More pressing but still professional
+      
+      Each should:
+      - Be brief (2-3 sentences max)
+      - Reference the context naturally
+      - Include a clear ask/next step
+      - Be appropriate for the time gap since last contact
+      
+      Return in this JSON format:
+      {
+        "gentle": "Gentle nudge text",
+        "direct": "Direct nudge text",
+        "urgent": "Urgent nudge text"
+      }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      return { 
+        gentle: `Hi ${recipientName}, just checking in on this. Let me know if you need anything!`,
+        direct: `Hi ${recipientName}, following up on ${context}. Can you provide an update?`,
+        urgent: `Hi ${recipientName}, we need to move forward on ${context}. Please respond ASAP.`
+      };
+    }
+    
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error generating nudge copy:", error);
+    return { 
+      gentle: `Hi ${recipientName}, just checking in on this. Let me know if you need anything!`,
+      direct: `Hi ${recipientName}, following up on ${context}. Can you provide an update?`,
+      urgent: `Hi ${recipientName}, we need to move forward on ${context}. Please respond ASAP.`,
+      error: "Failed to generate nudge copy"
+    };
+  }
+}
+
+/**
+ * Suggest content ideas based on talent profile and campaign
+ */
+export async function suggestContentIdeas(talentData: any, campaignBrief?: string) {
+  try {
+    const prompt = `
+      As an AI creative strategist for influencer marketing, suggest content ideas.
+      
+      Talent Profile:
+      ${JSON.stringify(talentData, null, 2)}
+      
+      ${campaignBrief ? `Campaign Brief: ${campaignBrief}` : ''}
+      
+      Generate 5 content ideas that:
+      - Align with the talent's style and audience
+      - Fit the campaign brief (if provided)
+      - Are platform-appropriate
+      - Include creative hooks and angles
+      
+      For each idea, provide:
+      - Title/hook
+      - Brief description
+      - Platform recommendation
+      - Why it would work
+      
+      Return in this JSON format:
+      {
+        "ideas": [
+          {
+            "title": "Content hook/title",
+            "description": "What the content would be",
+            "platform": "Instagram|TikTok|YouTube|etc",
+            "rationale": "Why this would work"
+          }
+        ]
+      }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      return { ideas: [] };
+    }
+    
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error suggesting content ideas:", error);
+    return { 
+      ideas: [],
+      error: "Failed to generate content suggestions"
+    };
+  }
+}
+
+/**
  * Analyze project for potential blockers
  */
 export async function analyzeProjectBlockers(project: any, tasks: any[], devPlan?: any) {

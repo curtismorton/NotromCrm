@@ -7,6 +7,13 @@ import {
   tags,
   activities,
   devPlans,
+  talent,
+  brands,
+  campaigns,
+  deliverables,
+  invoices,
+  contracts,
+  touchpoints,
   type User,
   type Lead,
   type Project,
@@ -15,11 +22,25 @@ import {
   type Tag,
   type Activity,
   type DevPlan,
+  type Talent,
+  type Brand,
+  type Campaign,
+  type Deliverable,
+  type Invoice,
+  type Contract,
+  type Touchpoint,
   type UpsertUser,
   type InsertLead,
   type InsertProject,
   type InsertClient,
   type InsertTask,
+  type InsertTalent,
+  type InsertBrand,
+  type InsertCampaign,
+  type InsertDeliverable,
+  type InsertInvoice,
+  type InsertContract,
+  type InsertTouchpoint,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, inArray, like, and, or, desc, sql, getTableColumns } from "drizzle-orm";
@@ -114,6 +135,61 @@ export interface IStorage {
     totalTasks: number;
     completedTasksThisWeek: number;
     overdueTasks: number;
+  }>;
+  
+  // Talent Management
+  createTalent(talent: any): Promise<any>;
+  getTalent(id: number): Promise<any | undefined>;
+  getTalents(filters?: any): Promise<any[]>;
+  updateTalent(id: number, talent: any): Promise<any | undefined>;
+  deleteTalent(id: number): Promise<boolean>;
+  
+  createBrand(brand: any): Promise<any>;
+  getBrand(id: number): Promise<any | undefined>;
+  getBrands(filters?: any): Promise<any[]>;
+  updateBrand(id: number, brand: any): Promise<any | undefined>;
+  deleteBrand(id: number): Promise<boolean>;
+  
+  createCampaign(campaign: any): Promise<any>;
+  getCampaign(id: number): Promise<any | undefined>;
+  getCampaigns(filters?: any): Promise<any[]>;
+  updateCampaign(id: number, campaign: any): Promise<any | undefined>;
+  deleteCampaign(id: number): Promise<boolean>;
+  
+  createDeliverable(deliverable: any): Promise<any>;
+  getDeliverable(id: number): Promise<any | undefined>;
+  getDeliverables(filters?: any): Promise<any[]>;
+  updateDeliverable(id: number, deliverable: any): Promise<any | undefined>;
+  deleteDeliverable(id: number): Promise<boolean>;
+  
+  createInvoice(invoice: any): Promise<any>;
+  getInvoice(id: number): Promise<any | undefined>;
+  getInvoices(filters?: any): Promise<any[]>;
+  updateInvoice(id: number, invoice: any): Promise<any | undefined>;
+  deleteInvoice(id: number): Promise<boolean>;
+  
+  createContract(contract: any): Promise<any>;
+  getContract(id: number): Promise<any | undefined>;
+  getContracts(filters?: any): Promise<any[]>;
+  updateContract(id: number, contract: any): Promise<any | undefined>;
+  deleteContract(id: number): Promise<boolean>;
+  
+  createTouchpoint(touchpoint: any): Promise<any>;
+  getTouchpoint(id: number): Promise<any | undefined>;
+  getTouchpoints(filters?: any): Promise<any[]>;
+  updateTouchpoint(id: number, touchpoint: any): Promise<any | undefined>;
+  deleteTouchpoint(id: number): Promise<boolean>;
+  
+  // Talent Management Stats
+  getTalentStats(): Promise<{
+    activeCampaigns: number;
+    deliverablesDueToday: number;
+    deliverablesDueThisWeek: number;
+    pipelineValue: string;
+    pipelineCount: number;
+    overdueInvoicesCount: number;
+    overdueInvoicesAmount: string;
+    usageExpiringCount: number;
   }>;
 }
 
@@ -688,6 +764,361 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDelivery(id: number): Promise<boolean> {
     return true;
+  }
+
+  // Talent Management CRUD operations
+  
+  // Talent
+  async createTalent(talentData: InsertTalent): Promise<Talent> {
+    const [talentRecord] = await db.insert(talent).values(talentData).returning();
+    return talentRecord;
+  }
+
+  async getTalent(id: number): Promise<Talent | undefined> {
+    const [talentRecord] = await db.select().from(talent).where(eq(talent.id, id));
+    return talentRecord;
+  }
+
+  async getTalents(filters?: Partial<Talent>): Promise<Talent[]> {
+    let query = db.select().from(talent);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.primaryPlatform) conditions.push(eq(talent.primaryPlatform, filters.primaryPlatform));
+      if (filters.niche) conditions.push(eq(talent.niche, filters.niche));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(talent.createdAt));
+  }
+
+  async updateTalent(id: number, talentData: Partial<InsertTalent>): Promise<Talent | undefined> {
+    const [updated] = await db
+      .update(talent)
+      .set({ ...talentData, updatedAt: new Date() })
+      .where(eq(talent.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTalent(id: number): Promise<boolean> {
+    const result = await db.delete(talent).where(eq(talent.id, id)).returning({ id: talent.id });
+    return result.length > 0;
+  }
+
+  // Brands
+  async createBrand(brandData: InsertBrand): Promise<Brand> {
+    const [brand] = await db.insert(brands).values(brandData).returning();
+    return brand;
+  }
+
+  async getBrand(id: number): Promise<Brand | undefined> {
+    const [brand] = await db.select().from(brands).where(eq(brands.id, id));
+    return brand;
+  }
+
+  async getBrands(filters?: Partial<Brand>): Promise<Brand[]> {
+    let query = db.select().from(brands);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.industry) conditions.push(eq(brands.industry, filters.industry));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(brands.createdAt));
+  }
+
+  async updateBrand(id: number, brandData: Partial<InsertBrand>): Promise<Brand | undefined> {
+    const [updated] = await db
+      .update(brands)
+      .set({ ...brandData, updatedAt: new Date() })
+      .where(eq(brands.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteBrand(id: number): Promise<boolean> {
+    const result = await db.delete(brands).where(eq(brands.id, id)).returning({ id: brands.id });
+    return result.length > 0;
+  }
+
+  // Campaigns
+  async createCampaign(campaignData: InsertCampaign): Promise<Campaign> {
+    const [campaign] = await db.insert(campaigns).values(campaignData).returning();
+    return campaign;
+  }
+
+  async getCampaign(id: number): Promise<Campaign | undefined> {
+    const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, id));
+    return campaign;
+  }
+
+  async getCampaigns(filters?: Partial<Campaign>): Promise<Campaign[]> {
+    let query = db.select().from(campaigns);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.stage) conditions.push(eq(campaigns.stage, filters.stage));
+      if (filters.brandId) conditions.push(eq(campaigns.brandId, filters.brandId));
+      if (filters.talentId) conditions.push(eq(campaigns.talentId, filters.talentId));
+      if (filters.healthScore) conditions.push(eq(campaigns.healthScore, filters.healthScore));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(campaigns.createdAt));
+  }
+
+  async updateCampaign(id: number, campaignData: Partial<InsertCampaign>): Promise<Campaign | undefined> {
+    const [updated] = await db
+      .update(campaigns)
+      .set({ ...campaignData, updatedAt: new Date() })
+      .where(eq(campaigns.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCampaign(id: number): Promise<boolean> {
+    const result = await db.delete(campaigns).where(eq(campaigns.id, id)).returning({ id: campaigns.id });
+    return result.length > 0;
+  }
+
+  // Deliverables
+  async createDeliverable(deliverableData: InsertDeliverable): Promise<Deliverable> {
+    const [deliverable] = await db.insert(deliverables).values(deliverableData).returning();
+    return deliverable;
+  }
+
+  async getDeliverable(id: number): Promise<Deliverable | undefined> {
+    const [deliverable] = await db.select().from(deliverables).where(eq(deliverables.id, id));
+    return deliverable;
+  }
+
+  async getDeliverables(filters?: Partial<Deliverable>): Promise<Deliverable[]> {
+    let query = db.select().from(deliverables);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.campaignId) conditions.push(eq(deliverables.campaignId, filters.campaignId));
+      if (filters.status) conditions.push(eq(deliverables.status, filters.status));
+      if (filters.platform) conditions.push(eq(deliverables.platform, filters.platform));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(deliverables.createdAt));
+  }
+
+  async updateDeliverable(id: number, deliverableData: Partial<InsertDeliverable>): Promise<Deliverable | undefined> {
+    const [updated] = await db
+      .update(deliverables)
+      .set({ ...deliverableData, updatedAt: new Date() })
+      .where(eq(deliverables.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDeliverable(id: number): Promise<boolean> {
+    const result = await db.delete(deliverables).where(eq(deliverables.id, id)).returning({ id: deliverables.id });
+    return result.length > 0;
+  }
+
+  // Invoices
+  async createInvoice(invoiceData: InsertInvoice): Promise<Invoice> {
+    const [invoice] = await db.insert(invoices).values(invoiceData).returning();
+    return invoice;
+  }
+
+  async getInvoice(id: number): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    return invoice;
+  }
+
+  async getInvoices(filters?: Partial<Invoice>): Promise<Invoice[]> {
+    let query = db.select().from(invoices);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.campaignId) conditions.push(eq(invoices.campaignId, filters.campaignId));
+      if (filters.status) conditions.push(eq(invoices.status, filters.status));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(invoices.createdAt));
+  }
+
+  async updateInvoice(id: number, invoiceData: Partial<InsertInvoice>): Promise<Invoice | undefined> {
+    const [updated] = await db
+      .update(invoices)
+      .set({ ...invoiceData, updatedAt: new Date() })
+      .where(eq(invoices.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteInvoice(id: number): Promise<boolean> {
+    const result = await db.delete(invoices).where(eq(invoices.id, id)).returning({ id: invoices.id });
+    return result.length > 0;
+  }
+
+  // Contracts
+  async createContract(contractData: InsertContract): Promise<Contract> {
+    const [contract] = await db.insert(contracts).values(contractData).returning();
+    return contract;
+  }
+
+  async getContract(id: number): Promise<Contract | undefined> {
+    const [contract] = await db.select().from(contracts).where(eq(contracts.id, id));
+    return contract;
+  }
+
+  async getContracts(filters?: Partial<Contract>): Promise<Contract[]> {
+    let query = db.select().from(contracts);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.campaignId) conditions.push(eq(contracts.campaignId, filters.campaignId));
+      if (filters.type) conditions.push(eq(contracts.type, filters.type));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(contracts.createdAt));
+  }
+
+  async updateContract(id: number, contractData: Partial<InsertContract>): Promise<Contract | undefined> {
+    const [updated] = await db
+      .update(contracts)
+      .set({ ...contractData, updatedAt: new Date() })
+      .where(eq(contracts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteContract(id: number): Promise<boolean> {
+    const result = await db.delete(contracts).where(eq(contracts.id, id)).returning({ id: contracts.id });
+    return result.length > 0;
+  }
+
+  // Touchpoints
+  async createTouchpoint(touchpointData: InsertTouchpoint): Promise<Touchpoint> {
+    const [touchpoint] = await db.insert(touchpoints).values(touchpointData).returning();
+    return touchpoint;
+  }
+
+  async getTouchpoint(id: number): Promise<Touchpoint | undefined> {
+    const [touchpoint] = await db.select().from(touchpoints).where(eq(touchpoints.id, id));
+    return touchpoint;
+  }
+
+  async getTouchpoints(filters?: Partial<Touchpoint>): Promise<Touchpoint[]> {
+    let query = db.select().from(touchpoints);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.campaignId) conditions.push(eq(touchpoints.campaignId, filters.campaignId));
+      if (filters.talentId) conditions.push(eq(touchpoints.talentId, filters.talentId));
+      if (filters.brandId) conditions.push(eq(touchpoints.brandId, filters.brandId));
+      if (filters.type) conditions.push(eq(touchpoints.type, filters.type));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(touchpoints.createdAt));
+  }
+
+  async updateTouchpoint(id: number, touchpointData: Partial<InsertTouchpoint>): Promise<Touchpoint | undefined> {
+    const [updated] = await db
+      .update(touchpoints)
+      .set(touchpointData)
+      .where(eq(touchpoints.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTouchpoint(id: number): Promise<boolean> {
+    const result = await db.delete(touchpoints).where(eq(touchpoints.id, id)).returning({ id: touchpoints.id });
+    return result.length > 0;
+  }
+
+  // Talent Management Stats
+  async getTalentStats() {
+    const [activeCampaignsStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(campaigns)
+      .where(
+        and(
+          sql`${campaigns.stage} NOT IN ('completed', 'cancelled')`
+        )
+      );
+
+    const [deliverablesDueTodayStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(deliverables)
+      .where(
+        sql`DATE(${deliverables.dueDate}) = CURRENT_DATE`
+      );
+
+    const [deliverablesDueThisWeekStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(deliverables)
+      .where(
+        sql`${deliverables.dueDate} BETWEEN NOW() AND NOW() + INTERVAL '7 days'`
+      );
+
+    const [pipelineStats] = await db
+      .select({
+        value: sql<string>`COALESCE(SUM(${campaigns.dealValue}), 0)`,
+        count: sql<number>`count(*)`
+      })
+      .from(campaigns)
+      .where(
+        sql`${campaigns.stage} IN ('pitch', 'negotiation', 'confirmed')`
+      );
+
+    const [overdueInvoicesStats] = await db
+      .select({
+        count: sql<number>`count(*)`,
+        amount: sql<string>`COALESCE(SUM(${invoices.amount}), 0)`
+      })
+      .from(invoices)
+      .where(eq(invoices.status, 'overdue'));
+
+    const [usageExpiringStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(contracts)
+      .where(
+        sql`${contracts.usageRightsExpiry} BETWEEN NOW() AND NOW() + INTERVAL '30 days'`
+      );
+
+    return {
+      activeCampaigns: activeCampaignsStats?.count || 0,
+      deliverablesDueToday: deliverablesDueTodayStats?.count || 0,
+      deliverablesDueThisWeek: deliverablesDueThisWeekStats?.count || 0,
+      pipelineValue: pipelineStats?.value || '0',
+      pipelineCount: pipelineStats?.count || 0,
+      overdueInvoicesCount: overdueInvoicesStats?.count || 0,
+      overdueInvoicesAmount: overdueInvoicesStats?.amount || '0',
+      usageExpiringCount: usageExpiringStats?.count || 0,
+    };
   }
 }
 

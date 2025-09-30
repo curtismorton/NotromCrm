@@ -68,6 +68,35 @@ export const contextEnum = pgEnum("context", [
   "work_personal"
 ]);
 
+// Talent Management Enums
+export const campaignStageEnum = pgEnum("campaign_stage", [
+  "pitch", "negotiation", "confirmed", "in_production", "delivered", "live", "completed", "cancelled"
+]);
+
+export const deliverableStatusEnum = pgEnum("deliverable_status", [
+  "pending", "in_progress", "submitted", "in_review", "approved", "needs_revision", "late"
+]);
+
+export const invoiceStatusEnum = pgEnum("invoice_status", [
+  "draft", "sent", "viewed", "paid", "overdue", "cancelled"
+]);
+
+export const contractTypeEnum = pgEnum("contract_type", [
+  "one_off", "retainer", "exclusivity", "usage_rights", "ambassador"
+]);
+
+export const emailPriorityEnum = pgEnum("email_priority", [
+  "urgent", "high", "normal", "low"
+]);
+
+export const dealHealthEnum = pgEnum("deal_health", [
+  "healthy", "at_risk", "critical"
+]);
+
+export const platformEnum = pgEnum("platform", [
+  "youtube", "instagram", "tiktok", "twitter", "linkedin", "twitch", "podcast", "other"
+]);
+
 // Core tables
 export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
@@ -188,14 +217,134 @@ export const taskTags = pgTable("task_tags", {
   tagId: integer("tag_id").references(() => tags.id),
 });
 
-// Stub tables for backward compatibility (will be removed in future)
-export const emails = pgTable("emails", {
+// Talent Management Tables
+export const talent = pgTable("talent", {
   id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  avatar: varchar("avatar", { length: 500 }),
+  primaryPlatform: platformEnum("primary_platform"),
+  followerCount: integer("follower_count"),
+  engagementRate: numeric("engagement_rate", { precision: 5, scale: 2 }),
+  niche: varchar("niche", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const brands = pgTable("brands", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  industry: varchar("industry", { length: 255 }),
+  contactName: varchar("contact_name", { length: 255 }),
+  contactEmail: varchar("contact_email", { length: 255 }),
+  contactPhone: varchar("contact_phone", { length: 50 }),
+  website: varchar("website", { length: 500 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const campaigns = pgTable("campaigns", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  brandId: integer("brand_id").references(() => brands.id).notNull(),
+  talentId: integer("talent_id").references(() => talent.id).notNull(),
+  stage: campaignStageEnum("stage").default("pitch").notNull(),
+  dealValue: numeric("deal_value", { precision: 10, scale: 2 }),
+  briefUrl: varchar("brief_url", { length: 500 }),
+  notes: text("notes"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  lastContact: timestamp("last_contact"),
+  nextStep: text("next_step"),
+  healthScore: dealHealthEnum("health_score").default("healthy"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const deliverables = pgTable("deliverables", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").references(() => campaigns.id).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  platform: platformEnum("platform").notNull(),
+  status: deliverableStatusEnum("status").default("pending").notNull(),
+  dueDate: timestamp("due_date"),
+  submittedDate: timestamp("submitted_date"),
+  approvedDate: timestamp("approved_date"),
+  fileUrl: varchar("file_url", { length: 500 }),
+  notes: text("notes"),
+  aiQualityScore: numeric("ai_quality_score", { precision: 3, scale: 2 }),
+  aiSuggestions: text("ai_suggestions"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").references(() => campaigns.id).notNull(),
+  invoiceNumber: varchar("invoice_number", { length: 50 }).notNull().unique(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  status: invoiceStatusEnum("status").default("draft").notNull(),
+  issuedDate: timestamp("issued_date"),
+  dueDate: timestamp("due_date"),
+  paidDate: timestamp("paid_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contracts = pgTable("contracts", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").references(() => campaigns.id).notNull(),
+  type: contractTypeEnum("type").notNull(),
+  signedDate: timestamp("signed_date"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  usageRightsExpiry: timestamp("usage_rights_expiry"),
+  exclusivityCategory: varchar("exclusivity_category", { length: 255 }),
+  fileUrl: varchar("file_url", { length: 500 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const touchpoints = pgTable("touchpoints", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").references(() => campaigns.id),
+  talentId: integer("talent_id").references(() => talent.id),
+  brandId: integer("brand_id").references(() => brands.id),
+  type: varchar("type", { length: 50 }).notNull(),
   subject: varchar("subject", { length: 255 }),
-  body: text("body"),
+  notes: text("notes"),
+  contactedAt: timestamp("contacted_at").defaultNow(),
+  createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const emails = pgTable("emails", {
+  id: serial("id").primaryKey(),
+  threadId: varchar("thread_id", { length: 255 }),
+  messageId: varchar("message_id", { length: 255 }).unique(),
+  from: varchar("from", { length: 255 }).notNull(),
+  to: varchar("to", { length: 255 }).notNull(),
+  subject: varchar("subject", { length: 500 }),
+  body: text("body"),
+  priority: emailPriorityEnum("priority").default("normal"),
+  needsResponse: boolean("needs_response").default(false),
+  responseBy: timestamp("response_by"),
+  linkedTalentId: integer("linked_talent_id").references(() => talent.id),
+  linkedBrandId: integer("linked_brand_id").references(() => brands.id),
+  linkedCampaignId: integer("linked_campaign_id").references(() => campaigns.id),
+  aiSummary: text("ai_summary"),
+  aiSuggestedAction: text("ai_suggested_action"),
+  aiDraftReply: text("ai_draft_reply"),
+  receivedAt: timestamp("received_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stub tables for backward compatibility (will be removed in future)
 export const revenues = pgTable("revenues", {
   id: serial("id").primaryKey(),
   amount: numeric("amount", { precision: 10, scale: 2 }),
@@ -234,6 +383,15 @@ export const insertReportSchema = createInsertSchema(reports);
 export const insertDeliverySchema = createInsertSchema(deliveries);
 export const insertAutomationSchema = createInsertSchema(automations);
 
+// Talent Management insert schemas
+export const insertTalentSchema = createInsertSchema(talent);
+export const insertBrandSchema = createInsertSchema(brands);
+export const insertCampaignSchema = createInsertSchema(campaigns);
+export const insertDeliverableSchema = createInsertSchema(deliverables);
+export const insertInvoiceSchema = createInsertSchema(invoices);
+export const insertContractSchema = createInsertSchema(contracts);
+export const insertTouchpointSchema = createInsertSchema(touchpoints);
+
 // Types
 export type Lead = typeof leads.$inferSelect;
 export type InsertLead = typeof leads.$inferInsert;
@@ -270,3 +428,25 @@ export type InsertDelivery = typeof deliveries.$inferInsert;
 
 export type Automation = typeof automations.$inferSelect;
 export type InsertAutomation = typeof automations.$inferInsert;
+
+// Talent Management types
+export type Talent = typeof talent.$inferSelect;
+export type InsertTalent = typeof talent.$inferInsert;
+
+export type Brand = typeof brands.$inferSelect;
+export type InsertBrand = typeof brands.$inferInsert;
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = typeof campaigns.$inferInsert;
+
+export type Deliverable = typeof deliverables.$inferSelect;
+export type InsertDeliverable = typeof deliverables.$inferInsert;
+
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = typeof invoices.$inferInsert;
+
+export type Contract = typeof contracts.$inferSelect;
+export type InsertContract = typeof contracts.$inferInsert;
+
+export type Touchpoint = typeof touchpoints.$inferSelect;
+export type InsertTouchpoint = typeof touchpoints.$inferInsert;
