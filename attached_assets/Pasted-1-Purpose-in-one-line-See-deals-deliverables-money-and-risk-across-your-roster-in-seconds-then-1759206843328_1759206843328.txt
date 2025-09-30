@@ -1,0 +1,90 @@
+1) Purpose in one line
+
+See deals, deliverables, money, and risk across your roster in seconds, then take the next action without leaving the page.
+
+2) Top bar
+	•	Global search: talent, brands, campaigns, emails, invoices, files.
+	•	Quick create: Campaign, Deliverable, Brief, Invoice, Lead, Contact.
+	•	Filters: Manager, Talent, Brand, Time window (today, week, month), Platform.
+
+3) KPI strip
+
+Six tiles that never lie.
+	1.	Active campaigns
+	2.	Deliverables due today
+	3.	Due this week
+	4.	Pipeline value and count
+	5.	Overdue invoices count and amount
+	6.	Usage windows expiring in 30 days
+
+4) Three working columns
+
+A) Priority Inbox
+	•	Emails that need a response, already tagged to Talent or Brand.
+	•	One click actions: Reply, Make task, Snooze, Assign, Convert to Brief.
+	•	Sort by response needed by. Show last touchpoint age.
+
+B) Deliverables Due
+	•	Table by creator, campaign, platform, due date, status, file link.
+	•	Actions: Send nudge, Mark submitted, Request edit, Approve, Raise invoice.
+	•	View toggles: Today, This week, All. Group by talent or brand.
+
+C) Pipeline and Money
+	•	Open deals list with stage, value, next step, last contact.
+	•	Overdue invoices and upcoming invoices.
+	•	Forecast for next 60 to 90 days with a simple burn up line.
+
+5) Risk and compliance rail
+
+Right side mini widgets that surface problems early.
+	•	Risk radar: late deliverables, silent brand threads, missing POs, unsigned contracts.
+	•	Usage and exclusivity: assets expiring soon, clashes by category.
+	•	Contract watch: signature status, start and end, key clauses.
+	•	Talent health: posting cadence, follower trend, content gap alerts.
+
+6) Talent cards row
+
+A scannable strip of your key creators.
+	•	Mini card shows avatar, current campaigns, next deliverable date, unpaid amount, red flags.
+	•	Click opens a focused drawer with everything for that talent this week.
+
+7) Shortcuts you will use
+	•	Log touchpoint
+	•	Create SOW or Brief from template
+	•	Auto title and draft email from a selected deliverable
+	•	Generate invoice from approved deliverables
+	•	Add usage extension proposal
+
+8) Saved views
+	•	Today view: only items that need action before midnight.
+	•	Weekly planning: Monday to Friday swimlanes by talent.
+	•	Brand review: group by brand, show value, last contact, next step.
+	•	Producer handoff: deliverables only, with file links and notes.
+
+9) Smart helpers
+	•	AI triage: set priority, suggest reply, extract deadline, make task.
+	•	Nudge copy: prewritten chasers for talent and brands with your tone.
+	•	Packaging tips: from YouTube Wins, suggest 3 titles or hooks for live campaigns.
+	•	Deal health score: low, medium, high, based on lateness, silence, edit loops, sentiment.
+
+10) Minimal data your API must serve
+	•	/api/talent/stats for the six KPIs.
+	•	/api/emails/needs-response?context=Talent&limit=10.
+	•	/api/deliverables?status=pending&due_within=7d.
+	•	/api/pipeline?stage=open&limit=20.
+	•	/api/invoices?status=overdue.
+	•	/api/contracts/usage-expiring?within=30d.
+	•	/api/talent/summary?limit=12 for the talent cards.
+
+11) Rollout in three steps
+
+Day one
+KPI strip, Priority Inbox, Deliverables Due, Quick create.
+
+Week two
+Pipeline and Money, Risk radar, Talent cards, Saved views.
+
+Month one
+Usage and exclusivity tracker, Contract watch, Deal health score, AI helpers and nudge copy.
+
+If you want, I can map each section to your existing tables and name the exact fields so your backend returns the right shapes.
