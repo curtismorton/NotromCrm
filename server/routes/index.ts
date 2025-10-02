@@ -97,6 +97,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/emails/:id/generate-reply", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { subject, body, fromEmail } = req.body;
+      
+      if (!subject || !body || !fromEmail) {
+        return res.status(400).json({ message: "Subject, body, and fromEmail are required" });
+      }
+      
+      const replyOptions = await aiService.generateEmailReply(subject, body, fromEmail);
+      res.json(replyOptions);
+    } catch (error) {
+      logger.error("Failed to generate reply", error);
+      res.status(500).json({ message: "Failed to generate reply" });
+    }
+  });
+
   // Dashboard
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
