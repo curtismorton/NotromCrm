@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { TrendingUp, DollarSign, AlertTriangle, Clock, Package, Shield } from "lucide-react";
+import { TrendingUp, DollarSign, AlertTriangle, Clock, Package, Shield, Mail, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 interface TalentStats {
   activeCampaigns: number;
@@ -12,10 +13,29 @@ interface TalentStats {
   usageExpiringCount: number;
 }
 
+interface TriagedEmail {
+  id: string;
+  subject: string;
+  from: string;
+  fromEmail: string;
+  snippet: string;
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  aiSummary: string;
+  date: string;
+  unread: boolean;
+}
+
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery<TalentStats>({
     queryKey: ['/api/talent/stats'],
   });
+
+  const { data: emails, isLoading: emailsLoading } = useQuery<TriagedEmail[]>({
+    queryKey: ['/api/emails'],
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+  });
+
+  const priorityEmails = emails?.filter(e => e.priority === 'urgent' || e.priority === 'high').slice(0, 5) || [];
 
   if (isLoading) {
     return (
@@ -124,6 +144,65 @@ export default function DashboardPage() {
           );
         })}
       </div>
+
+      {/* Priority Inbox Widget */}
+      {priorityEmails.length > 0 && (
+        <div className="card" style={{ borderColor: 'var(--alert-yellow-500)' }}>
+          <div className="card__header">
+            <div className="flex items-center gap-12">
+              <Mail className="w-5 h-5" style={{ color: 'var(--alert-yellow-500)' }} />
+              <h3 className="card__title">Priority Inbox</h3>
+            </div>
+            <Link href="/inbox">
+              <button className="btn btn--secondary btn--small" data-testid="btn-view-all-emails">
+                View All <ArrowRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </div>
+          <div className="card__content">
+            {emailsLoading ? (
+              <div className="space-y-12">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="skeleton" style={{ height: '60px' }}></div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-12">
+                {priorityEmails.map((email) => (
+                  <Link key={email.id} href="/inbox">
+                    <div 
+                      className="p-16 rounded-lg cursor-pointer transition-all duration-160 hover:bg-surface-2"
+                      style={{ 
+                        border: '1px solid var(--border-1)',
+                        borderLeft: `3px solid ${email.priority === 'urgent' ? 'var(--alert-red-500)' : 'var(--alert-yellow-500)'}`
+                      }}
+                      data-testid={`email-preview-${email.id}`}
+                    >
+                      <div className="flex items-start justify-between mb-8">
+                        <div className="flex items-center gap-8">
+                          {email.unread && (
+                            <div className="w-2 h-2 rounded-full" style={{ background: 'var(--action-cyan-500)' }}></div>
+                          )}
+                          <p className="font-medium text-ink-200 text-sm">{email.from}</p>
+                        </div>
+                        <div className="glass-pill glass-pill--small" style={{ 
+                          background: email.priority === 'urgent' ? 'var(--alert-red-500)' : 'var(--alert-yellow-500)',
+                          color: 'var(--surface-1)',
+                          opacity: 0.9
+                        }}>
+                          {email.priority.toUpperCase()}
+                        </div>
+                      </div>
+                      <h4 className="text-body font-medium mb-8">{email.subject}</h4>
+                      <p className="text-meta text-sm">{email.aiSummary}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Quick Stats Summary */}
       <div className="card">
