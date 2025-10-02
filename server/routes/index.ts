@@ -57,6 +57,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return id;
   };
 
+  // Email routes
+  app.get("/api/emails", async (req, res) => {
+    try {
+      const maxResults = parseInt(req.query.maxResults as string) || 20;
+      const emails = await gmailService.fetchAndTriageEmails(maxResults);
+      res.json(emails);
+    } catch (error) {
+      logger.error("Failed to fetch emails", error);
+      res.status(500).json({ message: "Failed to fetch emails" });
+    }
+  });
+
+  app.post("/api/emails/:id/reply", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { replyText } = req.body;
+      
+      if (!replyText) {
+        return res.status(400).json({ message: "Reply text is required" });
+      }
+      
+      await gmailService.sendEmailReply(id, replyText);
+      res.json({ success: true });
+    } catch (error) {
+      logger.error("Failed to send reply", error);
+      res.status(500).json({ message: "Failed to send reply" });
+    }
+  });
+
+  app.post("/api/emails/:id/mark-read", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await gmailService.markEmailAsRead(id);
+      res.json({ success: true });
+    } catch (error) {
+      logger.error("Failed to mark email as read", error);
+      res.status(500).json({ message: "Failed to mark as read" });
+    }
+  });
+
   // Dashboard
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
