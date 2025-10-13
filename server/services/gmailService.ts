@@ -5,36 +5,69 @@ import { logger } from '../utils/logger';
 let connectionSettings: any;
 
 async function getAccessToken() {
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
+  if (connectionSettings && connectionSettings.settings?.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
     return connectionSettings.settings.access_token;
   }
   
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY 
     ? 'repl ' + process.env.REPL_IDENTITY 
     : process.env.WEB_REPL_RENEWAL 
     ? 'depl ' + process.env.WEB_REPL_RENEWAL 
     : null;
 
+  if (!hostname) {
+    logger.error('REPLIT_CONNECTORS_HOSTNAME not found');
+    throw new Error('REPLIT_CONNECTORS_HOSTNAME not found');
+  }
+
   if (!xReplitToken) {
+    logger.error('X_REPLIT_TOKEN not found for repl/depl');
     throw new Error('X_REPLIT_TOKEN not found for repl/depl');
   }
 
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=google-mail',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
+  const url = 'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=google-mail';
+  logger.info('Fetching Gmail connection', { url, hasToken: !!xReplitToken });
+
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/json',
+      'X_REPLIT_TOKEN': xReplitToken
     }
-  ).then(res => res.json()).then(data => data.items?.[0]);
+  });
 
-  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
-
-  if (!connectionSettings || !accessToken) {
-    throw new Error('Gmail not connected');
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error('Failed to fetch connection', { status: response.status, error: errorText });
+    throw new Error(`Failed to fetch connection: ${response.status} ${errorText}`);
   }
+
+  const data = await response.json();
+  console.error('=== Gmail Connection Debug ===');
+  console.error('Full response:', JSON.stringify(data, null, 2));
+  console.error('Items count:', data.items?.length);
+  console.error('First item:', JSON.stringify(data.items?.[0], null, 2));
+
+  connectionSettings = data.items?.[0];
+
+  if (!connectionSettings) {
+    console.error('ERROR: No connection settings found');
+    throw new Error('Gmail connection not found. Please set up Gmail in the Replit connections panel.');
+  }
+
+  console.error('Connection settings:', JSON.stringify(connectionSettings, null, 2));
+  
+  const accessToken = connectionSettings?.settings?.access_token || connectionSettings?.settings?.oauth?.credentials?.access_token;
+
+  if (!accessToken) {
+    console.error('ERROR: No access token found');
+    console.error('Settings keys:', connectionSettings?.settings ? Object.keys(connectionSettings.settings) : 'no settings');
+    throw new Error('Gmail access token not found. Please reconnect Gmail in the integrations panel.');
+  }
+
+  console.error('Successfully got access token');
+  console.error('=== End Debug ===');
+  
   return accessToken;
 }
 
