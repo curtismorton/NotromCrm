@@ -1,6 +1,82 @@
 import OpenAI from "openai";
 import { storage } from "../config/storage";
 import { env } from "../config/env";
+import { z } from "zod";
+
+export const TaskSuggestionsSchema = z.object({
+  tasks: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      priority: z.enum(["low", "medium", "high"]),
+      estimatedDays: z.number().optional()
+    })
+  )
+});
+
+export const TaskUpdateSchema = z.object({
+  updates: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    status: z.enum(["todo", "in_progress", "blocked", "in_review", "completed"]).optional(),
+    priority: z.enum(["low", "medium", "high"]).optional(),
+    dueDate: z.string().optional(),
+    assignedTo: z.string().optional()
+  })
+});
+
+export const ClientInsightsSchema = z.object({
+  insights: z.string()
+});
+
+export const ProspectiveClientsSchema = z.object({
+  prospects: z.array(
+    z.object({
+      name: z.string(),
+      description: z.string(),
+      needs: z.string(),
+      approach: z.string()
+    })
+  )
+});
+
+export const TaskAdviceSchema = z.object({
+  advice: z.string()
+});
+
+export const DashboardInsightsSchema = z.object({
+  priorities: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      status: z.enum(["pending", "overdue", "completed"])
+    })
+  ),
+  summary: z.string()
+});
+
+export const ProjectBlockersSchema = z.object({
+  blockers: z.array(
+    z.object({
+      description: z.string(),
+      impact: z.string(),
+      mitigation: z.string()
+    })
+  )
+});
+
+export function parseModelResponse<T extends Record<string, any>>(schema: z.ZodSchema<T>, content: string, fallback: T): T & { error?: string } {
+  try {
+    const json = JSON.parse(content);
+    const parsed = schema.safeParse(json);
+    if (parsed.success) {
+      return parsed.data;
+    }
+    return { ...fallback, error: "Invalid model response structure" };
+  } catch {
+    return { ...fallback, error: "Invalid JSON in model response" };
+  }
+}
 
 // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
@@ -37,7 +113,7 @@ export async function generateTaskSuggestions(projectDescription: string, projec
       return { tasks: [] };
     }
     
-    return JSON.parse(content);
+    return parseModelResponse(TaskSuggestionsSchema, content, { tasks: [] });
   } catch (error) {
     console.error("Error generating task suggestions:", error);
     return { 
@@ -99,7 +175,7 @@ export async function processNaturalLanguageUpdate(taskId: number, currentStatus
       return { updates: {} };
     }
     
-    return JSON.parse(content);
+    return parseModelResponse(TaskUpdateSchema, content, { updates: {} });
   } catch (error) {
     console.error("Error processing natural language update:", error);
     return { 
@@ -141,7 +217,7 @@ export async function generateClientInsights(clientData: any) {
       return { insights: "No insights available at this time." };
     }
     
-    return JSON.parse(content);
+    return parseModelResponse(ClientInsightsSchema, content, { insights: "" });
   } catch (error) {
     console.error("Error generating client insights:", error);
     return { 
@@ -184,7 +260,7 @@ export async function searchProspectiveClients(industry: string, criteria: strin
       return { prospects: [] };
     }
     
-    return JSON.parse(content);
+    return parseModelResponse(ProspectiveClientsSchema, content, { prospects: [] });
   } catch (error) {
     console.error("Error searching prospective clients:", error);
     return { 
@@ -223,7 +299,7 @@ export async function getTaskAdvice(taskDescription: string, taskStatus: string,
       return { advice: "No advice available at this time." };
     }
     
-    return JSON.parse(content);
+    return parseModelResponse(TaskAdviceSchema, content, { advice: "" });
   } catch (error) {
     console.error("Error getting task advice:", error);
     return { 
@@ -279,7 +355,7 @@ export async function generateDashboardInsights(dashboardData: any) {
       };
     }
     
-    return JSON.parse(content);
+    return parseModelResponse(DashboardInsightsSchema, content, { priorities: [], summary: "" });
   } catch (error: any) {
     console.error("Error generating dashboard insights:", error);
     return { 
@@ -670,19 +746,20 @@ export async function analyzeProjectBlockers(project: any, tasks: any[], devPlan
 
     const content = response.choices[0].message.content;
     if (!content) {
-      return [];
+      return { blockers: [] };
     }
-    
-    const result = JSON.parse(content);
-    return result.blockers || [];
+
+    return parseModelResponse(ProjectBlockersSchema, content, { blockers: [] });
   } catch (error) {
     console.error("Error analyzing project blockers:", error);
-    return [
-      {
-        description: "Unable to analyze project blockers at this time. Please try again later.",
-        impact: "Analysis service is currently unavailable",
-        mitigation: "Try refreshing or check your connection"
-      }
-    ];
+    return {
+      blockers: [
+        {
+          description: "Unable to analyze project blockers at this time. Please try again later.",
+          impact: "Analysis service is currently unavailable",
+          mitigation: "Try refreshing or check your connection"
+        }
+      ]
+    };
   }
 }
