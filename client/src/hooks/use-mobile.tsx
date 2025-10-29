@@ -10,9 +10,23 @@ export function useIsMobile() {
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
-    mql.addEventListener("change", onChange)
+    if (typeof mql.addEventListener === "function") {
+      mql.addEventListener("change", onChange)
+    } else {
+      // Safari < 14
+      // @ts-ignore
+      mql.addListener(onChange)
+    }
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
+    return () => {
+      if (typeof mql.removeEventListener === "function") {
+        mql.removeEventListener("change", onChange)
+      } else {
+        // Safari < 14
+        // @ts-ignore
+        mql.removeListener(onChange)
+      }
+    }
   }, [])
 
   return !!isMobile
@@ -28,8 +42,22 @@ export function useMedia(query: string) {
     }
     
     const listener = () => setMatches(media.matches)
-    media.addEventListener("change", listener)
-    return () => media.removeEventListener("change", listener)
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", listener)
+    } else {
+      // Safari < 14
+      // @ts-ignore
+      media.addListener(listener)
+    }
+    return () => {
+      if (typeof media.removeEventListener === "function") {
+        media.removeEventListener("change", listener)
+      } else {
+        // Safari < 14
+        // @ts-ignore
+        media.removeListener(listener)
+      }
+    }
   }, [matches, query])
 
   return matches
